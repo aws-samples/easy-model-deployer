@@ -1,0 +1,51 @@
+[project]
+name = "dmaa"
+description = "Deploy Model Anywhere on AWS"
+version = "0.6.0"
+authors = [
+    {name = "Yi Yan",email = "<yiyanz@amazon.com>"}, 
+    {name = "Jie Tang", email="<tangjiee@amazon.com>"}, 
+    {name="Xuan Zhou",email="<zhouxss@amazon.com>"}
+]
+readme = "README.md"
+
+[tool.poetry]
+packages = [
+    { include = "**/*", from = "src/dmaa", to = "dmaa" },
+    { include = "pipeline", from = "src", to = "dmaa" },
+    { include = "s5cmd", from = "assets", to = "dmaa/pipeline" }
+]
+exclude = [".venv"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+typer = {extras = ["all"], version = "^0.13.0"}
+rich = "^13.9.4"
+boto3 = "^1.35.0"
+questionary = "^2.0.1"
+requests = "^2.26"
+pydantic = "^2.9.2"
+sagemaker = "^2.237.0"
+langchain = "^0.3.9"
+langchain-aws = "^0.2.9"
+huggingface_hub = "^0.26.1"
+openai = "^1.54.4"
+jinja2 = "^3.1.4"
+modelscope = "^1.21.1"
+
+[tool.poetry.extras]
+# optional dependencies
+cli = ["typer","rich","questionary","requests"]
+langchain = ["langchain", "langchain-aws"]  # langchain required 
+all = ["typer","rich","questionary","langchain", "langchain-aws","sagemaker","openai","jinja2","huggingface_hub","modelscope"] # all 
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+[tool.poetry.scripts]
+dmaa = "dmaa.cli:app"
+[project.scripts]
+dmaa = "dmaa.cli:app"

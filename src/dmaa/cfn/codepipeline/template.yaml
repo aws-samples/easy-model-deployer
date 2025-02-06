@@ -1,0 +1,329 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CodePipeline for model deployment
+Parameters:
+  ArtifactBucketName:
+    Type: String
+    Description: Name of the existing S3 bucket to store pipeline artifacts
+  ArtifactVersion:
+    Type: String
+    Description: Version of the pipeline
+  PipelineZipS3Key:
+    Type: String
+    Description: S3 Key of the pipeline zip file
+  CodepipepineName:
+    Type: String
+    Description: Name of the pipeline
+  CodeBuildRoleName:
+    Type: String
+    Description: Name of the CodeBuild role name
+  CodePipelineRoleName:
+    Type: String
+    Description: Name of the CodePipeline role name
+  CloudFormationRoleName:
+    Type: String
+    Description: Name of the CloudFormation role name
+    
+Resources:
+  CodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref CodeBuildRoleName
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: !Join ["-", ["CodeBuildServiceRole", !Ref AWS::StackName]]
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecr-public:*
+                  - sts:GetServiceBearerToken
+                Resource:
+                  - "*"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AWSCodeBuildAdminAccess
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/CloudWatchLogsFullAccess
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AmazonS3FullAccess
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AmazonEC2ContainerRegistryFullAccess
+  CodePipelineServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref CodePipelineRoleName
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codepipeline.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AWSCodePipeline_FullAccess
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AWSCodeBuildAdminAccess
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AWSCloudFormationFullAccess
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AmazonS3FullAccess
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/IAMFullAccess
+  CloudFormationServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref CloudFormationRoleName
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudformation.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AWSCloudFormationFullAccess
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/IAMFullAccess
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AmazonSageMakerFullAccess
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AmazonSSMFullAccess
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AmazonECS_FullAccess
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/ElasticLoadBalancingFullAccess
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AmazonEC2FullAccess
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AWSLambda_FullAccess
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        PrivilegedMode: true
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_LARGE
+        Image: aws/codebuild/standard:6.0
+        EnvironmentVariables:
+          - Name: ModelBucketName
+            Value: !Ref ArtifactBucketName
+          - Name: ModelRegion
+            Value: !Ref AWS::Region
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: |
+          version: 0.2
+
+          phases:
+            pre_build:
+              commands:
+                - echo Build started on `date`
+            build:
+              commands:
+                - echo "Building Amazon ECR image..."
+                - |
+                  region=$ModelRegion
+                  model_s3_bucket=$ModelBucketName
+                  model_id=$ModelId
+                  model_tag=$ModelTag
+                  backend_name=$EngineType
+                  framwork=$FrameworkType
+                  service=$ServiceType
+                  instance_type=$InstanceType
+                  extra_params=$ExtraParams
+                - cd pipeline/
+                - export PYTHONPATH=.:$PYTHONPATH
+                - pip install --upgrade pip
+                - pip install -r requirements.txt
+                - python pipeline.py --region $region --model_id $model_id --model_tag $ModelTag --framework_type $FrameworkType --service_type $service --backend_type $backend_name  --model_s3_bucket $model_s3_bucket --instance_type $instance_type --extra_params "$extra_params" --skip_deploy
+                - cd ..
+
+            post_build:
+              commands:
+                - SERVICE_TYPE=$(echo "$ServiceType" | tr '[:upper:]' '[:lower:]')
+                - cp cfn/$ServiceType/template.yaml template.yaml
+                - cp pipeline/parameters.json parameters.json
+                - cat parameters.json
+                - echo Build completed on `date`
+
+          artifacts:
+            files:
+              - parameters.json
+              - template.yaml
+
+  Pipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: !Ref CodepipepineName
+      RoleArn: !GetAtt CodePipelineServiceRole.Arn
+      ArtifactStore:
+        Type: S3
+        Location: !Ref ArtifactBucketName
+      Variables:
+        - Name: ModelStackName
+        - Name: ModelId
+        - Name: ModelTag
+        - Name: ServiceType
+        - Name: InstanceType
+        - Name: EngineType
+        - Name: ExtraParams
+        - Name: FrameworkType
+        - Name: CreateTime
+        - Name: Region
+      PipelineType: V2
+      ExecutionMode: QUEUED
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: Source
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Version: '1'
+                Provider: S3
+              Configuration:
+                S3Bucket: !Ref ArtifactBucketName
+                S3ObjectKey: !Ref PipelineZipS3Key
+                PollForSourceChanges: false
+                AllowOverrideForS3ObjectKey: true
+              OutputArtifacts:
+                - Name: SourceOutput
+              RunOrder: 1
+        - Name: Build
+          Actions:
+            - Name: Build
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: '1'
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: !Ref CodeBuildProject
+                EnvironmentVariables: 
+                  !Sub |
+                    [{
+                      "name": "ModelId",
+                      "type": "PLAINTEXT",
+                      "value": "#{variables.ModelId}"
+                    },
+                    {
+                      "name": "ModelTag",
+                      "type": "PLAINTEXT",
+                      "value": "#{variables.ModelTag}"
+                    },
+                    {
+                      "name": "ServiceType",
+                      "type": "PLAINTEXT",
+                      "value": "#{variables.ServiceType}"
+                    },
+                    {
+                      "name": "InstanceType",
+                      "type": "PLAINTEXT",
+                      "value": "#{variables.InstanceType}"
+                    },
+                    {
+                      "name": "EngineType",
+                      "type": "PLAINTEXT",
+                      "value": "#{variables.EngineType}"
+                    },
+                    {
+                      "name": "FrameworkType",
+                      "type": "PLAINTEXT",
+                      "value": "#{variables.FrameworkType}"
+                    },
+                    {
+                      "name": "CreateTime",
+                      "type": "PLAINTEXT",
+                      "value": "#{variables.CreateTime}"
+                    },
+                    {
+                      "name": "ExtraParams",
+                      "type": "PLAINTEXT",
+                      "value": "#{variables.ExtraParams}"
+                    }]
+              InputArtifacts:
+                - Name: SourceOutput
+              OutputArtifacts:
+                - Name: BuildOutput
+              RunOrder: 1
+        - Name: Deploy
+          Actions:
+            - Name: Deploy
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              Configuration:
+                ActionMode: CREATE_UPDATE
+                StackName: "#{variables.ModelStackName}"
+                TemplatePath: BuildOutput::template.yaml
+                TemplateConfiguration: BuildOutput::parameters.json
+                Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM
+                RoleArn: !GetAtt CloudFormationServiceRole.Arn
+              InputArtifacts:
+                - Name: BuildOutput
+              RunOrder: 1

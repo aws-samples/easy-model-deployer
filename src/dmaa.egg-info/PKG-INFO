@@ -1,0 +1,23 @@
+Metadata-Version: 2.1
+Name: dmaa
+Version: 0.0.0
+Summary: DMAA: Deploy Model Anywhere on AWS
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: Apache Software License
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: boto3==1.35.52
+
+# DMAA: Deploy Model Anywhere on AWS
+
+## Installation
+
+### Prepare virtual env and install dmaa
+```bash
+./environment_setup.sh dmaa
+```
+
+### Install from source code
+```bash
+./environment_setup.sh dmaa
+```

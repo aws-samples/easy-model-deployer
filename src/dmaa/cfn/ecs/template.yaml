@@ -1,0 +1,586 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploy an ECS cluster with GPU-optimized AMI to run DMAA model in a new VPC with secure networking.
+Parameters:
+  ECRImageURI:
+    Type: String
+    Default: ""
+    Description: The URI of the ECR image to be used for the ECS Endpoint
+  InstanceType:
+    Type: String
+    Default: "g5.xlarge"
+    Description: The instance type to be used for the ECS Endpoint
+  ModelId:
+    Type: String
+    Description: The dmaa model ID to be used for the ECS Endpoint
+  ModelTag:
+    Type: String
+    Description: The model tag to be used for the ECS Endpoint
+  FrameWorkType:
+    Type: String
+    Description: The framework type to be used for the ECS Endpoint
+  ServiceType:
+    Type: String
+    Description: The service type to be used for the ECS Endpoint
+  EngineType:
+    Type: String
+    Description: The engine type to be used for the ECS Endpoint
+  Region:
+    Type: String
+    Description: The region to be used for the ECS
+  DesiredCapacity:
+    Type: Number
+    Default: 1
+    Description: Number of EC2 instances to launch in your ECS cluster.
+  MaxSize:
+    Type: Number
+    Default: 2
+    Description: Maximum number of EC2 instances that can be launched in your ECS cluster.
+  ECSAMI:
+    Description: The Amazon Machine Image ID used for the cluster
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ecs/optimized-ami/amazon-linux-2/gpu/amzn2-ami-ecs-gpu-hvm-2.0.20241001-x86_64-ebs/image_id
+  ContainerCpu:
+    Type: Number
+    Default: 4096
+    Description: How much CPU to give the container. Please refer https://aws.amazon.com/ec2/instance-types/g5/
+  ContainerMemory:
+    Type: Number
+    Default: 12288
+    Description: How much memory in MB to give the container. Please refer https://aws.amazon.com/ec2/instance-types/g5/
+  ContainerGpu:
+    Type: Number
+    Default: 1
+    Description: How much GPU to give the container. Please refer https://aws.amazon.com/ec2/instance-types/g5/
+  ContainerPort:
+    Type: Number
+    Default: 8080
+    Description: What port that the application expects traffic on
+  DesiredCount:
+    Type: Number
+    Default: 1
+    Description: How many copies of the service task to run
+
+Mappings:
+  SubnetConfig:
+    VPC:
+      CIDR: '10.0.0.0/16'
+    PublicOne:
+      CIDR: '10.0.0.0/18'
+    PublicTwo:
+      CIDR: '10.0.64.0/18'
+Resources:
+  # VPC in which containers will be networked.
+  # It has two public subnets.
+  # We distribute the subnets across the first two available subnets
+  # for the region, for high availability.
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      CidrBlock: !FindInMap ['SubnetConfig', 'VPC', 'CIDR']
+
+  # Two public subnets, where containers can have public IP addresses
+  PublicSubnetOne:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+         Fn::Select:
+         - 0
+         - Fn::GetAZs: {Ref: 'AWS::Region'}
+      VpcId: !Ref 'VPC'
+      CidrBlock: !FindInMap ['SubnetConfig', 'PublicOne', 'CIDR']
+      MapPublicIpOnLaunch: true
+  PublicSubnetTwo:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+         Fn::Select:
+         - 1
+         - Fn::GetAZs: {Ref: 'AWS::Region'}
+      VpcId: !Ref 'VPC'
+      CidrBlock: !FindInMap ['SubnetConfig', 'PublicTwo', 'CIDR']
+      MapPublicIpOnLaunch: true
+
+  # Setup networking resources for the public subnets. Containers
+  # in the public subnets have public IP addresses and the routing table
+  # sends network traffic via the internet gateway.
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+  GatewayAttachement:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref 'VPC'
+      InternetGatewayId: !Ref 'InternetGateway'
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref 'VPC'
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: GatewayAttachement
+    Properties:
+      RouteTableId: !Ref 'PublicRouteTable'
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId: !Ref 'InternetGateway'
+  PublicSubnetOneRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetOne
+      RouteTableId: !Ref PublicRouteTable
+  PublicSubnetTwoRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetTwo
+      RouteTableId: !Ref PublicRouteTable
+
+  S3Endpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      VpcEndpointType: Gateway
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: '*'
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+              - s3:ListBucket
+            Resource: '*'
+      RouteTableIds:
+        - !Ref PublicRouteTable
+        
+  # Security Groups
+  ECSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ECS Security Group
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ALB Security Group
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+   # ECS Resources
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    DependsOn:
+      - GatewayAttachement
+    Properties:
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+  
+
+  # Autoscaling group. This launches the actual EC2 instances that will register
+  # themselves as members of the cluster, and run the docker containers.
+  ECSAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    DependsOn:
+      - ECSCluster
+      - EC2Role
+    UpdatePolicy:
+      # This configures the ASG to wait on resource signals from the cfn-init
+      # script that runs on the instance itself. Depending on the expected
+      # total size of your ASG you may need to tune the parameters below
+      AutoScalingRollingUpdate:
+        MaxBatchSize: 5
+        MinInstancesInService: 1 # Note that ECS draining hook will maintain instances that are still hosting tasks
+        PauseTime: PT2M
+        WaitOnResourceSignals: true
+        MinSuccessfulInstancesPercent: 100
+    Properties:
+      VPCZoneIdentifier:
+        - !Ref PublicSubnetOne
+        - !Ref PublicSubnetTwo
+      LaunchTemplate:
+        LaunchTemplateId: !Ref ContainerInstances
+        Version: !GetAtt ContainerInstances.LatestVersionNumber
+      MinSize: 0
+      MaxSize:
+        Ref: MaxSize
+      DesiredCapacity:
+        Ref: DesiredCapacity
+      NewInstancesProtectedFromScaleIn: false
+  # The config for each instance that is added to the cluster
+  ContainerInstances:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        ImageId:
+          Ref: ECSAMI
+        InstanceType:
+          Ref: InstanceType
+        IamInstanceProfile:
+          Name: !Ref EC2InstanceProfile
+        SecurityGroupIds:
+          - !Ref ContainerHostSecurityGroup
+        BlockDeviceMappings:
+          - DeviceName: /dev/xvda
+            Ebs:
+              VolumeType: gp2
+              VolumeSize: 150
+              DeleteOnTermination: true
+              Encrypted: true
+        # This injected configuration file is how the EC2 instance
+      # knows which ECS cluster on your AWS account it should be joining
+        UserData:
+          Fn::Base64: !Sub |
+           #!/bin/bash -xe
+            echo ECS_CLUSTER=${ECSCluster} >> /etc/ecs/ecs.config
+            echo ECS_ENABLE_GPU_SUPPORT=true >> /etc/ecs/ecs.config
+            yum install -y aws-cfn-bootstrap
+            /opt/aws/bin/cfn-init -v --stack ${AWS::StackId} --resource ContainerInstances --configsets full_install --region ${AWS::Region} &
+         # Disable IMDSv1, and require IMDSv2
+        MetadataOptions:
+          HttpEndpoint: enabled
+          HttpTokens: required
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles: 
+      - !Ref EC2Role 
+  # Create an ECS capacity provider to attach the ASG to the ECS cluster
+  # so that it autoscales as we launch more containers
+  CapacityProvider:
+    Type: AWS::ECS::CapacityProvider
+    Properties:
+      AutoScalingGroupProvider:
+        AutoScalingGroupArn: !Ref ECSAutoScalingGroup
+        ManagedScaling:
+          InstanceWarmupPeriod: 60
+          MinimumScalingStepSize: 1
+          MaximumScalingStepSize: 100
+          Status: ENABLED
+          # Percentage of cluster reservation to try to maintain
+          TargetCapacity: 100
+        ManagedTerminationProtection: DISABLED
+        ManagedDraining: ENABLED
+   # Create a cluster capacity provider assocation so that the cluster
+  # will use the capacity provider
+  CapacityProviderAssociation:
+    Type: AWS::ECS::ClusterCapacityProviderAssociations
+    Properties:
+      CapacityProviders:
+        - !Ref CapacityProvider
+      Cluster: !Ref ECSCluster
+      DefaultCapacityProviderStrategy:
+        - Base: 0
+          CapacityProvider: !Ref CapacityProvider
+          Weight: 1
+  # A security group for the EC2 hosts that will run the containers.
+  # This can be used to limit incoming traffic to or outgoing traffic
+  # from the container's host EC2 instance.
+  ContainerHostSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Access to the EC2 hosts that run containers
+      VpcId:
+        Ref: VPC
+  # Role for the EC2 hosts. This allows the ECS agent on the EC2 hosts
+  # to communciate with the ECS control plane, as well as download the docker
+  # images from ECR to run on your host.
+  EC2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AmazonECS_FullAccess
+  # This is a role which is used within Fargate to allow the Fargate agent
+  # to download images, and upload logs.
+  ECSTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs-tasks.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+  TaskDefinition:
+    Type: 'AWS::ECS::TaskDefinition'
+    DependsOn:
+      - ECSTaskExecutionRole
+      - EC2Role
+      - CapacityProviderAssociation
+      - ECSCluster
+      - ECSAutoScalingGroup
+    Properties:
+      Family: !Sub '${AWS::StackName}'
+      Memory: !Ref ContainerMemory
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - EC2
+      ExecutionRoleArn: !Ref ECSTaskExecutionRole
+      ContainerDefinitions:
+        - Name: !Sub '${AWS::StackName}'
+          Memory: !Ref ContainerMemory
+          Image: !Ref ECRImageURI
+          ResourceRequirements:
+            - Type: GPU
+              Value: !Ref ContainerGpu
+          PortMappings:
+            - ContainerPort: !Ref ContainerPort
+              HostPort: !Ref ContainerPort
+            - ContainerPort: 80
+              HostPort: 80
+          # Command: [--gpus, all]
+          Essential: 'true'
+          LinuxParameters:
+            sharedMemorySize: 1024
+          healthCheck:
+            command: ["CMD-SHELL","curl -f http://localhost:8080/health || exit 1"]
+            interval: 60
+            retries: 10
+            timeout: 60
+            startPeriod: 30
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              mode: non-blocking
+              max-buffer-size: 25m
+              awslogs-group: !Ref LogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: !Sub '${AWS::StackName}'
+          # MountPoints:
+          #   - ContainerPath: /opt/tomcat/webapps
+          #     SourceVolume: webapps
+      # Volumes: 
+      #   - Name: webapps
+  Service:
+    Type: AWS::ECS::Service
+    DependsOn: 
+      - PublicLoadBalancerListener
+      - ECSTaskExecutionRole
+      - EC2Role
+      - CapacityProviderAssociation
+      - CleanupFunction
+      - LambdaExecutionRole
+    Properties:
+      ServiceName: !Sub '${AWS::StackName}'
+      Cluster: !Ref ECSCluster
+      PlacementStrategies:
+        - Field: 'attribute:ecs.availability-zone'
+          Type: spread
+        - Field: cpu
+          Type: binpack
+      CapacityProviderStrategy:
+        - Base: 0
+          CapacityProvider: !Ref CapacityProvider
+          Weight: 1
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+            - !Ref ServiceSecurityGroup
+          Subnets:
+            - !Ref PublicSubnetOne
+            - !Ref PublicSubnetTwo
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 75
+      DesiredCount: !Ref DesiredCount
+      TaskDefinition: !Ref TaskDefinition
+      LoadBalancers:
+        - ContainerName: !Sub '${AWS::StackName}'
+          ContainerPort: !Ref ContainerPort
+          TargetGroupArn: !Ref ServiceTargetGroup
+  ServiceSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Security group for service
+      VpcId: !Ref VPC
+  ServiceTargetGroup:
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Properties:
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: /ping
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      TargetType: ip
+      Port: !Ref ContainerPort
+      Protocol: HTTP
+      Matcher:
+        HttpCode: 200-404
+      UnhealthyThresholdCount: 10
+      VpcId: !Ref VPC
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 0
+  PublicLoadBalancerSG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Access to the public facing load balancer
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: -1
+  PublicLoadBalancer:
+    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    DependsOn:
+      - CapacityProviderAssociation
+      - GatewayAttachement
+    Properties:
+      Scheme: internet-facing
+      LoadBalancerAttributes:
+        - Key: idle_timeout.timeout_seconds
+          Value: '30'
+      Subnets:
+        - !Ref PublicSubnetOne
+        - !Ref PublicSubnetTwo
+      SecurityGroups:
+        - !Ref PublicLoadBalancerSG
+  PublicLoadBalancerListener:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Properties:
+      DefaultActions:
+        - Type: forward
+          ForwardConfig:
+            TargetGroups:
+              - TargetGroupArn: !Ref ServiceTargetGroup
+                Weight: 100
+      LoadBalancerArn: !Ref PublicLoadBalancer
+      Port: 80
+      Protocol: HTTP
+  ServiceIngressfromLoadBalancer:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      Description: Ingress from the public ALB
+      GroupId: !Ref ServiceSecurityGroup
+      IpProtocol: -1
+      SourceSecurityGroupId: !Ref PublicLoadBalancerSG
+  LogGroup:
+    Type: 'AWS::Logs::LogGroup'
+
+  # Lambda execution role
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: ASGTerminateInstances
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - autoscaling:*
+                  - ec2:*
+                Resource: '*'
+
+  # Lambda function for cleanup
+  CleanupFunction:
+    Type: AWS::Lambda::Function
+    DependsOn:
+      - ECSAutoScalingGroup
+    Properties:
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          import boto3
+          import cfnresponse
+          import time
+          import os
+
+          def handler(event, context):
+              try:
+                  if event['RequestType'] == 'Delete':
+                      asg_name = os.environ['ASG_NAME']
+                      autoscaling = boto3.client('autoscaling')
+                      ec2 = boto3.client('ec2')
+                      
+                      # 1. Set desired capacity to 0 first
+                      print(f"Setting capacity to 0 for ASG: {asg_name}")
+                      autoscaling.update_auto_scaling_group(
+                          AutoScalingGroupName=asg_name,
+                          DesiredCapacity=0,
+                          MinSize=0,
+                          MaxSize=0
+                      )
+                      
+                      # 2. Get and terminate all instances in the ASG
+                      response = autoscaling.describe_auto_scaling_groups(
+                          AutoScalingGroupNames=[asg_name]
+                      )
+                      
+                      if response['AutoScalingGroups']:
+                          instance_ids = [
+                              instance['InstanceId'] 
+                              for instance in response['AutoScalingGroups'][0]['Instances']
+                          ]
+                          
+                          if instance_ids:
+                              print(f"Terminating instances: {instance_ids}")
+                              ec2.terminate_instances(InstanceIds=instance_ids)
+                              
+                              # Wait for instances to terminate
+                              waiter = ec2.get_waiter('instance_terminated')
+                              waiter.wait(InstanceIds=instance_ids)
+                      
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+              except Exception as e:
+                  print(f"Error: {str(e)}")
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {})
+      Runtime: python3.9
+      Timeout: 300
+      Environment:
+        Variables:
+          ASG_NAME: !Ref ECSAutoScalingGroup
+
+  # Custom resource to trigger cleanup
+  CleanupTrigger:
+    Type: Custom::CleanupTrigger
+    Properties:
+      ServiceToken: !GetAtt CleanupFunction.Arn
+
+
+Outputs:
+  ClusterName:
+    Description: The ECS cluster into which to launch resources
+    Value: !Ref ECSCluster
+  PublicLoadBalancerDNSName:
+    Description: The DNS name of the public load balancer
+    Value: !Join ['', ['http://', !GetAtt 'PublicLoadBalancer.DNSName']]

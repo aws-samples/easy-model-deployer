@@ -1,0 +1,1 @@
+{"Parameters": {"InstanceType": "g5.4xlarge", "ModelId": "Qwen2.5-0.5B-Instruct", "ECRImageURI": "683638520402.dkr.ecr.us-west-2.amazonaws.com/qwen2-5-0-5b-instruct:latest", "ModelTag": "/", "FrameWorkType": "fastapi", "ServiceType": "local", "EngineType": "vllm", "Region": "us-west-2"}}

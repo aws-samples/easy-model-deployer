@@ -1,0 +1,225 @@
+{
+  "8": {
+    "inputs": {
+      "samples": [
+        "36",
+        1
+      ],
+      "vae": [
+        "102",
+        1
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "14": {
+    "inputs": {
+      "sampler_name": "euler_ancestral"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "36": {
+    "inputs": {
+      "noise": [
+        "37",
+        0
+      ],
+      "guider": [
+        "130",
+        0
+      ],
+      "sampler": [
+        "14",
+        0
+      ],
+      "sigmas": [
+        "104",
+        0
+      ],
+      "latent_image": [
+        "103",
+        1
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "37": {
+    "inputs": {
+      "noise_seed": 0
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "60": {
+    "inputs": {
+      "frame_rate": 24,
+      "loop_count": 0,
+      "filename_prefix": "LTXVideo",
+      "format": "video/h264-mp4",
+      "pix_fmt": "yuv420p",
+      "crf": 19,
+      "save_metadata": false,
+      "pingpong": false,
+      "save_output": true,
+      "images": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "VHS_VideoCombine",
+    "_meta": {
+      "title": "Video Combine 🎥🅥🅗🅢"
+    }
+  },
+  "81": {
+    "inputs": {
+      "scheduler": "normal",
+      "steps": 25,
+      "denoise": 1,
+      "model": [
+        "103",
+        0
+      ]
+    },
+    "class_type": "BasicScheduler",
+    "_meta": {
+      "title": "BasicScheduler"
+    }
+  },
+  "87": {
+    "inputs": {
+      "text": "a man is riding a motorcycle on a paved road, the motorcycle is a dark red with a sleek, modern design, and it has a large, round headlight in the center of the video, the man has short, wavy brown hair and a light complexion, he is wearing a black leather jacket, black leather gloves, and blue jeans, with black leather boots, his expression is one of mild surprise or curiosity, with a slight smirk on his face, in the background, there is a gas station with a red awning and a sign reading oil and diner, the gas station is set against a lush green field with tall, leafy trees, the road is paved with a yellow line on the right side, indicating a rural setting, the overall mood of the videograph is slightly out of focus, emphasizing the man's rugged appearance, The scene appears to be from a fantasy movie.",
+      "clip": [
+        "142",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "88": {
+    "inputs": {
+      "text": "watermark, logo, text, subtitles, worst quality, inconsistent motion, blurry, jittery, distorted",
+      "clip": [
+        "142",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "102": {
+    "inputs": {
+      "ckpt_name": "ltx-video-2b-v0.9.1.safetensors",
+      "dtype": "bfloat16"
+    },
+    "class_type": "LTXVLoader",
+    "_meta": {
+      "title": "🅛🅣🅧 LTXV Loader"
+    }
+  },
+  "103": {
+    "inputs": {
+      "preset": "Custom",
+      "width": 768,
+      "height": 512,
+      "frames_number": 105,
+      "frame_rate": 25,
+      "batch": 1,
+      "mixed_precision": true,
+      "img_compression": 29,
+      "model": [
+        "128",
+        0
+      ],
+      "vae": [
+        "102",
+        1
+      ]
+    },
+    "class_type": "LTXVModelConfigurator",
+    "_meta": {
+      "title": "🅛🅣🅧 LTXV Model Configurator"
+    }
+  },
+  "104": {
+    "inputs": {
+      "sigma_shift": [
+        "103",
+        2
+      ],
+      "stretch": true,
+      "terminal": 0.1,
+      "sigmas": [
+        "81",
+        0
+      ]
+    },
+    "class_type": "LTXVShiftSigmas",
+    "_meta": {
+      "title": "🅛🅣🅧 LTXV Shift Sigmas"
+    }
+  },
+  "128": {
+    "inputs": {
+      "stg_mode": "attention",
+      "block_indices": "14",
+      "model": [
+        "102",
+        0
+      ]
+    },
+    "class_type": "LTXVApplySTG",
+    "_meta": {
+      "title": "🅛🅣🅧 LTXV Apply STG"
+    }
+  },
+  "130": {
+    "inputs": {
+      "cfg": 3,
+      "stg": 1,
+      "rescale": 0.75,
+      "model": [
+        "103",
+        0
+      ],
+      "positive": [
+        "87",
+        0
+      ],
+      "negative": [
+        "88",
+        0
+      ]
+    },
+    "class_type": "STGGuider",
+    "_meta": {
+      "title": "🅛🅣🅧 STG Guider"
+    }
+  },
+  "142": {
+    "inputs": {
+      "clip_name": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "ltxv"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  }
+}
