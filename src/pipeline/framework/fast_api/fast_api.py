@@ -11,7 +11,12 @@ from fastapi.responses import JSONResponse, Response, StreamingResponse
 from dmaa.utils.logger_utils import get_logger
 from fastapi.concurrency import run_in_threadpool
 
+model_id = os.environ.get("model_id")
+model_tag = os.environ.get("model_tag")
 logger = get_logger(__name__)
+logger.setLevel(logging.INFO)
+logger.info(f"model_id: {model_id}")
+logger.info(f"model_tag: {model_tag}")
 # prevent logging ping
 class HealthCheckFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
@@ -86,6 +91,13 @@ async def invocations(request: Request, authorization: str = Depends(get_authori
         payload["extra_headers"] = { "Authorization": authorization }
 
     return await invoke(payload)
+
+if model_id and model_tag:
+    app.add_api_route(
+        path=f"/{model_id}/{model_tag}/v1/chat/completions",
+        endpoint=invocations,
+        methods=["POST"]
+    )
 
 if __name__ == "__main__":
     args = parse_args()
