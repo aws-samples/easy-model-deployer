@@ -1,12 +1,14 @@
 cd src/pipeline
+export model_id=Qwen2.5-0.5B-Instruct
+export model_tag=latest
 python pipeline.py \
-    --model_id Qwen2.5-7B-Instruct \
-    --model_s3_bucket "llm-bot-dev-uiconstructuis3bucket14677a01-mjsoiqblq7wm" \
+    --model_id Qwen2.5-0.5B-Instruct \
+    --model_tag latest \
+    --model_s3_bucket "dmaa-test" \
     --backend_type vllm \
-    --service_type sagemaker \
+    --service_type local \
     --instance_type g5.4xlarge \
     --region us-west-2 \
-    --is_async_deploy false \
     --framework_type fastapi \
     --role_name SageMakerExecutionRoleTest6 \
-    --vllm_cli_args "--max_num_seqs 20 --max_model_len 16000 --disable-log-stats"
+    --disable_parallel_prepare_and_build_image
