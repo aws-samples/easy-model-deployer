@@ -27,6 +27,7 @@ def run(
     role_name: str,
 ):
     model_id = execute_model.model_id
+    model_tag = deploy_params["ModelTag"]
     backend_type = execute_model.executable_config.current_engine.engine_type
     service_type = execute_model.executable_config.current_service.service_type
     instance_type = deploy_params["InstanceType"]
@@ -73,7 +74,13 @@ def run(
         model_dir = DMAA_MODELS_LOCAL_DIR_TEMPLATE.format(model_id=model_id)
         model_dir_abs = os.path.abspath(model_dir)
         model_dir_in_image = f"/{model_dir}"
-        running_cmd = f"""docker run --shm-size 1g -e MODEL_DIR={model_dir_in_image} -e AWS_ACCESS_KEY_ID={aws_access_key_id} -e AWS_SECRET_ACCESS_KEY={aws_secret_access_key} -it {accelerator_cli_args} -v {model_dir_abs}:{model_dir_in_image} -p 8080:8080 {img_uri}"""
+        running_cmd = (
+            f"docker run --shm-size 1g"
+            f" -e model_id={model_id}  -e model_tag={model_tag}"
+            f" -e MODEL_DIR={model_dir_in_image}"
+            f" -e AWS_ACCESS_KEY_ID={aws_access_key_id} -e AWS_SECRET_ACCESS_KEY={aws_secret_access_key}"
+            f" -it {accelerator_cli_args} -v {model_dir_abs}:{model_dir_in_image} -p 8080:8080 {img_uri}"
+        )
         logger.info(f"Running {running_cmd}")
         os.system(running_cmd)
     elif service_type == ServiceType.SAGEMAKER:
