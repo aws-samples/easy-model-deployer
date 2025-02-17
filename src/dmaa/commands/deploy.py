@@ -269,6 +269,76 @@ def deploy(
     if not check_service_support_on_cn_region(service_type,region):
         raise ServiceNotSupported(region, service_type=service_type)
 
+    if Service.get_service_from_name(service_name).need_vpc and service_type != ServiceType.LOCAL:
+        client = boto3.client('ec2', region_name=region)
+        vpcs = []
+        dmaa_default_vpc = None
+        paginator = client.get_paginator('describe_vpcs')
+        for page in paginator.paginate():
+            for vpc in page['Vpcs']:
+                if any(tag['Key'] == 'Name' and tag['Value'] == 'DMAA-vpc' for tag in vpc.get('Tags', [])):
+                    dmaa_default_vpc = vpc
+                    continue
+                vpcs.append(vpc)
+        else:
+            for vpc in vpcs:
+                vpc_name = next((tag['Value'] for tag in vpc.get('Tags', []) if tag.get('Key') == 'Name'), None)
+                vpc['Name'] = vpc_name if vpc_name else '-'
+            dmaa_vpc = select_with_help(
+                "Select the VPC (Virtual Private Cloud) you want to deploy the ESC service:",
+                choices=[
+                    Choice(
+                        title=f"{dmaa_default_vpc['VpcId']} ({dmaa_default_vpc['CidrBlock']}) (DMAA-vpc)" if dmaa_default_vpc else 'Create a new VPC',
+                        description='Use the existing DMAA-VPC for the new model deployment (recommended)' if dmaa_default_vpc else 'Create a new VPC with two public subnets and a S3 Endpoint for the model deployment. Select this option if you do not know what is VPC',
+                    )
+                ] + [
+                    Choice(
+                        title=f"{vpc['VpcId']} ({vpc['CidrBlock']}) ({vpc['Name']})",
+                        description="Custom VPC requirement: A NAT Gateway or S3 Endpoint, with at least two public and two private subnet.",
+                    )
+                    for vpc in vpcs
+                ],
+                style=custom_style
+            ).ask()
+
+    vpc_id = None
+    selected_subnet_ids = []
+    if 'Create a new VPC' == dmaa_vpc:
+        pass
+    elif 'DMAA-vpc' in dmaa_vpc:
+        vpc_id = dmaa_vpc.split()[0]
+        paginator = client.get_paginator('describe_subnets')
+        for page in paginator.paginate(Filters=[{'Name': 'vpc-id', 'Values': [vpc_id]}]):
+            for subnet in page['Subnets']:
+                selected_subnet_ids.append(subnet['SubnetId'])
+    else:
+        vpc_id = dmaa_vpc.split()[0]
+        subnets = []
+        paginator = client.get_paginator('describe_subnets')
+        for page in paginator.paginate(Filters=[{'Name': 'vpc-id', 'Values': [vpc_id]}]):
+            for subnet in page['Subnets']:
+                subnets.append(subnet)
+        if not subnets:
+            console.print("[bold red]No subnets found in the selected VPC.[/bold red]")
+            raise typer.Exit(0)
+        else:
+            for subnet in subnets:
+                subnet_name = next((tag['Value'] for tag in subnet.get('Tags', []) if tag.get('Key') == 'Name'), None)
+                subnet['Name'] = subnet_name if subnet_name else '-'
+            selected_subnet = questionary.checkbox(
+                "Select multiple subnets for the model deployment:",
+                choices=[
+                    f"{subnet['SubnetId']} ({subnet['CidrBlock']}) ({subnet['Name']})"
+                    for subnet in subnets
+                ],
+                style=custom_style
+            ).ask()
+            if selected_subnet is None:
+                raise typer.Exit(0)
+            else:
+                for subnet in selected_subnet:
+                    selected_subnet_ids.append(subnet.split()[0])
+
     # support instance
     supported_instances = model.supported_instances
     supported_instances = supported_instances_filter(region,allow_local_deploy,supported_instances)
@@ -393,6 +463,12 @@ def deploy(
         except json.JSONDecodeError as e:
             console.print("[red]Invalid JSON format. Please try again.[/red]")
 
+    # append extra params for VPC and subnets
+    if vpc_id is not None:
+        extra_params['service_params'] = {
+            'vpc_id': vpc_id,
+            'subnet_ids': selected_subnet_ids
+        }
     # model tag
     if model_tag==MODEL_DEFAULT_TAG and not skip_confirm:
         while True:

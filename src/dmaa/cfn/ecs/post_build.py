@@ -123,11 +123,11 @@ def post_build():
 
     extra_params = json.loads(args.extra_params) if args.extra_params else {}
 
-    if 'VpcID' not in extra_params:
+    if 'vpc_id' not in extra_params:
         vpc_id, subnets = deploy_vpc_template(args.region)
     else:
-        vpc_id = extra_params.get('VpcID')
-        subnets = extra_params.get('Subnets')
+        vpc_id = extra_params.get('vpc_id')
+        subnets = extra_params.get('subnet_ids')
         update_parameters_file('parameters.json', {'VpcID': vpc_id, 'Subnets': subnets})
 
     deploy_ecs_cluster_template(args.region, vpc_id, subnets)

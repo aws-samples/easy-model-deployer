@@ -98,6 +98,7 @@ class Service(ModelBase):
     name: str
     description: str
     support_cn_region: bool
+    need_vpc: bool = False
 
     # class vars
     service_name_maps: ClassVar[dict] = {}
