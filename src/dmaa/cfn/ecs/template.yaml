@@ -231,6 +231,11 @@ Resources:
             - ContainerPort: 80
               HostPort: 80
           # Command: [--gpus, all]
+          Environment:
+            - Name: model_id
+              Value: !Ref ModelId
+            - Name: model_tag
+              Value: !Ref ModelTag
           Essential: 'true'
           LinuxParameters:
             sharedMemorySize: 1024
