@@ -5,6 +5,10 @@ import argparse
 
 # Post build script for ECS, it will deploy the VPC and ECS cluster.
 
+CFN_ROOT_PATH = 'cfn'
+WAIT_SECONDS = 10
+CFN_ROOT_PATH = '../../cfn'
+
 def wait_for_stack_completion(client, stack_id, stack_name):
     while True:
         stack_status = client.describe_stacks(StackName=stack_id)['Stacks'][0]['StackStatus']
@@ -13,7 +17,7 @@ def wait_for_stack_completion(client, stack_id, stack_name):
             break
         elif stack_status in ['CREATE_IN_PROGRESS', 'UPDATE_IN_PROGRESS']:
             print(f"Stack {stack_name} is still being deployed...")
-            time.sleep(30)
+            time.sleep(WAIT_SECONDS)
         else:
             raise Exception(f"Stack {stack_name} deployment failed with status {stack_status}")
 
@@ -21,14 +25,18 @@ def get_stack_outputs(client, stack_name):
     response = client.describe_stacks(StackName=stack_name)
     return response['Stacks'][0].get('Outputs', [])
 
-def create_or_update_stack(client, stack_name, template_path):
+def create_or_update_stack(client, stack_name, template_path, parameters=[]):
     try:
         response = client.describe_stacks(StackName=stack_name)
         stack_status = response['Stacks'][0]['StackStatus']
+        # if stack_status == 'ROLLBACK_COMPLETE':
+        #     print(f"Stack {stack_name} is in ROLLBACK_COMPLETE state. Deleting the stack to allow for recreation.")
+        #     client.delete_stack(StackName=stack_name)
+        #     wait_for_stack_completion(client, stack_name, stack_name)
         while stack_status not in ['CREATE_COMPLETE', 'UPDATE_COMPLETE']:
             if stack_status in ['CREATE_IN_PROGRESS', 'UPDATE_IN_PROGRESS']:
                 print(f"Stack {stack_name} is currently {stack_status}. Waiting for it to complete...")
-                time.sleep(10)
+                time.sleep(SLEEP_WAIT_SECONDS)
                 response = client.describe_stacks(StackName=stack_name)
                 stack_status = response['Stacks'][0]['StackStatus']
             else:
@@ -43,7 +51,8 @@ def create_or_update_stack(client, stack_name, template_path):
             response = client.create_stack(
                 StackName=stack_name,
                 TemplateBody=template_body,
-                Capabilities=['CAPABILITY_NAMED_IAM']
+                Capabilities=['CAPABILITY_NAMED_IAM'],
+                Parameters=parameters
             )
 
             stack_id = response['StackId']
@@ -63,36 +72,40 @@ def update_parameters_file(parameters_path, updates):
 
 def deploy_vpc_template(region):
     client = boto3.client('cloudformation', region_name=region)
-    stack_name = 'DMAA-Networking-0-6-0'
-    template_path = 'cfn/networking/template.yaml'
+    stack_name = 'DMAA-VPC'
+    template_path = f'{CFN_ROOT_PATH}/vpc/template.yaml'
     create_or_update_stack(client, stack_name, template_path)
     outputs = get_stack_outputs(client, stack_name)
     vpc_id = None
     subnets = None
     for output in outputs:
-        print(f"{output['OutputKey']}: {output['OutputValue']}")
-        if output['OutputKey'] == 'VPCId':
+        if output['OutputKey'] == 'VPCID':
             vpc_id = output['OutputValue']
-        elif 'PublicSubnets' == output['OutputKey']:
+        elif output['OutputKey'] == 'Subnets':
             subnets = output['OutputValue']
+    update_parameters_file('parameters.json', {'VPCID': vpc_id, 'Subnets': subnets})
+    return vpc_id, subnets
 
-    if vpc_id and subnets:
-        update_parameters_file('parameters.json', {'VpcID': vpc_id, 'PublicSubnets': subnets})
 
-def deploy_ecs_cluster_template(region):
+def deploy_ecs_cluster_template(region, vpc_id, subnets):
     client = boto3.client('cloudformation', region_name=region)
-    stack_name = 'DMAA-ECS-Cluster-0-6-0'
-    template_path = 'cfn/ecs/cluster_template.yaml'
-    create_or_update_stack(client, stack_name, template_path)
-    outputs = get_stack_outputs(client, stack_name)
-    cluster_name = None
-    for output in outputs:
-        print(f"{output['OutputKey']}: {output['OutputValue']}")
-        if output['OutputKey'] == 'ClusterName':
-            cluster_name = output['OutputValue']
+    stack_name = 'DMAA-ECS-Cluster'
+    template_path = f'{CFN_ROOT_PATH}/ecs/cluster.yaml'
+    create_or_update_stack(client, stack_name, template_path, [
+        {
+            'ParameterKey': 'VPCID',
+            'ParameterValue': vpc_id,
+        },
+        {
+            'ParameterKey': 'Subnets',
+            'ParameterValue': subnets,
+        },
+    ])
 
-    if cluster_name:
-        update_parameters_file('parameters.json', {'ClusterName': cluster_name})
+    outputs = get_stack_outputs(client, stack_name)
+    for output in outputs:
+        update_parameters_file('parameters.json', {output['OutputKey']: output['OutputValue']})
+
 
 def post_build():
     parser = argparse.ArgumentParser(description="Post build script")
@@ -111,13 +124,13 @@ def post_build():
     extra_params = json.loads(args.extra_params) if args.extra_params else {}
 
     if 'VpcID' not in extra_params:
-        deploy_vpc_template(args.region)
+        vpc_id, subnets = deploy_vpc_template(args.region)
     else:
         vpc_id = extra_params.get('VpcID')
-        public_subnets = extra_params.get('PublicSubnets')
-        update_parameters_file('parameters.json', {'VpcID': vpc_id, 'PublicSubnets': public_subnets})
+        subnets = extra_params.get('Subnets')
+        update_parameters_file('parameters.json', {'VpcID': vpc_id, 'Subnets': subnets})
 
-    deploy_ecs_cluster_template(args.region)
+    deploy_ecs_cluster_template(args.region, vpc_id, subnets)
 
 if __name__ == "__main__":
     post_build()

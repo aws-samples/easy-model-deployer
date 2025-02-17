@@ -1,11 +1,11 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: DMAA ECS Cluster - Ensure all associated models are deleted before removing this stack.
 Parameters:
-  VpcID:
+  VPCID:
     Type: AWS::EC2::VPC::Id
     Default: "vpc-043d6906ccc5614f9"
     Description: The VPC ID to be used for the ECS cluster
-  PublicSubnets:
+  Subnets:
     Type: List<AWS::EC2::Subnet::Id>
     Default: "subnet-0d74bc4b17d7ab99b,subnet-0bd0680e698e529f2"
     Description: The public subnets to be used for the ECS cluster
@@ -16,11 +16,11 @@ Resources:
       ClusterSettings:
         - Name: containerInsights
           Value: enabled
-  ALBSecurityGroup:
+  PublicLoadBalancerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: ALB Security Group
-      VpcId: !Ref VpcID
+      VpcId: !Ref VPCID
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
@@ -36,9 +36,9 @@ Resources:
       LoadBalancerAttributes:
         - Key: idle_timeout.timeout_seconds
           Value: '30'
-      Subnets: !Ref PublicSubnets
+      Subnets: !Ref Subnets
       SecurityGroups:
-        - !Ref ALBSecurityGroup
+        - !Ref PublicLoadBalancerSecurityGroup
   PublicLoadBalancerListener:
     Type: 'AWS::ElasticLoadBalancingV2::Listener'
     Properties:
@@ -213,6 +213,12 @@ Outputs:
   LogGroup:
     Description: The log group
     Value: !Ref LogGroup
-  LambdaDeploymentHelper:
+  PublicLoadBalancerListenerArn:
+    Description: The ARN of the public load balancer listener
+    Value: !GetAtt PublicLoadBalancerListener.ListenerArn
+  PublicLoadBalancerSecurityGroup:
+    Description: The security group for the public load balancer
+    Value: !Ref PublicLoadBalancerSecurityGroup
+  LambdaDeploymentHelperArn:
     Description: The Lambda function for capacity provider association
-    Value: !Ref LambdaDeploymentHelper
+    Value: !GetAtt LambdaDeploymentHelper.Arn

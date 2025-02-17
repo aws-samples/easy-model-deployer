@@ -100,9 +100,9 @@ Resources:
         - !Ref PublicRouteTable
 
 Outputs:
-  VPCId:
+  VPCID:
     Description: ID of the VPC
     Value: !Ref VPC
-  PublicSubnets:
+  Subnets:
     Description: List of public subnets
     Value: !Join [",", [!Ref PublicSubnet1, !Ref PublicSubnet2]]
