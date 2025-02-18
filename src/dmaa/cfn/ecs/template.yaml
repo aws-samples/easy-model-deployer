@@ -139,8 +139,8 @@ Resources:
     Type: AWS::IAM::InstanceProfile
     Properties:
       Path: /
-      Roles: 
-      - !Ref EC2Role 
+      Roles:
+      - !Ref EC2Role
   CapacityProvider:
     Type: AWS::ECS::CapacityProvider
     Properties:
@@ -328,7 +328,7 @@ Resources:
         - Field: path-pattern
           PathPatternConfig:
             Values:
-              - !Join 
+              - !Join
                 - ''
                 - - '/'
                   - !Ref ModelId
