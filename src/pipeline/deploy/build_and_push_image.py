@@ -236,17 +236,34 @@ def run(
     docker_login_region = docker_login_region or region
 
     if build_image_host:
-        if check_cn_region(region):
-            build_image_script = (
+        build_image_script_cn = (
                 f"cd {execute_dir}"
                 f' && docker build --platform linux/amd64 -f {dockerfile_name} -t "{ecr_repo_uri}" .'
             )
-        else:
-            build_image_script = (
+        build_image_script_global = (
                 f"cd {execute_dir}"
                 f" && aws {ecr_name} get-login-password --region {docker_login_region} | docker login --username AWS --password-stdin {build_image_host}"
                 f' && docker build --platform linux/amd64 -f {dockerfile_name} -t "{ecr_repo_uri}" .'
             )
+        if check_cn_region(region):
+            build_image_scripts = [build_image_script_cn]
+        else:
+            build_image_scripts = [build_image_script_global,build_image_script_cn]
+
+        is_build_success = False
+        for build_image_script in build_image_scripts:
+            logger.info(f"building image: {build_image_script}")
+            try:
+                assert os.system(build_image_script) == 0
+                is_build_success = True
+                break
+            except Exception as e:
+                logger.error(f"docker build errorr: {e}")
+
+        if not is_build_success:
+            raise RuntimeError("docker build errorr")
+
+
         # build_image_script = (
         #     f"cd {execute_dir}"
         #     f" && aws {ecr_name} get-login-password --region {docker_login_region} | docker login --username AWS --password-stdin {build_image_host}"
@@ -258,8 +275,8 @@ def run(
             f' && docker build --platform linux/amd64 -f {dockerfile_name} -t "{ecr_repo_uri}" .'
         )
 
-    logger.info(f"building image: {build_image_script}")
-    assert os.system(build_image_script) == 0
+        logger.info(f"building image: {build_image_script}")
+        assert os.system(build_image_script) == 0
 
     # push image
     # It should not push the image to ecr when service_type is `local`

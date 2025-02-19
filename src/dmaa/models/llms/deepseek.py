@@ -53,7 +53,7 @@ Model.register(
         supported_frameworks=[
             fastapi_framework
         ],
-        allow_china_region=False,
+        allow_china_region=True,
         huggingface_model_id="deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
         # modelscope_model_id="Qwen/Qwen2.5-32B-Instruct",
         require_huggingface_token=False,
@@ -83,7 +83,7 @@ Model.register(
         supported_frameworks=[
             fastapi_framework
         ],
-        allow_china_region=False,
+        allow_china_region=True,
         huggingface_model_id="deepseek-ai/DeepSeek-R1-Distill-Qwen-14B",
         # modelscope_model_id="Qwen/Qwen2.5-14B-Instruct",
         require_huggingface_token=False,
@@ -114,7 +114,7 @@ Model.register(
         supported_frameworks=[
             fastapi_framework
         ],
-        allow_china_region=False,
+        allow_china_region=True,
         huggingface_model_id="deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
         # modelscope_model_id="Qwen/Qwen2.5-14B-Instruct",
         require_huggingface_token=False,
@@ -145,7 +145,7 @@ Model.register(
         supported_frameworks=[
             fastapi_framework
         ],
-        allow_china_region=False,
+        allow_china_region=True,
         huggingface_model_id="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
         # modelscope_model_id="Qwen/Qwen2.5-14B-Instruct",
         require_huggingface_token=False,
@@ -242,7 +242,7 @@ Model.register(
         supported_frameworks=[
             fastapi_framework
         ],
-        allow_china_region=False,
+        allow_china_region=True,
         huggingface_model_id="deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
         # modelscope_model_id="Qwen/Qwen2.5-14B-Instruct",
         require_huggingface_token=False,
