@@ -71,7 +71,12 @@ def run(
             accelerator_cli_args = f"""--gpus '"{gpus_str}"'"""
         else:
             raise RuntimeError("No accelerator found")
-        model_dir = DMAA_MODELS_LOCAL_DIR_TEMPLATE.format(model_id=model_id)
+
+        reguar_model_dir = DMAA_MODELS_LOCAL_DIR_TEMPLATE.format(model_id=model_id)
+        if execute_model.model_files_local_path is not None:
+            model_dir = execute_model.model_files_local_path
+        else:
+            model_dir = reguar_model_dir
         model_dir_abs = os.path.abspath(model_dir)
         model_dir_in_image = f"/{model_dir}"
         running_cmd = (

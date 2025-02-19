@@ -8,9 +8,9 @@ from dmaa.models import Model
 from dmaa.models.utils.constants import ServiceType,EngineType
 from dmaa.utils.aws_service_utils import check_cn_region
 from dmaa.utils.logger_utils import get_logger
-from utils.common import upload_dir_to_s3_by_s5cmd
+from utils.common import upload_dir_to_s3_by_s5cmd,download_dir_from_s3_by_s5cmd
 from dmaa.constants import DMAA_MODELS_LOCAL_DIR_TEMPLATE,DMAA_MODELS_S3_KEY_TEMPLATE
-
+from dmaa.utils.network_check import check_website_urllib
 
 logger = get_logger(__name__)
 
@@ -24,7 +24,6 @@ def enable_hf_transfer():
         logger.info("hf_transfer enabled")
     except ModuleNotFoundError as e:
         logger.info(f"hf_transfer not installed, skip enabling hf_transfer, error: {e}")
-
 
 
 def download_huggingface_model(model:Model,model_dir=None):
@@ -45,6 +44,10 @@ def download_huggingface_model(model:Model,model_dir=None):
     for huggingface_endpoint in huggingface_endpoints:
         try:
             logger.info(f"Downloading {huggingface_model_id} model from endpoint: {huggingface_endpoint}")
+            # check endpoint reacheable
+            if not check_website_urllib(huggingface_endpoint):
+                logger.error(f"Endpoint {huggingface_endpoint} is not reachable")
+                continue
             hf_snapshot_download(
                 huggingface_model_id,
                 local_dir=model_dir,
@@ -131,6 +134,19 @@ def run(model:Model):#, model_s3_bucket, backend_type, service_type, region,args
             return
         if not need_prepare_model and service_type == ServiceType.LOCAL:
             logger.info("Force to download model when deploy in local")
+
+        if model.model_files_local_path is not None:
+            logger.info(f"Model {model.model_id} already prepared, skip prepare model step. need_prepare_model:{need_prepare_model}, model_files_local_path: {model.model_files_local_path}")
+            return
+        if model_files_s3_path is not None and service_type == ServiceType.LOCAL:
+            # donwload model files from s3 to local
+            model_dir = DMAA_MODELS_LOCAL_DIR_TEMPLATE.format(model_id=model.model_id)
+            os.makedirs(model_dir, exist_ok=True)
+            download_dir_from_s3_by_s5cmd(
+                local_dir=model_dir,
+                model_files_s3_path=model_files_s3_path
+            )
+            return
         download_model_files(model)
     else:
         logger.info(f"Model {model.model_id} already prepared, skip prepare model step. need_prepare_model:{need_prepare_model}, model_files_s3_path: {model_files_s3_path}")

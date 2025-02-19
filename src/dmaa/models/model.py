@@ -168,7 +168,7 @@ class Model(ModelBase,Generic[T]):
 
     # allow_china_region_ecs: bool = False
     huggingface_model_id: str = ""
-    huggingface_endpoints: List[str] =  ["https://huggingface.co","https://hf-mirror.com"]
+    huggingface_endpoints: List[str] = ["https://huggingface.co","https://hf-mirror.com"]
     disable_hf_transfer:bool = False
 
     huggingface_model_download_kwargs: dict = Field(default_factory=dict)
@@ -182,6 +182,7 @@ class Model(ModelBase,Generic[T]):
     need_prepare_model: bool = True
     # download model files directly from s3
     model_files_s3_path: Union[str,None] = None
+    model_files_local_path: Union[str,None] = None
     model_series: ModelSeries
     executable_config: Union[ExecutableConfig,None] = None
 

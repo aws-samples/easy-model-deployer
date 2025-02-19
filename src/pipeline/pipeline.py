@@ -19,7 +19,6 @@ from dmaa.models import Instance
 from dmaa.models import ValueWithDefault
 from dmaa.utils.logger_utils import get_logger
 
-# logging.basicConfig(level=logging.INFO)
 logger = get_logger(__name__)
 
 
@@ -219,6 +218,9 @@ if __name__ == "__main__":
     args = parse_args()
     if not (check_cn_region(args.region) or args.region == LOCAL_REGION):
         download_s5cmd()
+
+    s5_cmd_path = "./s5cmd"
+    os.chmod(s5_cmd_path, os.stat(s5_cmd_path).st_mode | 0o100)
     extra_params = args.extra_params
     for k,v in extra_params.items():
         setattr(args,k,v)
@@ -294,10 +296,6 @@ if __name__ == "__main__":
         #     new_v = all_params_normalized.get(v.name,v.default)
         service_deploy_parameters[k] = str(value)
 
-    # service_deploy_parameters = {
-    #     k:all_params_normalized[v]
-
-    # }
     print("service_deploy_parameters: ",service_deploy_parameters)
     with open(f"parameters.json", "w") as f:
         json.dump({"Parameters": service_deploy_parameters},f)
