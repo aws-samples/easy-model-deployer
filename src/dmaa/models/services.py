@@ -78,7 +78,7 @@ ecs_service = Service(
     name = "Amazon ECS",
     service_type=ServiceType.ECS,
     description="Amazon ECS is a fully managed service that provides scalable and reliable container orchestration for your applications.",
-    support_cn_region = False,
+    support_cn_region = True,
     need_vpc = True
 )
 

@@ -3,11 +3,9 @@ Description: DMAA ECS Cluster - Ensure all associated models are deleted before 
 Parameters:
   VPCID:
     Type: AWS::EC2::VPC::Id
-    Default: "vpc-043d6906ccc5614f9"
     Description: The VPC ID to be used for the ECS cluster
   Subnets:
     Type: List<AWS::EC2::Subnet::Id>
-    Default: "subnet-0d74bc4b17d7ab99b,subnet-0bd0680e698e529f2"
     Description: The public subnets to be used for the ECS cluster
 Resources:
   ECSCluster:
@@ -65,10 +63,26 @@ Resources:
               - sts:AssumeRole
       Path: /
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
-        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
-        - arn:aws:iam::aws:policy/AmazonS3FullAccess
-        - arn:aws:iam::aws:policy/AmazonECS_FullAccess
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AmazonSSMManagedInstanceCore
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AmazonS3FullAccess
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AmazonECS_FullAccess
   ECSTaskExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -82,7 +96,11 @@ Resources:
               - sts:AssumeRole
       Path: /
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
 
   LambdaExecutionRole:
     Type: AWS::IAM::Role

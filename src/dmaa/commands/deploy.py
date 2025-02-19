@@ -228,7 +228,7 @@ def deploy(
     # console.print("[bold blue]Checking AWS environment...[/bold blue]")
 
     region = get_current_region()
-
+    vpc_id = None
     # ask model id
     model_id = ask_model_id(region,model_id=model_id)
 
@@ -269,7 +269,7 @@ def deploy(
     if not check_service_support_on_cn_region(service_type,region):
         raise ServiceNotSupported(region, service_type=service_type)
 
-    if Service.get_service_from_name(service_name).need_vpc and service_type != ServiceType.LOCAL:
+    if Service.get_service_from_service_type(service_type).need_vpc:
         client = boto3.client('ec2', region_name=region)
         vpcs = []
         dmaa_default_vpc = None
@@ -301,43 +301,43 @@ def deploy(
                 style=custom_style
             ).ask()
 
-    vpc_id = None
-    selected_subnet_ids = []
-    if 'Create a new VPC' == dmaa_vpc:
-        pass
-    elif 'DMAA-vpc' in dmaa_vpc:
-        vpc_id = dmaa_vpc.split()[0]
-        paginator = client.get_paginator('describe_subnets')
-        for page in paginator.paginate(Filters=[{'Name': 'vpc-id', 'Values': [vpc_id]}]):
-            for subnet in page['Subnets']:
-                selected_subnet_ids.append(subnet['SubnetId'])
-    else:
-        vpc_id = dmaa_vpc.split()[0]
-        subnets = []
-        paginator = client.get_paginator('describe_subnets')
-        for page in paginator.paginate(Filters=[{'Name': 'vpc-id', 'Values': [vpc_id]}]):
-            for subnet in page['Subnets']:
-                subnets.append(subnet)
-        if not subnets:
-            console.print("[bold red]No subnets found in the selected VPC.[/bold red]")
-            raise typer.Exit(0)
+        vpc_id = None
+        selected_subnet_ids = []
+        if 'Create a new VPC' == dmaa_vpc:
+            pass
+        elif 'DMAA-vpc' in dmaa_vpc:
+            vpc_id = dmaa_vpc.split()[0]
+            paginator = client.get_paginator('describe_subnets')
+            for page in paginator.paginate(Filters=[{'Name': 'vpc-id', 'Values': [vpc_id]}]):
+                for subnet in page['Subnets']:
+                    selected_subnet_ids.append(subnet['SubnetId'])
         else:
-            for subnet in subnets:
-                subnet_name = next((tag['Value'] for tag in subnet.get('Tags', []) if tag.get('Key') == 'Name'), None)
-                subnet['Name'] = subnet_name if subnet_name else '-'
-            selected_subnet = questionary.checkbox(
-                "Select multiple subnets for the model deployment:",
-                choices=[
-                    f"{subnet['SubnetId']} ({subnet['CidrBlock']}) ({subnet['Name']})"
-                    for subnet in subnets
-                ],
-                style=custom_style
-            ).ask()
-            if selected_subnet is None:
+            vpc_id = dmaa_vpc.split()[0]
+            subnets = []
+            paginator = client.get_paginator('describe_subnets')
+            for page in paginator.paginate(Filters=[{'Name': 'vpc-id', 'Values': [vpc_id]}]):
+                for subnet in page['Subnets']:
+                    subnets.append(subnet)
+            if not subnets:
+                console.print("[bold red]No subnets found in the selected VPC.[/bold red]")
                 raise typer.Exit(0)
             else:
-                for subnet in selected_subnet:
-                    selected_subnet_ids.append(subnet.split()[0])
+                for subnet in subnets:
+                    subnet_name = next((tag['Value'] for tag in subnet.get('Tags', []) if tag.get('Key') == 'Name'), None)
+                    subnet['Name'] = subnet_name if subnet_name else '-'
+                selected_subnet = questionary.checkbox(
+                    "Select multiple subnets for the model deployment:",
+                    choices=[
+                        f"{subnet['SubnetId']} ({subnet['CidrBlock']}) ({subnet['Name']})"
+                        for subnet in subnets
+                    ],
+                    style=custom_style
+                ).ask()
+                if selected_subnet is None:
+                    raise typer.Exit(0)
+                else:
+                    for subnet in selected_subnet:
+                        selected_subnet_ids.append(subnet.split()[0])
 
     # support instance
     supported_instances = model.supported_instances
@@ -464,17 +464,17 @@ def deploy(
             console.print("[red]Invalid JSON format. Please try again.[/red]")
 
     # append extra params for VPC and subnets
-    if vpc_id is not None:
-        extra_params['service_params'] = {
-            'vpc_id': vpc_id,
-            'subnet_ids': selected_subnet_ids
-        }
+    if vpc_id:
+        if 'service_params' not in extra_params:
+            extra_params['service_params'] = {}
+        extra_params['service_params']['vpc_id'] = vpc_id
+        extra_params['service_params']['subnet_ids'] = ",".join(selected_subnet_ids)
     # model tag
     if model_tag==MODEL_DEFAULT_TAG and not skip_confirm:
         while True:
             model_tag = questionary.text(
                     "(Optional) Add a model deployment tag (custom label), you can skip by pressing Enter:",
-                    default=""
+                    default="dev"
                 ).ask()
             if model_tag == MODEL_DEFAULT_TAG:
                 console.print(f"[bold blue]invalid model tag: {model_tag}. Please try again.[/bold blue]")
