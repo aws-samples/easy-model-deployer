@@ -44,6 +44,21 @@ Resources:
                 Action:
                   - ecr-public:*
                   - sts:GetServiceBearerToken
+                  - cloudformation:DescribeStacks
+                  - cloudformation:CreateStack
+                  - cloudformation:DeleteStack
+                  - ec2:*
+                  - ecs:*
+                  - iam:CreateRole
+                  - iam:AttachRolePolicy
+                  - iam:PassRole
+                  - iam:PutRolePolicy
+                  - iam:DetachRolePolicy
+                  - iam:DeleteRole
+                  - iam:GetRole
+                  - lambda:*
+                  - logs:*
+                  - elasticloadbalancing:*
                 Resource:
                   - "*"
       ManagedPolicyArns:
@@ -183,8 +198,8 @@ Resources:
                 - echo Build started on `date`
             build:
               commands:
-                - echo "Building Amazon ECR image..."
-                - |
+                - |-
+                  echo "Building Amazon ECR image..."
                   region=$ModelRegion
                   model_s3_bucket=$ModelBucketName
                   model_id=$ModelId
@@ -194,25 +209,26 @@ Resources:
                   service=$ServiceType
                   instance_type=$InstanceType
                   extra_params=$ExtraParams
-                - cd pipeline/
-                - export PYTHONPATH=.:$PYTHONPATH
-                - pip install --upgrade pip
-                - pip install -r requirements.txt
-                - python pipeline.py --region $region --model_id $model_id --model_tag $ModelTag --framework_type $FrameworkType --service_type $service --backend_type $backend_name  --model_s3_bucket $model_s3_bucket --instance_type $instance_type --extra_params "$extra_params" --skip_deploy
-                - cd ..
+                  cd pipeline/
+                  export PYTHONPATH=.:$PYTHONPATH
+                  pip install --upgrade pip
+                  pip install -r requirements.txt
+                  python pipeline.py --region $region --model_id $model_id --model_tag $ModelTag --framework_type $FrameworkType --service_type $service --backend_type $backend_name  --model_s3_bucket $model_s3_bucket --instance_type $instance_type --extra_params "$extra_params" --skip_deploy
+                  cd ..
+                  echo pipeline build completed on `date`
 
             post_build:
               commands:
-                - SERVICE_TYPE=$(echo "$ServiceType" | tr '[:upper:]' '[:lower:]')
-                - cp cfn/$ServiceType/template.yaml template.yaml
-                - cp pipeline/parameters.json parameters.json
-                - echo pipeline build completed on `date`, post deployment starting
-                - if [ -f cfn/$ServiceType/post_build.py ]; then
+                - |-
+                  SERVICE_TYPE=$(echo "$ServiceType" | tr '[:upper:]' '[:lower:]')
+                  cp cfn/$ServiceType/template.yaml template.yaml
+                  cp pipeline/parameters.json parameters.json
+                  if [ -f cfn/$ServiceType/post_build.py ]; then
                     cp cfn/$ServiceType/post_build.py post_build.py
                     python post_build.py --region $region --model_id $model_id --model_tag $ModelTag --framework_type $FrameworkType --service_type $service --backend_type $backend_name --model_s3_bucket $model_s3_bucket --instance_type $instance_type --extra_params "$extra_params"
                   fi
-                - cat parameters.json
-                - echo Build completed on `date`
+                  cat parameters.json
+                  echo Build completed on `date`
 
           artifacts:
             files:

@@ -75,7 +75,7 @@ def get_account_id():
 
 
 def create_s3_bucket(bucket_name, region):
-    s3 = boto3.client("s3")
+    s3 = boto3.client("s3", region_name=region)
     try:
         s3.head_bucket(Bucket=bucket_name)
     except:

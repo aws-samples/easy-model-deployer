@@ -1,13 +1,25 @@
 import boto3
 import time
 import json
+import os
 import argparse
 
 # Post build script for ECS, it will deploy the VPC and ECS cluster.
 
 CFN_ROOT_PATH = 'cfn'
 WAIT_SECONDS = 10
-CFN_ROOT_PATH = '../../cfn'
+# CFN_ROOT_PATH = '../../cfn'
+JSON_DOUBLE_QUOTE_REPLACE = '<!>'
+
+def load_extra_params(string):
+    string = string.replace(JSON_DOUBLE_QUOTE_REPLACE,'"')
+    try:
+        return json.loads(string)
+    except json.JSONDecodeError:
+        raise argparse.ArgumentTypeError(f"Invalid dictionary format: {string}")
+
+def dump_extra_params(d:dict):
+    return json.dumps(d).replace('"', JSON_DOUBLE_QUOTE_REPLACE)
 
 def wait_for_stack_completion(client, stack_id, stack_name):
     while True:
@@ -29,14 +41,28 @@ def create_or_update_stack(client, stack_name, template_path, parameters=[]):
     try:
         response = client.describe_stacks(StackName=stack_name)
         stack_status = response['Stacks'][0]['StackStatus']
-        # if stack_status == 'ROLLBACK_COMPLETE':
-        #     print(f"Stack {stack_name} is in ROLLBACK_COMPLETE state. Deleting the stack to allow for recreation.")
-        #     client.delete_stack(StackName=stack_name)
-        #     wait_for_stack_completion(client, stack_name, stack_name)
+        if stack_status in ['ROLLBACK_COMPLETE', 'ROLLBACK_FAILED', 'DELETE_FAILED']:
+            print(f"Stack {stack_name} is in {stack_status} state. Deleting the stack to allow for recreation.")
+            client.delete_stack(StackName=stack_name)
+            while True:
+                try:
+                    response = client.describe_stacks(StackName=stack_name)
+                    stack_status = response['Stacks'][0]['StackStatus']
+                    if stack_status == 'DELETE_IN_PROGRESS':
+                        print(f"Stack {stack_name} is being deleted...")
+                        time.sleep(WAIT_SECONDS)
+                    else:
+                        raise Exception(f"Unexpected status {stack_status} while waiting for stack deletion.")
+                except client.exceptions.ClientError as e:
+                    if 'does not exist' in str(e):
+                        print(f"Stack {stack_name} successfully deleted.")
+                        break
+                    else:
+                        raise
         while stack_status not in ['CREATE_COMPLETE', 'UPDATE_COMPLETE']:
             if stack_status in ['CREATE_IN_PROGRESS', 'UPDATE_IN_PROGRESS']:
                 print(f"Stack {stack_name} is currently {stack_status}. Waiting for it to complete...")
-                time.sleep(SLEEP_WAIT_SECONDS)
+                time.sleep(WAIT_SECONDS)
                 response = client.describe_stacks(StackName=stack_name)
                 stack_status = response['Stacks'][0]['StackStatus']
             else:
@@ -108,27 +134,27 @@ def deploy_ecs_cluster_template(region, vpc_id, subnets):
 
 
 def post_build():
-    parser = argparse.ArgumentParser(description="Post build script")
-    parser.add_argument('--region', type=str, required=False, help='AWS region')
-    parser.add_argument('--model_id', type=str, required=False, help='Model ID')
-    parser.add_argument('--model_tag', type=str, required=False, help='Model tag')
-    parser.add_argument('--framework_type', type=str, required=False, help='Framework type')
-    parser.add_argument('--service_type', type=str, required=False, help='Service type')
-    parser.add_argument('--backend_type', type=str, required=False, help='Backend type')
-    parser.add_argument('--model_s3_bucket', type=str, required=False, help='Model S3 bucket')
-    parser.add_argument('--instance_type', type=str, required=False, help='Instance type')
-    parser.add_argument('--extra_params', type=str, required=False, help='Extra parameters')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--region', type=str, required=False)
+    parser.add_argument('--model_id', type=str, required=False)
+    parser.add_argument('--model_tag', type=str, required=False)
+    parser.add_argument('--framework_type', type=str, required=False)
+    parser.add_argument('--service_type', type=str, required=False)
+    parser.add_argument('--backend_type', type=str, required=False)
+    parser.add_argument('--model_s3_bucket', type=str, required=False)
+    parser.add_argument('--instance_type', type=str, required=False)
+    parser.add_argument('--extra_params', type=load_extra_params, required=False, default=os.environ.get("extra_params","{}"))
 
     args = parser.parse_args()
 
-    extra_params = json.loads(args.extra_params) if args.extra_params else {}
+    service_params = args.extra_params.get('service_params',{})
 
-    if 'VpcID' not in extra_params:
+    if 'vpc_id' not in service_params:
         vpc_id, subnets = deploy_vpc_template(args.region)
     else:
-        vpc_id = extra_params.get('VpcID')
-        subnets = extra_params.get('Subnets')
-        update_parameters_file('parameters.json', {'VpcID': vpc_id, 'Subnets': subnets})
+        vpc_id = service_params.get('vpc_id')
+        subnets = service_params.get('subnet_ids')
+        update_parameters_file('parameters.json', {'VPCID': vpc_id, 'Subnets': subnets})
 
     deploy_ecs_cluster_template(args.region, vpc_id, subnets)
 
