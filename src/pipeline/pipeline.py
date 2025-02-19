@@ -7,7 +7,7 @@ import json
 import logging
 from concurrent.futures import as_completed,ProcessPoolExecutor
 from dmaa.models import Model
-from dmaa.constants import MODEL_DEFAULT_TAG
+from dmaa.constants import MODEL_DEFAULT_TAG,LOCAL_REGION
 from dmaa.models.utils.constants import FrameworkType,ServiceType,InstanceType
 from utils.common import str2bool
 from dmaa.utils.aws_service_utils import check_cn_region
@@ -217,7 +217,7 @@ if __name__ == "__main__":
     t0 = time.time()
     start_time = time.time()
     args = parse_args()
-    if not check_cn_region(args.region):
+    if not (check_cn_region(args.region) or args.region == LOCAL_REGION):
         download_s5cmd()
     extra_params = args.extra_params
     for k,v in extra_params.items():

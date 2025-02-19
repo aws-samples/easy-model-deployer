@@ -11,6 +11,7 @@ from dmaa.constants import (
     ENV_STACK_NAME,
     MODEL_DEFAULT_TAG,
     VERSION,
+    LOCAL_REGION
 )
 from dmaa.models import Model
 from dmaa.models.utils.constants import FrameworkType, ServiceType,InstanceType
@@ -311,7 +312,7 @@ def deploy_local(
         f" --service_type {service_type}"
         f" --backend_type {engine_type}"
         f" --framework_type {framework_type}"
-        f" --region 'local'"
+        f" --region '{LOCAL_REGION}'"
         f" --extra_params '{extra_params}'"
     )
     logger.info(f"pipeline cmd: {pipeline_cmd}")
