@@ -28,7 +28,8 @@ def enable_hf_transfer():
 
 
 def download_huggingface_model(model:Model,model_dir=None):
-    enable_hf_transfer()
+    if not model.disable_hf_transfer:
+        enable_hf_transfer()
     huggingface_model_id = model.huggingface_model_id
     service_type = model.executable_config.current_service.service_type
     model_id = model.model_id

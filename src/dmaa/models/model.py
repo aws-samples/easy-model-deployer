@@ -169,6 +169,8 @@ class Model(ModelBase,Generic[T]):
     # allow_china_region_ecs: bool = False
     huggingface_model_id: str = ""
     huggingface_endpoints: List[str] =  ["https://huggingface.co","https://hf-mirror.com"]
+    disable_hf_transfer:bool = False
+
     huggingface_model_download_kwargs: dict = Field(default_factory=dict)
     ollama_model_id:Union[str,None] = None
     require_huggingface_token: bool = False
