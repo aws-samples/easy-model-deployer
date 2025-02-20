@@ -37,7 +37,7 @@ jaconv==0.4.0
 jamo==0.4.1
 jedi==0.19.1
 jieba==0.42.1
-Jinja2==3.1.4
+Jinja2==3.1.5
 jmespath==0.10.0
 joblib==1.4.2
 kaldiio==2.18.0
