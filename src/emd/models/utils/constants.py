@@ -131,13 +131,10 @@ class ServiceCode(ConstantBase):
     SAGEMAKER = "sagemaker"
 
 
-# class ModelPrepareMethod(ConstantBase):
-#     UPLOAD_TO_S3 = "upload to s3"
-#     DOANLOWD_FROM_S3 = "download from s3"
-#     IGNORE = "ignore"
-
-
-
+class ModelFilesDownloadSource(ConstantBase):
+    HUGGINGFACE = "huggingface"
+    MODELSCOPE= "modelscope"
+    AUTO = "auto"
 
 class ServiceQuotaCode(ConstantBase):
     G5dXLARGE_ENDPOINT = "L-1928E07B"

@@ -5,7 +5,7 @@ import logging
 from huggingface_hub import snapshot_download as hf_snapshot_download
 from modelscope import snapshot_download as ms_snapshot_download
 from emd.models import Model
-from emd.models.utils.constants import ServiceType,EngineType
+from emd.models.utils.constants import ServiceType,EngineType,ModelFilesDownloadSource
 from emd.utils.aws_service_utils import check_cn_region
 from emd.utils.logger_utils import get_logger
 from utils.common import upload_dir_to_s3_by_s5cmd,download_dir_from_s3_by_s5cmd
@@ -110,15 +110,23 @@ def download_model_files(model:Model,model_dir=None):
     if engine_type == EngineType.COMFYUI:
         download_comfyui_model(model,model_dir=model_dir)
     else:
-        if check_cn_region(region):
-            try:
-                download_modelscope_model(model,model_dir=model_dir)
-            except Exception as e:
-                logger.error(f"Error downloading {model.model_id} model from modelscope, error: {e}")
-                logger.info("download from huggingface...")
-                download_huggingface_model(model, model_dir=model_dir)
+        if model.model_files_download_source == ModelFilesDownloadSource.AUTO:
+            if check_cn_region(region):
+                try:
+                    download_modelscope_model(model,model_dir=model_dir)
+                except Exception as e:
+                    logger.error(f"Error downloading {model.model_id} model from modelscope, error: {e}")
+                    logger.info("download from huggingface...")
+                    download_huggingface_model(model, model_dir=model_dir)
+            else:
+                download_huggingface_model(model,model_dir=model_dir)
         else:
-            download_huggingface_model(model,model_dir=model_dir)
+            if model.model_files_download_source == ModelFilesDownloadSource.HUGGINGFACE:
+                download_huggingface_model(model, model_dir=model_dir)
+            elif model.model_files_download_source == ModelFilesDownloadSource.MODELSCOPE:
+                download_modelscope_model(model, model_dir=model_dir)
+            else:
+                raise ValueError(f"Invalid model_files_download_source: {model.model_files_download_source}")
 
 
 def run(model:Model):#, model_s3_bucket, backend_type, service_type, region,args):

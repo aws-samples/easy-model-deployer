@@ -10,6 +10,7 @@ from .utils.constants import (
     FrameworkType,
     ModelType,
     ModelSeriesType,
+    ModelFilesDownloadSource
     # ModelPrepareMethod
 )
 import boto3
@@ -183,6 +184,7 @@ class Model(ModelBase,Generic[T]):
     # download model files directly from s3
     model_files_s3_path: Union[str,None] = None
     model_files_local_path: Union[str,None] = None
+    model_files_download_source: ModelFilesDownloadSource = ModelFilesDownloadSource.AUTO
     model_series: ModelSeries
     executable_config: Union[ExecutableConfig,None] = None
 
