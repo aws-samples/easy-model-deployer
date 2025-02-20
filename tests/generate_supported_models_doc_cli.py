@@ -1,6 +1,6 @@
 import argparse
 import pandas
-from dmaa.models import Model
+from emd.models import Model
 
 
 def generate_model_table():

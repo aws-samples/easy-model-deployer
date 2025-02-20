@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Iterable, List
-from dmaa.models import Model,Engine
+from emd.models import Model,Engine
 from typing import Iterable, List
 import os
 import time
@@ -14,15 +14,15 @@ import threading
 
 
 # import httpx
-from dmaa.models.utils.constants import ModelType,ServiceType
-from dmaa.models import Engine
-from dmaa.utils.accelerator_utils import get_gpu_num
+from emd.models.utils.constants import ModelType,ServiceType
+from emd.models import Engine
+from emd.utils.accelerator_utils import get_gpu_num
 
 
 from utils.common import download_dir_from_s3_by_s5cmd
 # import torch
-from dmaa.constants import DMAA_MODELS_S3_KEY_TEMPLATE
-from dmaa.utils.logger_utils import get_logger
+from emd.constants import EMD_MODELS_S3_KEY_TEMPLATE
+from emd.utils.logger_utils import get_logger
 
 logger = get_logger(__name__)
 
@@ -126,7 +126,7 @@ class OpenAICompitableProxyBackendBase(BackendBase):
 
     def before_start(self,model_dir=None):
         if model_dir is None:
-            model_dir = os.environ.get("MODEL_DIR") or DMAA_MODELS_S3_KEY_TEMPLATE.format(model_id=self.model_id)
+            model_dir = os.environ.get("MODEL_DIR") or EMD_MODELS_S3_KEY_TEMPLATE.format(model_id=self.model_id)
         model_abs_path = os.path.abspath(model_dir)
         model_files_modify_hook = self.execute_model.executable_config.current_engine.model_files_modify_hook
         model_files_modify_hook_kwargs = self.execute_model.executable_config.current_engine.model_files_modify_hook_kwargs or {}

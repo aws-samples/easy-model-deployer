@@ -1,5 +1,5 @@
 [project]
-name = "dmaa"
+name = "emd"
 description = "Deploy Model Anywhere on AWS"
 version = "0.6.0"
 authors = [
@@ -11,9 +11,9 @@ readme = "README.md"
 
 [tool.poetry]
 packages = [
-    { include = "**/*", from = "src/dmaa", to = "dmaa" },
-    { include = "pipeline", from = "src", to = "dmaa" },
-    { include = "s5cmd", from = "assets", to = "dmaa/pipeline" }
+    { include = "**/*", from = "src/emd", to = "emd" },
+    { include = "pipeline", from = "src", to = "emd" },
+    { include = "s5cmd", from = "assets", to = "emd/pipeline" }
 ]
 exclude = [".venv"]
 
@@ -46,6 +46,6 @@ pytest = "^8.0.0"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
-dmaa = "dmaa.cli:app"
+emd = "emd.cli:app"
 [project.scripts]
-dmaa = "dmaa.cli:app"
+emd = "emd.cli:app"

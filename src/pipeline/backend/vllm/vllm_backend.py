@@ -1,8 +1,8 @@
 import httpx
-from dmaa.models.utils.constants import ModelType
+from emd.models.utils.constants import ModelType
 
 from backend.backend import OpenAICompitableProxyBackendBase
-from dmaa.utils.logger_utils import get_logger
+from emd.utils.logger_utils import get_logger
 
 logger = get_logger(__name__)
 

@@ -10,7 +10,7 @@ app = FastAPI()
 sagemaker_runtime = boto3.client('sagemaker-runtime', region_name='us-east-1')
 
 # Define the SageMaker endpoint name
-SAGEMAKER_ENDPOINT_NAME = 'DMAA-QwenQwen2-beta-7B-Chat-ed3pqh-endpoint'
+SAGEMAKER_ENDPOINT_NAME = 'EMD-QwenQwen2-beta-7B-Chat-ed3pqh-endpoint'
 
 @app.post("/v1/chat/completions")
 async def chat(request: Request):

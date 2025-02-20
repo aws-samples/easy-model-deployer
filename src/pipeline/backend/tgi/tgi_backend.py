@@ -1,14 +1,14 @@
 from backend.backend import OpenAICompitableProxyBackendBase
-from dmaa.utils.logger_utils import get_logger
-from dmaa.models import Instance
+from emd.utils.logger_utils import get_logger
+from emd.models import Instance
 import os
-from dmaa.utils.accelerator_utils import (
+from emd.utils.accelerator_utils import (
     check_cuda_exists,
     check_neuron_exists,
     get_gpu_num,
     get_neuron_core_num
 )
-from dmaa.constants import DMAA_MODELS_S3_KEY_TEMPLATE
+from emd.constants import EMD_MODELS_S3_KEY_TEMPLATE
 
 logger = get_logger(__name__)
 
@@ -65,7 +65,7 @@ class TgiBackend(OpenAICompitableProxyBackendBase):
         # model_dir = None
         if self.compile_to_neuron:
             # compile the model to neuron
-            # model_dir = os.environ.get("MODEL_DIR") or DMAA_MODELS_S3_KEY_TEMPLATE.format(model_id=self.model_id)
+            # model_dir = os.environ.get("MODEL_DIR") or EMD_MODELS_S3_KEY_TEMPLATE.format(model_id=self.model_id)
             # model_abs_path = os.path.abspath(model_dir)
             output_path = os.path.join(model_abs_path+'_neuron')
             logger.info(f"compiling model to neuron from {model_abs_path} to {output_path}...")

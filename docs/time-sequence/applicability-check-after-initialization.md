@@ -7,17 +7,17 @@ sequenceDiagram
     autonumber
     actor User
     User->>+WebUI: List supported models for an application, e.g. Text2SQL
-    box rgb(243, 255, 242) DMAA App Layer
+    box rgb(243, 255, 242) EMD App Layer
     participant Application API
     end
 
-    box rgb(250, 233, 232) DMAA Core Layer
+    box rgb(250, 233, 232) EMD Core Layer
     participant Core API
     participant DB
     end
 
-    WebUI->>+Application API: Call dmaa.app.list_app('Text2SQL')
-    Application API->>Core API: Call dmaa.core.retrieve_db('Text2SQL')
+    WebUI->>+Application API: Call emd.app.list_app('Text2SQL')
+    Application API->>Core API: Call emd.core.retrieve_db('Text2SQL')
     Core API->>DB: Retrive relating db
     DB-->>Core API: Results of supported information relating to Text2SQL
     Core API-->>Application API: results from DB

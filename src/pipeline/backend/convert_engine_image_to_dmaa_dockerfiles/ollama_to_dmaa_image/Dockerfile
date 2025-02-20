@@ -35,7 +35,7 @@ RUN ln -s  /usr/local/bin/pip3.12 /usr/local/bin/pip3
 RUN pip3 install boto3 huggingface_hub ipython hf_transfer
 
 RUN mkdir -p /opt/ml/code
-RUN mkdir -p /opt/ml/code/dmaa_models
+RUN mkdir -p /opt/ml/code/emd_models
 COPY ./Dockerfile /
 
 RUN curl https://github.com/peak/s5cmd/releases/download/v2.0.0/s5cmd_2.0.0_Linux-64bit.tar.gz -L -o /tmp/s5cmd.tar.gz

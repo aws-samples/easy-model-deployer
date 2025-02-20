@@ -2,13 +2,13 @@ from typing import Iterable, List
 import os
 import time
 
-from dmaa.models.utils.constants import ModelType,ServiceType
+from emd.models.utils.constants import ModelType,ServiceType
 
 from backend.backend import BackendBase
 from utils.common import download_dir_from_s3_by_s5cmd
 import torch
-from dmaa.constants import DMAA_MODELS_LOCAL_DIR_TEMPLATE
-from dmaa.utils.logger_utils import get_logger
+from emd.constants import EMD_MODELS_LOCAL_DIR_TEMPLATE
+from emd.utils.logger_utils import get_logger
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 from transformers import TextIteratorStreamer
@@ -38,7 +38,7 @@ class TransformerLLMBackend(BackendBase):
 
 
     def start(self):
-        model_dir = os.environ.get("MODEL_DIR") or DMAA_MODELS_LOCAL_DIR_TEMPLATE.format(model_id=self.model_id)
+        model_dir = os.environ.get("MODEL_DIR") or EMD_MODELS_LOCAL_DIR_TEMPLATE.format(model_id=self.model_id)
         if self.service_type != ServiceType.LOCAL:
             logger.info(f"Downloading model from s3")
             download_dir_from_s3_by_s5cmd(self.model_s3_bucket, model_dir)
