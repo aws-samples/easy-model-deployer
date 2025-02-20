@@ -1,7 +1,7 @@
 import os
 import sys
 # sys.path.append("src/pipeline")
-from dmaa.sdk.clients.sagemaker_client import SageMakerClient
+from emd.sdk.clients.sagemaker_client import SageMakerClient
 
 pyload = dict(
     audio_input = "s3://llm-bot-dev-uiconstructuicloudfrontloggingbuckete6-kekcadtyn2hd/vad_example.wav",

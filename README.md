@@ -25,9 +25,9 @@ curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 python3 get-pip.py
 ```
 
-### Installing DMAA
+### Installing EMD
 
-To install the DMAA package, execute the following steps:
+To install the EMD package, execute the following steps:
 
 1. **(Optional)** Create and activate a virtual environment:
 
@@ -58,7 +58,7 @@ This command installs the package along with its dependencies.
 After successful installation, use the following command to access the CLI help:
 
 ```bash
-dmaa --help
+emd --help
 ```
 
-This command displays the available options and commands for the DMAA CLI.
+This command displays the available options and commands for the EMD CLI.

@@ -129,7 +129,7 @@ cython_debug/
 .vscode/
 
 # data
-dmaa_models/
+emd_models/
 **artifacts
-src/pipeline/dmaa
+src/pipeline/emd
 *.log

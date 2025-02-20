@@ -43,7 +43,7 @@ ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/tmp/llama.cpp
 
 RUN python3 -m pip  install boto3 huggingface_hub ipython hf_transfer openai fastapi uvicorn
 RUN mkdir -p /opt/ml/code
-RUN mkdir -p /opt/ml/code/dmaa_models
+RUN mkdir -p /opt/ml/code/emd_models
 
 RUN ln -s /tmp/llama.cpp/llama-server /opt/ml/code/llama-server
 

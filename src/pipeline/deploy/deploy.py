@@ -4,19 +4,19 @@ import subprocess
 import logging
 import json
 import argparse
-from dmaa.models.utils.constants import (
+from emd.models.utils.constants import (
     InstanceType,
     ServiceType,
     EngineType,
     FrameworkType
 )
-from dmaa.models import Model, ExecutableConfig
+from emd.models import Model, ExecutableConfig
 
 from utils.common import str2bool
-from dmaa.constants import DMAA_MODELS_LOCAL_DIR_TEMPLATE
-from dmaa.models import Instance
-from dmaa.utils.logger_utils import get_logger
-from dmaa.utils.accelerator_utils import check_cuda_exists,check_neuron_exists,get_neuron_core_num
+from emd.constants import EMD_MODELS_LOCAL_DIR_TEMPLATE
+from emd.models import Instance
+from emd.utils.logger_utils import get_logger
+from emd.utils.accelerator_utils import check_cuda_exists,check_neuron_exists,get_neuron_core_num
 
 logger = get_logger(__name__)
 
@@ -71,7 +71,12 @@ def run(
             accelerator_cli_args = f"""--gpus '"{gpus_str}"'"""
         else:
             raise RuntimeError("No accelerator found")
-        model_dir = DMAA_MODELS_LOCAL_DIR_TEMPLATE.format(model_id=model_id)
+
+        reguar_model_dir = EMD_MODELS_LOCAL_DIR_TEMPLATE.format(model_id=model_id)
+        if execute_model.model_files_local_path is not None:
+            model_dir = execute_model.model_files_local_path
+        else:
+            model_dir = reguar_model_dir
         model_dir_abs = os.path.abspath(model_dir)
         model_dir_in_image = f"/{model_dir}"
         running_cmd = (

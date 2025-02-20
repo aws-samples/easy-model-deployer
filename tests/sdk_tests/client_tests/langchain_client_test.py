@@ -1,4 +1,4 @@
-from dmaa.integrations.langchain_clients import SageMakerVllmChatModel
+from emd.integrations.langchain_clients import SageMakerVllmChatModel
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.messages import HumanMessage,AIMessage,SystemMessage
 from langchain.tools.base import StructuredTool
@@ -9,7 +9,7 @@ from langchain_core.utils.function_calling import (
 
 chat_model = SageMakerVllmChatModel(
     # region_name='us-west-2',
-    # endpoint_name="DMAA-Model-Qwen2-5-7B-Instruct-r8av5c-endpoint"
+    # endpoint_name="EMD-Model-Qwen2-5-7B-Instruct-r8av5c-endpoint"
     # model_id="Qwen2.5-0.5B-Instruct",
     # model_id="Qwen2.5-0.5B-Instruct",
     # model_id="Qwen2.5-7B-Instruct",
@@ -26,7 +26,7 @@ chat_model = SageMakerVllmChatModel(
         # "chat_template": open("/efs/projects/deploy-model-anywhere-on-aws/src/pipeline/backend/vllm/chat_templates/deepseek_32b_chat_template.jinja").read()
     }
     # model_tag='Admin',
-    # endpoint_name="DMAA-Model-Qwen2-5-72B-Instruct-AWQ-sv1dqz-endpoint"
+    # endpoint_name="EMD-Model-Qwen2-5-72B-Instruct-AWQ-sv1dqz-endpoint"
 )
 
 
@@ -93,7 +93,7 @@ print(chat_model_with_tool.invoke(
 
 # chat_model = SageMakerVllmChatModel(
 #     # region_name='us-west-2',
-#     # endpoint_name="DMAA-Model-Qwen2-5-7B-Instruct-r8av5c-endpoint"
+#     # endpoint_name="EMD-Model-Qwen2-5-7B-Instruct-r8av5c-endpoint"
 #     # model_id="Qwen2.5-0.5B-Instruct",
 #     # model_id="Qwen2.5-0.5B-Instruct",
 #     # model_id="Qwen2.5-7B-Instruct",
@@ -105,7 +105,7 @@ print(chat_model_with_tool.invoke(
 #     model_id="Qwen2-VL-7B-Instruct",
 #     # model_id="internlm2_5-20b-chat-4bit-awq",
 #     # model_tag='Admin',
-#     # endpoint_name="DMAA-Model-Qwen2-5-72B-Instruct-AWQ-sv1dqz-endpoint"
+#     # endpoint_name="EMD-Model-Qwen2-5-72B-Instruct-AWQ-sv1dqz-endpoint"
 # )
 
 

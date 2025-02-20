@@ -18,7 +18,7 @@ class TestVLLMBackend(unittest.TestCase):
         instance_type = "g5.4xlarge"
         service_type = "sagemaker"
         framework_type = "fastapi"
-        model_s3_bucket = "dmaa-us-east-1-bucket-75c6f785084f4fd998da560a0a6190fc"
+        model_s3_bucket = "emd-us-east-1-bucket-75c6f785084f4fd998da560a0a6190fc"
         vllm_cli_args = "--max_model_len 4096"
         # model_id = "Qwen2.5-0.5B-Instruct"
         model_id = "bge-m3"
