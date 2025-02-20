@@ -1,11 +1,12 @@
 <h3 align="center">
 Easy Model Deployer - Simple, Efficient, and Easy-to-Integrate
 </h3>
+
 ---
 
 *Latest News* 🔥
 
-- [2025/03] We officially released EMD! Check out our [blog post](https://vllm.ai).
+- [2025/03] We officially released EMD!
 
 ---
 
@@ -14,7 +15,7 @@ Easy Model Deployer - Simple, Efficient, and Easy-to-Integrate
 EMD (Easy Model Deployer) is a lightweight tool designed to simplify model deployment. Built for developers who need reliable and scalable model serving without complex setup.
 
 **Key Features**
-- One-click deployment of models to the cloud (Amazon SageMaker, Amazon ECS) or on-premises
+- One-click deployment of models to the cloud (Amazon SageMaker, Amazon ECS, Amazon EC2)
 - Diverse model types (LLMs, VLMs, Embeddings, Vision, etc.)
 - Rich inference engine (vLLM, TGI, Lmdeploy, etc.)
 - Different instance types (CPU/GPU/AWS Inferentia)
@@ -22,8 +23,8 @@ EMD (Easy Model Deployer) is a lightweight tool designed to simplify model deplo
 
 **Notes**
 
-- Please check the [Supported Models](docs/supported_models.md) for complete list.
-- OpenAI Compatible API is supported only for Amazon ECS deployment.
+- Please check the [Supported Models](docs/en/supported_models.md) for complete list.
+- OpenAI Compatible API is supported only for Amazon ECS and Amazon EC2 deployment.
 
 ## Getting Started
 
@@ -80,11 +81,12 @@ Notes: Find *ModelId* in the output of ```emd status```.
 emd destroy DeepSeek-R1-Distill-Qwen-1.5B
 ```
 Notes: Find *ModelId* in the output of ```emd status```.
+![alt text](docs/images/emd-destroy.png)
 
 
 ## Documentation
 
-For advanced configurations and detailed guides, visit our [documentation site](https://emd-docs.example.com).
+For advanced configurations and detailed guides, visit our [documentation site](https://aws-samples.github.io/easy-model-deployer/).
 
 ## Contributing
 
