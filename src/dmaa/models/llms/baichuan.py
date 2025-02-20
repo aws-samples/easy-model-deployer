@@ -1,6 +1,7 @@
 from .. import Model
 from ..engines import (
-    huggingface_baichuan_engine_4d41d2
+    huggingface_baichuan_engine_4d41d2,
+    vllm_baichuan_engine071
 )
 from ..services import (
     sagemaker_service,
@@ -30,7 +31,7 @@ from ..model_series import BAICHAUN_SERIES
 Model.register(
     dict(
         model_id = "Baichuan-M1-14B-Instruct",
-        supported_engines=[huggingface_baichuan_engine_4d41d2],
+        supported_engines=[vllm_baichuan_engine071,huggingface_baichuan_engine_4d41d2],
         supported_instances=[
             g5d12xlarge_instance,
             g5d24xlarge_instance,
