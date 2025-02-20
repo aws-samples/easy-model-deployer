@@ -7,7 +7,7 @@ import argparse
 
 import boto3
 from huggingface_hub import snapshot_download
-from dmaa.models import Model
+from emd.models import Model
 
 from utils.common import upload_dir_to_s3_by_s5cmd
 
@@ -22,7 +22,7 @@ parser.add_argument(
     default=os.environ.get("model_id",None),
     help="Currently supports txt2video_LTX",
 )
-parser.add_argument("--model_s3_bucket", type=str, default=os.environ.get('model_s3_bucket',"dmaa-us-east-1-bucket-1234567890"))
+parser.add_argument("--model_s3_bucket", type=str, default=os.environ.get('model_s3_bucket',"emd-us-east-1-bucket-1234567890"))
 args = parser.parse_known_args()[0]
 
 # User defined variables
@@ -36,7 +36,7 @@ huggingface_url_list = model.huggingface_url_list
 
 # Prepare model
 os.environ["AWS_REGION"] = region
-model_dir = f"dmaa_models/{model_id}"
+model_dir = f"emd_models/{model_id}"
 # Create S3 bucket
 # logger.info(f"Creating S3 bucket {model_s3_bucket}")
 # boto3.client("s3", region_name=region).create_bucket(Bucket=model_s3_bucket, CreateBucketConfiguration={"LocationConstraint": region})

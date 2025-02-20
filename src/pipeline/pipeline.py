@@ -6,18 +6,18 @@ import importlib
 import json
 import logging
 from concurrent.futures import as_completed,ProcessPoolExecutor
-from dmaa.models import Model
-from dmaa.constants import MODEL_DEFAULT_TAG,LOCAL_REGION
-from dmaa.models.utils.constants import FrameworkType,ServiceType,InstanceType
+from emd.models import Model
+from emd.constants import MODEL_DEFAULT_TAG,LOCAL_REGION
+from emd.models.utils.constants import FrameworkType,ServiceType,InstanceType
 from utils.common import str2bool
-from dmaa.utils.aws_service_utils import check_cn_region
-from dmaa.models import Model, ExecutableConfig
-from dmaa.models.utils.serialize_utils import load_extra_params,dump_extra_params
+from emd.utils.aws_service_utils import check_cn_region
+from emd.models import Model, ExecutableConfig
+from emd.models.utils.serialize_utils import load_extra_params,dump_extra_params
 import threading
 from multiprocessing import Event
-from dmaa.models import Instance
-from dmaa.models import ValueWithDefault
-from dmaa.utils.logger_utils import get_logger
+from emd.models import Instance
+from emd.models import ValueWithDefault
+from emd.utils.logger_utils import get_logger
 
 logger = get_logger(__name__)
 

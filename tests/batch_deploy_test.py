@@ -1,9 +1,9 @@
-from dmaa import deploy as deploy_sdk, destroy as destroy_sdk
+from emd import deploy as deploy_sdk, destroy as destroy_sdk
 from pydantic import BaseModel
-from dmaa.models import Model
-from dmaa.models.utils.constants import ModelType
+from emd.models import Model
+from emd.models.utils.constants import ModelType
 import traceback
-from dmaa.utils.logger_utils import get_logger
+from emd.utils.logger_utils import get_logger
 
 
 logger = get_logger(__name__)
@@ -48,26 +48,26 @@ def invoke(task:Task):
     model_type = model.model_type
     invoker_cls = None
     if model_type == ModelType.LLM:
-        from dmaa.sdk.invoke.conversation_invoker import ConversationInvoker
+        from emd.sdk.invoke.conversation_invoker import ConversationInvoker
         invoker_cls = ConversationInvoker
         # return conversation_invoke(model_id,model_tag)
     elif model_type == ModelType.WHISPER:
-        from dmaa.sdk.invoke.whisper_invoker import WhisperInvoker
+        from emd.sdk.invoke.whisper_invoker import WhisperInvoker
         invoker_cls = WhisperInvoker
     elif model_type == ModelType.EMBEDDING:
-        from dmaa.sdk.invoke.embedding_invoker import EmbeddingInvoker
+        from emd.sdk.invoke.embedding_invoker import EmbeddingInvoker
         invoker_cls = EmbeddingInvoker
 
     elif model_type == ModelType.VLM:
-        from dmaa.sdk.invoke.vlm_invoker import VLMInvoker
+        from emd.sdk.invoke.vlm_invoker import VLMInvoker
         invoker_cls = VLMInvoker
 
     elif model_type == ModelType.RERANK:
-        from dmaa.sdk.invoke.rerank_invoker import RerankInvoker
+        from emd.sdk.invoke.rerank_invoker import RerankInvoker
         invoker_cls = RerankInvoker
 
     elif model_type == ModelType.VIDEO:
-        from dmaa.sdk.invoke.comfyui_invoke import ComfyUIInvoker
+        from emd.sdk.invoke.comfyui_invoke import ComfyUIInvoker
         invoker_cls = ComfyUIInvoker
     else:
         raise NotImplementedError

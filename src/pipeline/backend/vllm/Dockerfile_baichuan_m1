@@ -1,0 +1,21 @@
+FROM public.ecr.aws/aws-gcr-solutions/dmaa-vllm/vllm-openai:{{VERSION}} AS vllm-base
+
+# Create a new stage based on vllm-base
+FROM vllm-base AS sagemaker-serving
+
+# Ensure the serve script has executable permissions
+# RUN chmod +x /usr/bin/serve
+RUN pip install boto3 hf_transfer modelscope
+
+RUN git clone https://github.com/baichuan-inc/vllm.git && cd vllm && export VLLM_PRECOMPILED_WHEEL_LOCATION=https://files.pythonhosted.org/packages/b0/14/9790c07959456a92e058867b61dc41dde27e1c51e91501b18207aef438c5/vllm-0.6.6.post1-cp38-abi3-manylinux1_x86_64.whl && pip install --editable .
+# 国内用户可选用以下配置
+# export VLLM_PRECOMPILED_WHEEL_LOCATION=https://pypi.tuna.tsinghua.edu.cn/packages/b0/14/9790c07959456a92e058867b61dc41dde27e1c51e91501b18207aef438c5/vllm-0.6.6.post1-cp38-abi3-manylinux1_x86_64.whl
+
+
+# Expose port 8080
+EXPOSE 8080
+WORKDIR /opt/ml/code
+
+
+# Set the serve script as the entrypoint
+ENTRYPOINT ["/usr/bin/serve"]

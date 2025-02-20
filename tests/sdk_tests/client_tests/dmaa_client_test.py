@@ -1,4 +1,4 @@
-from dmaa.sdk.clients.sagemaker_client import SageMakerClient
+from emd.sdk.clients.sagemaker_client import SageMakerClient
 
 
 client = SageMakerClient(
@@ -134,7 +134,7 @@ print(ret)
 
 
 
-# from dmaa.sdk.clients.ecs_client import ECSClient
+# from emd.sdk.clients.ecs_client import ECSClient
 
 # client = ECSClient(
 #     # model_id="Qwen2.5-72B-Instruct-AWQ"

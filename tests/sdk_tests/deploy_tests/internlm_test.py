@@ -1,4 +1,4 @@
-from dmaa import deploy
+from emd import deploy
 
 deploy(
     model_id="internlm2_5-20b-chat-4bit-awq",

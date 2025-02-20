@@ -1,4 +1,4 @@
-from dmaa.sdk.deploy import deploy
+from emd.sdk.deploy import deploy
 
 deploy(
     model_id="glm-4-9b-chat-GPTQ-Int4",

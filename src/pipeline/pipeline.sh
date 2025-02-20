@@ -9,8 +9,8 @@ export PYTHONPATH=.:..:$PYTHONPATH
 region=us-east-1
 # region=us-west-2
 export AWS_REGION=$region
-model_s3_bucket=dmaa-us-east-1-bucket-75c6f785084f4fd998da560a0a6190fc
-# model_s3_bucket=dmaa-cn-north-1-bucket-7cc5276c18f341bda8a457160936d78e
+model_s3_bucket=emd-us-east-1-bucket-75c6f785084f4fd998da560a0a6190fc
+# model_s3_bucket=emd-cn-north-1-bucket-7cc5276c18f341bda8a457160936d78e
 # model_id=Qwen2.5-7B-Instruct
 model_id=Qwen2.5-0.5B-Instruct
 

@@ -13,7 +13,7 @@ import boto3
 import botocore
 import json
 import os
-from dmaa.models.utils.logger_utils import get_logger
+from emd.models.utils.logger_utils import get_logger
 from concurrent.futures import ProcessPoolExecutor,as_completed
 
 logger = get_logger(__name__)

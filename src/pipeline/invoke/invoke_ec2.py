@@ -28,8 +28,8 @@ if __name__ == "__main__":
     # Initialize clients
     invoke_vllm_ec2_stream_client = VLLMEC2Client(host="http://localhost:9000", stream=True)
     invoke_vllm_ec2_client = VLLMEC2Client(host="http://0.0.0.0:9000", stream=False)
-    invoke_vllm_sagemaker_stream_client = VLLMSageMakerClient(endpoint_name="dmaa-vllm-on-sagemaker", stream=True)
-    invoke_vllm_sagemaker_client = VLLMSageMakerClient(endpoint_name="dmaa-vllm-on-sagemaker", stream=False)
+    invoke_vllm_sagemaker_stream_client = VLLMSageMakerClient(endpoint_name="emd-vllm-on-sagemaker", stream=True)
+    invoke_vllm_sagemaker_client = VLLMSageMakerClient(endpoint_name="emd-vllm-on-sagemaker", stream=False)
     invoke_comfy_ui_ec2_client = ComfyUIEC2Client(host="http://0.0.0.0:9000")
     invoke_comfy_ui_sagemaker_client = ComfyUISageMakerClient(endpoint_name="vllm-on-sagemaker-4")
 

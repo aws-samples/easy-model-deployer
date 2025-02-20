@@ -1,4 +1,4 @@
-from dmaa import deploy
+from emd import deploy
 
 
 deploy(
