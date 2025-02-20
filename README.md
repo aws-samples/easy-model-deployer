@@ -32,7 +32,7 @@ EMD (Easy Model Deployer) is a lightweight tool designed to simplify model deplo
 Install EMD with `pip`, currently only support for Python 3.9 and above:
 
 ```bash
-pip install https://github.com/aws-samples/easy-model-deployer/releases/download/v0.1.0/easy_model_deployer-0.1.0-py3-none-any.whl
+curl  https://github.com/aws-samples/easy-model-deployer/releases/download/dev/emd-0.6.0-py3-none-any.whl -o emd-0.6.0-py3-none-any.whl && pip install emd-0.6.0-py3-none-any.whl"[all]"
 ```
 
 Visit our [documentation](https://aws-samples.github.io/easy-model-deployer/) to learn more.
@@ -44,33 +44,42 @@ Visit our [documentation](https://aws-samples.github.io/easy-model-deployer/) to
 emd config set-default-profile-name
 ```
 Notes: If you don't set aws profile, it will use the default profile in your env (suitable for Temporary Credentials). Whenever you want to switch deployment accounts, run ```emd config set-default-profile-name```
+![alt text](docs/images/emd-config.png)
 
 #### Bootstrap emd stack
 ```bash
 emd bootstrap
 ```
-Notes: This is going to set up the necessary resources for model deployment. Whenever you change emd version, run this command again.
+Notes: This is going to set up the necessary resources for model deployment. Whenever you change EMD version, run this command again.
+![alt text](docs/images/emd-bootstrap.png)
 
-#### Choose deployment parameters interactively or deploy with one command
+#### Choose deployment parameters interactively by ```emd deploy``` or deploy with one command
 ```bash
-emd deploy
+emd deploy --model-id DeepSeek-R1-Distill-Qwen-1.5B --instance-type g5.8xlarge --engine-type vllm --framework-type fastapi --service-type sagemaker --extra-params {} --skip-confirm
 ```
-Notes: When you see "...waiting for model deployment pipeline...",  it means the deployment task has started, you can quit the current task by ctrl+c.
+Notes: Get complete parameters by ```emd deploy --help``` and find the values of the required parameters [here](docs/en/supported_models.md) 
+When you see "Waiting for model: ...",  it means the deployment task has started, you can quit the current task by ctrl+c.
+![alt text](docs/images/emd-deploy.png)
 
-#### Check deployment status
+#### Check deployment status. 
 ```bash
 emd status
 ```
+![alt text](docs/images/emd-status.png)
+Notes: EMD allows to launch multiple deployment tasks at the same time.
 
 #### Quick functional verfication or check our [documentation](https://aws-samples.github.io/easy-model-deployer/) for integration examples.
 ```bash
-emd status
+emd invoke DeepSeek-R1-Distill-Qwen-1.5B
 ```
+Notes: Find *ModelId* in the output of ```emd status```.
+![alt text](docs/images/emd-invoke.png)
 
 #### Delete the deployed model
 ```bash
-emd status
+emd destroy DeepSeek-R1-Distill-Qwen-1.5B
 ```
+Notes: Find *ModelId* in the output of ```emd status```.
 
 
 ## Documentation
