@@ -3,12 +3,12 @@ import sys
 import uvicorn
 import argparse
 import logging
-from dmaa.models import Model,ExecutableConfig
-from dmaa.models.utils.constants import FrameworkType
-from dmaa.models.utils.serialize_utils import load_extra_params,dump_extra_params
+from emd.models import Model,ExecutableConfig
+from emd.models.utils.constants import FrameworkType
+from emd.models.utils.serialize_utils import load_extra_params,dump_extra_params
 from fastapi import FastAPI, Request, status, Header, Depends
 from fastapi.responses import JSONResponse, Response, StreamingResponse
-from dmaa.utils.logger_utils import get_logger
+from emd.utils.logger_utils import get_logger
 from fastapi.concurrency import run_in_threadpool
 
 model_id = os.environ.get("model_id")
@@ -32,7 +32,7 @@ def parse_args():
     # parser.add_argument("--uvicorn_log_level", type=str,default="info")
     parser.add_argument("--model_id", type=str)
     parser.add_argument("--backend_type", type=str)
-    parser.add_argument("--model_s3_bucket", type=str, default="dmaa-models")
+    parser.add_argument("--model_s3_bucket", type=str, default="emd-models")
     parser.add_argument("--region", type=str)
     parser.add_argument("--instance_type", type=str)
     parser.add_argument("--service_type", type=str)

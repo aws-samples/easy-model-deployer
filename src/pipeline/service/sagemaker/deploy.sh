@@ -2,11 +2,11 @@ model_id=$1
 backend=$2
 
 export REGION='us-east-1' # change as needed
-export IMG_NAME="dmaa-${backend}" # change as needed
+export IMG_NAME="emd-${backend}" # change as needed
 export IMG_TAG='latest' # change as needed
-export SAGEMAKER_ENDPOINT_NAME="dmaa-${backend}-on-sagemaker-2"
+export SAGEMAKER_ENDPOINT_NAME="emd-${backend}-on-sagemaker-2"
 export INSTANCE_TYPE='g5.2xlarge' # change as needed
-export IMG_NAME="dmaa-${backend}" # change as needed
+export IMG_NAME="emd-${backend}" # change as needed
 echo "#!/bin/bash
 export BACKEND=${backend}
 export MODEL_ID=${model_id}

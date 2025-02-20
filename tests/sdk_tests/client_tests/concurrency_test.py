@@ -1,5 +1,5 @@
 from threading import Thread
-from dmaa.sdk.clients.sagemaker_client import SageMakerClient
+from emd.sdk.clients.sagemaker_client import SageMakerClient
 import time
 
 pyload = {

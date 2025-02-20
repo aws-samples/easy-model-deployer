@@ -5,7 +5,7 @@ import time
 client = boto3.client('cloudformation')
 
 # 定义堆栈名称
-stack_name = 'dmaa-test-stack'
+stack_name = 'emd-test-stack'
 
 # 定义 CloudFormation 模板
 template = {

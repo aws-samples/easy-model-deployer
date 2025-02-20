@@ -1,0 +1,10 @@
+INHERIT: ./mkdocs.base.yml
+docs_dir: en
+site_dir: ./site/en
+theme:
+  language: en
+nav:
+  - About: about.md
+  - Supported Model: supported_models.md
+  - Installation: installation.md
+  - Usage: usage.md

@@ -1,10 +1,10 @@
 from backend.backend import OpenAICompitableProxyBackendBase
-from dmaa.utils.logger_utils import get_logger
+from emd.utils.logger_utils import get_logger
 import os
 import threading
-from dmaa.constants import DMAA_MODELS_S3_KEY_TEMPLATE
-from dmaa.models.utils.constants import ModelType,ServiceType
-from dmaa.utils.system_call_utils import execute_command
+from emd.constants import EMD_MODELS_S3_KEY_TEMPLATE
+from emd.models.utils.constants import ModelType,ServiceType
+from emd.utils.system_call_utils import execute_command
 import time
 import traceback
 
@@ -32,7 +32,7 @@ class OllamaBackend(OpenAICompitableProxyBackendBase):
 
     def before_start(self,model_dir=None):
         if model_dir is None:
-            model_dir = DMAA_MODELS_S3_KEY_TEMPLATE.format(model_id=self.model_id)
+            model_dir = EMD_MODELS_S3_KEY_TEMPLATE.format(model_id=self.model_id)
         model_abs_path = os.path.abspath(model_dir)
         return model_abs_path
 

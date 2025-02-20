@@ -15,7 +15,7 @@ click==8.1.7
 coloredlogs==15.0.1
 contourpy==1.2.1
 crcmod==1.7
-cryptography==44.0.0
+cryptography==44.0.1
 cycler==0.12.1
 decorator==5.1.1
 editdistance==0.8.1

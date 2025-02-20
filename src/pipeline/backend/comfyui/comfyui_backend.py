@@ -48,7 +48,7 @@ class ComfyUIBackend(BackendBase):
             self.workflow = json.load(f)
 
     def start(self):
-        model_dir = f"dmaa_models/{self.model_id}"
+        model_dir = f"emd_models/{self.model_id}"
         logger.info(f"Downloading model from s3")
         sync_s3_files_or_folders_to_local(self.model_s3_bucket, model_dir, ROOT_PATH)
         os.system("bash backend/comfyui/start.sh > comfyui.log 2>&1 &")

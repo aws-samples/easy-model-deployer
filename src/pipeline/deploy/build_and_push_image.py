@@ -5,20 +5,20 @@ import argparse
 import json
 from jinja2 import Template
 import boto3
-from dmaa.models import (
+from emd.models import (
     Model,
     ExecutableConfig,
 )
-from dmaa.models.utils.constants import (
+from emd.models.utils.constants import (
     ServiceType,
     EngineType,
     FrameworkType,
     InstanceType,
 )
-from dmaa.models.utils.serialize_utils import load_extra_params, dump_extra_params
-from dmaa.constants import MODEL_DEFAULT_TAG
-from dmaa.utils.aws_service_utils import check_cn_region
-from dmaa.utils.logger_utils import get_logger
+from emd.models.utils.serialize_utils import load_extra_params, dump_extra_params
+from emd.constants import MODEL_DEFAULT_TAG
+from emd.utils.aws_service_utils import check_cn_region
+from emd.utils.logger_utils import get_logger
 logger = get_logger(__name__)
 
 parser = argparse.ArgumentParser()
@@ -52,7 +52,7 @@ parser.add_argument(
 parser.add_argument(
     "--model_s3_bucket",
     type=str,
-    default=os.environ.get("model_s3_bucket", "dmaa-us-east-1-bucket-1234567890"),
+    default=os.environ.get("model_s3_bucket", "emd-us-east-1-bucket-1234567890"),
 )
 parser.add_argument(
     "--instance_type", type=str, default=os.environ.get("instance_type", "g5.2xlarge")
@@ -122,13 +122,13 @@ def run(
     os.makedirs(execute_dir, exist_ok=True)
     # assert os.system(f"rm -rf {execute_dir}/*") == 0
 
-    # find dmaa path
-    dmaa_path_in_pipeline = os.path.join(os.getcwd(), "dmaa")
-    if os.path.exists(dmaa_path_in_pipeline):
+    # find emd path
+    emd_path_in_pipeline = os.path.join(os.getcwd(), "emd")
+    if os.path.exists(emd_path_in_pipeline):
         # print('copy models',f"cp -r models {execute_dir}")
-        assert os.system(f"cp -Lr {dmaa_path_in_pipeline} {execute_dir}") == 0
+        assert os.system(f"cp -Lr {emd_path_in_pipeline} {execute_dir}") == 0
     else:
-        raise RuntimeError("dmaa path not found...")
+        raise RuntimeError("emd path not found...")
 
     assert os.system(f"cp -r backend {execute_dir}") == 0
     assert os.system(f"cp -r deploy {execute_dir}") == 0

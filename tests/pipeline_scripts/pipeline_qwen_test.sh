@@ -4,7 +4,7 @@ export model_tag=latest
 python pipeline.py \
     --model_id Qwen2.5-0.5B-Instruct \
     --model_tag latest \
-    --model_s3_bucket "dmaa-test" \
+    --model_s3_bucket "emd-test" \
     --backend_type vllm \
     --service_type local \
     --instance_type g5.4xlarge \
