@@ -39,7 +39,7 @@ Visit our [documentation](https://aws-samples.github.io/easy-model-deployer/) to
 
 ### Usage
 
-#### Choose your default aws profile. 
+#### Choose your default aws profile.
 ```bash
 emd config set-default-profile-name
 ```
