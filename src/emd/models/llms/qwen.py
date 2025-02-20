@@ -78,8 +78,7 @@ Model.register(
         model_id = "Qwen2.5-72B-Instruct-AWQ",
         supported_engines=[
             vllm_qwen2d5_engine064,
-            tgi_qwen2d5_72b_engine064,
-            tgi_qwen2d5_72b_on_inf2
+            tgi_qwen2d5_72b_engine064
         ],
         supported_instances=[
             g5d12xlarge_instance,
