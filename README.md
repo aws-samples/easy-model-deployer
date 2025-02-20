@@ -57,11 +57,11 @@ Notes: This is going to set up the necessary resources for model deployment. Whe
 ```bash
 emd deploy --model-id DeepSeek-R1-Distill-Qwen-1.5B --instance-type g5.8xlarge --engine-type vllm --framework-type fastapi --service-type sagemaker --extra-params {} --skip-confirm
 ```
-Notes: Get complete parameters by ```emd deploy --help``` and find the values of the required parameters [here](docs/en/supported_models.md) 
+Notes: Get complete parameters by ```emd deploy --help``` and find the values of the required parameters [here](docs/en/supported_models.md)
 When you see "Waiting for model: ...",  it means the deployment task has started, you can quit the current task by ctrl+c.
 ![alt text](docs/images/emd-deploy.png)
 
-#### Check deployment status. 
+#### Check deployment status.
 ```bash
 emd status
 ```
