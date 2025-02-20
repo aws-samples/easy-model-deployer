@@ -41,7 +41,8 @@ class VLLMBackend(OpenAICompitableProxyBackendBase):
             ).json()
         else:
             response = self.client.chat.completions.create(**request)
-        logger.info(f"response:{response}")
+        logger.info(f"response:{response},{request}")
+
         if request.get("stream", False):
             return self._transform_streaming_response(response)
         else:

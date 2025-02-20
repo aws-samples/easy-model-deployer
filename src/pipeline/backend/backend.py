@@ -183,14 +183,21 @@ class OpenAICompitableProxyBackendBase(BackendBase):
         # Transform response to sagemaker format
         return self._get_streaming_response(response)
 
+    def _format_streaming_response(self, response:bytes):
+        if self.service_type == ServiceType.SAGEMAKER:
+            return response +  "\n"
+        else:
+            return f"data: {response}\n\n"
+
     def _get_streaming_response(self, response) -> Iterable[List[str]]:
         try:
             for chunk in response:
                 # logger.info(f"chunk: {chunk}")
-                yield chunk.model_dump_json() + "\n"
+                yield self._format_streaming_response(chunk.model_dump_json())
         except Exception as e:
             logger.error(traceback.format_exc())
-            yield json.dumps({"error": str(e)}) + "\n"
+            yield self._format_streaming_response(json.dumps({"error": str(e)}))
+
 
     def _get_response(self, response) -> List[str]:
         return response
