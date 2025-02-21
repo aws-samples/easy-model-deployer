@@ -98,7 +98,7 @@ def callback(ctx: typer.Context):
         # Show welcome message
         console.print(
             Panel.fit(
-                f"[bold blue]Deploy Models Anywhere on AWS[/bold blue]\n[dim]Version: {VERSION}[/dim]\n[dim]Build  : {COMMIT_HASH}[/dim]",
+                f"[bold blue]Easy Model Deployer[/bold blue]\n[dim]Version: {VERSION}[/dim]\n[dim]Build  : {COMMIT_HASH}[/dim]",
                 border_style="green",
             )
         )
