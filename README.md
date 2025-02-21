@@ -33,7 +33,7 @@ EMD (Easy Model Deployer) is a lightweight tool designed to simplify model deplo
 Install EMD with `pip`, currently only support for Python 3.9 and above:
 
 ```bash
-curl  -LO https://github.com/aws-samples/easy-model-deployer/releases/download/dev/emd-0.6.0-py3-none-any.whl && pip install emd-0.6.0-py3-none-any.whl"[all]"
+pip install https://github.com/aws-samples/easy-model-deployer/releases/download/main/emd-0.6.0-py3-none-any.whl
 ```
 
 Visit our [documentation](https://aws-samples.github.io/easy-model-deployer/) to learn more.
