@@ -10,6 +10,9 @@ Parameters:
   ECSCluster:
     Type: String
     Description: The name of the ECS cluster to be used for the ECS Endpoint
+  DNSName:
+    Type: String
+    Description: The DNS name of the public load balancer. To use HTTPS, create an SSL certificate in AWS Certificate Manager and attach it to the load balancer.
   PublicLoadBalancerListenerArn:
     Type: String
     Description: The listener to be used for the ECS Endpoint
@@ -357,7 +360,7 @@ Resources:
         - Type: forward
           TargetGroupArn: !Ref ServiceTargetGroup
 
-# Outputs:
-#   PublicLoadBalancerDNSName:
-#     Description: The DNS name of the public load balancer. To use HTTPS, create an SSL certificate in AWS Certificate Manager and attach it to the load balancer.
-#     Value: !Join ['', ['http://', !Ref PublicLoadBalancer.DNSName, '/', !Ref ModelId, '/', !Ref ModelTag]]
+Outputs:
+  PublicLoadBalancerDNSName:
+    Description: The DNS name of the public load balancer. To use HTTPS, create an SSL certificate in AWS Certificate Manager and attach it to the load balancer.
+    Value: !Join ['', ['http://', !Ref DNSName, '/', !Ref ModelId, '/', !Ref ModelTag]]
