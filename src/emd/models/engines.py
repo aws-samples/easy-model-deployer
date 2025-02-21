@@ -278,7 +278,7 @@ lmdeploy_intervl2d5_awq_engine064 = LMdeployEngine(
 
 vllm_baichuan_engine071 = VllmEngine(**{
             "engine_type":EngineType.VLLM,
-            "engine_dockerfile_config": {"VERSION":"v0.7.1"},
+            "engine_dockerfile_config": {"VERSION":"v0.6.6-baichuan-m1"},
             "engine_cls":"vllm.vllm_backend.VLLMBackend",
             "base_image_host":"public.ecr.aws",
             "use_public_ecr":True,

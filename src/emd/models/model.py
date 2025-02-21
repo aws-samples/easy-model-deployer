@@ -1,7 +1,7 @@
 import os
 import re
 import importlib
-from pydantic import BaseModel,Field,ConfigDict
+from pydantic import BaseModel,Field,ConfigDict,SerializeAsAny
 from typing import List,ClassVar,Union,TypeVar, Generic,Any
 from .utils.constants import (
     EngineType,
@@ -161,10 +161,10 @@ class ModelSeries(ModelBase):
 class Model(ModelBase,Generic[T]):
     model_map: ClassVar[dict] = {}
     model_id: str = Field(description="model id")
-    supported_engines: List[Engine] = Field(description="supported engine")
-    supported_instances: List[Instance] = Field(description="supported instances")
-    supported_services: List[Service] = Field(description="supported services")
-    supported_frameworks: List[Framework] = Field(description="supported frameworks")
+    supported_engines: List[SerializeAsAny[Engine]] = Field(description="supported engine")
+    supported_instances: List[SerializeAsAny[Instance]] = Field(description="supported instances")
+    supported_services: List[SerializeAsAny[Service]] = Field(description="supported services")
+    supported_frameworks: List[SerializeAsAny[Framework]] = Field(description="supported frameworks")
     allow_china_region: bool = False
 
     # allow_china_region_ecs: bool = False
