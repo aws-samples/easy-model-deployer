@@ -52,9 +52,7 @@ async def get_authorization(authorization: str = Header(None)):
     return authorization
 
 async def invoke(payload):
-    # logger.info('invoke ......')
     generator = await run_in_threadpool(engine.invoke, payload)
-    # generator = engine.invoke(payload)
     stream = payload.get("stream",False)
     if stream:
         return StreamingResponse(content=generator,

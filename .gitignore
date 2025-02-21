@@ -127,6 +127,7 @@ cython_debug/
 
 # VS Code
 .vscode/
+docs/site
 
 # data
 emd_models/

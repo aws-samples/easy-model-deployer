@@ -1,0 +1,37 @@
+site_name: Easy Model Deployer
+site_url: https://github.com/aws-samples/easy-model-deployer/
+repo_url: https://github.com/aws-samples/easy-model-deployer/
+repo_name: aws-samples/easy-model-deployer
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+  favicon: https://s3.cn-north-1.amazonaws.com.cn/aws-assets-prod/libra-css/images/site/fav/favicon.ico
+  logo: https://s3.cn-north-1.amazonaws.com.cn/aws-assets-prod/libra-css/images/site/fav/favicon.ico
+  icon:
+      repo: fontawesome/brands/github
+  language: en
+
+extra:
+  generator: false
+  copyright: Copyright &copy; 2020 - 2025 Amazon Web Services
+  alternate:
+    - name: English
+      link: /easy-model-deployer/en/
+      lang: en
+  bucket: aws-gcr-solutions
+  version: develop
+
+plugins:
+  - search
+  - include-markdown
+  - macros
+  - with-pdf
+  - print-site
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - pymdownx.details
+  - pymdownx.superfences

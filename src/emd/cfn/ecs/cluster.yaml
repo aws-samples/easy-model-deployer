@@ -231,6 +231,9 @@ Outputs:
   LogGroup:
     Description: The log group
     Value: !Ref LogGroup
+  DNSName:
+    Description: The DNS name of the public load balancer. To use HTTPS, create an SSL certificate in AWS Certificate Manager and attach it to the load balancer.
+    Value: !GetAtt PublicLoadBalancer.DNSName
   PublicLoadBalancerListenerArn:
     Description: The ARN of the public load balancer listener
     Value: !GetAtt PublicLoadBalancerListener.ListenerArn

@@ -304,6 +304,8 @@ def deploy_local(
     with zipfile.ZipFile(pipeline_zip_local_path, "r") as zip_ref:
         zip_ref.extractall(dir)
 
+    # assert os.system(f"chmod -R 777 {dir}") == 0, f"chmod -R 777 {dir} failed"
+
     pipeline_cmd = (
         f"cd {dir}/pipeline && {sys.executable} pipeline.py "
         f" --model_id {model_id}"

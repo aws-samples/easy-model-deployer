@@ -10,6 +10,7 @@ from concurrent.futures import as_completed,ProcessPoolExecutor
 from emd.models import Model
 from emd.constants import MODEL_DEFAULT_TAG,LOCAL_REGION
 from emd.models.utils.constants import FrameworkType,ServiceType,InstanceType
+
 from utils.common import str2bool
 from emd.utils.aws_service_utils import check_cn_region
 from emd.models import Model, ExecutableConfig
