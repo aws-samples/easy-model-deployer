@@ -133,7 +133,7 @@ class OpenAICompitableProxyBackendBase(BackendBase):
 
         if self.service_type != ServiceType.LOCAL:
             if self.execute_model.need_prepare_model or self.model_files_s3_path:
-                logger.info(f"Downloading model from s3")
+                logger.info(f"Downloading model from s3, model_dir: {model_dir}, bucket_name: {self.model_s3_bucket}")
                 download_dir_from_s3_by_s5cmd(
                     model_dir,
                     bucket_name = self.model_s3_bucket,

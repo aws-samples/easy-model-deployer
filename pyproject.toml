@@ -35,9 +35,9 @@ modelscope = "^1.21.1"
 
 [tool.poetry.extras]
 # optional dependencies
-cli = ["typer","rich","questionary","requests"]
-langchain = ["langchain", "langchain-aws"]  # langchain required
-all = ["typer","rich","questionary","langchain", "langchain-aws","sagemaker","openai","jinja2","huggingface_hub","hf_transfer","modelscope"] # all
+#cli = ["typer","rich","questionary","requests"]
+#langchain = ["langchain", "langchain-aws"]  # langchain required
+#all = ["typer","rich","questionary","langchain", "langchain-aws","sagemaker","openai","jinja2","huggingface_hub","hf_transfer","modelscope"] # all
 
 
 [tool.poetry.group.dev.dependencies]
