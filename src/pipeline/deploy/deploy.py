@@ -82,13 +82,13 @@ def run(
         container_name = f"{EMD_DEFAULT_CONTAINER_PREFIX}-{model_id.replace('/', '-')}-{int(time.time())}"  # emd-Qwen2.5-72B-Instruct-AWQ-1740116480
         running_cmd = (
             f"docker run --shm-size 1g"
-            f" --restart always"
+            f" --restart always"  # Always restart in case EC2 restart for patching
             f" --name {container_name}"
             f" -e model_id={model_id}  -e model_tag={model_tag}"
             f" -e MODEL_DIR={model_dir_in_image}"
             f" -e AWS_ACCESS_KEY_ID={aws_access_key_id} -e AWS_SECRET_ACCESS_KEY={aws_secret_access_key}"
-            f" -dit {accelerator_cli_args} -v {model_dir_abs}:{model_dir_in_image} -p 8080:8080 {img_uri}"
-            f" && docker logs -f ${container_name}"
+            f" -dit {accelerator_cli_args} -v {model_dir_abs}:{model_dir_in_image} -p 8080:8080 {img_uri}" # daemon run with attached logging
+            f" && docker logs -f {container_name}"
         )
         logger.info(f"Running {running_cmd}")
         os.system(running_cmd)
