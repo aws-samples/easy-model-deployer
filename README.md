@@ -23,7 +23,6 @@ EMD (Easy Model Deployer) is a lightweight tool designed to simplify model deplo
 
 **Notes**
 
-- Please check the [Supported Models](docs/en/supported_models.md) for complete list.
 - OpenAI Compatible API is supported only for Amazon ECS and Amazon EC2 deployment.
 
 ## Table of Contents
@@ -39,11 +38,6 @@ Deploy models to the cloud with EMD will use the following components in Amazon 
 
 ![alt text](docs/images/emd-architecture.png)
 
-- Amazon SageMaker
-- Amazon ECS
-- Amazon EC2
-- Amazon ECR
-- Amazon EKS
 
 ## Getting Started
 
@@ -52,7 +46,7 @@ Deploy models to the cloud with EMD will use the following components in Amazon 
 Install EMD with `pip`, currently only support for Python 3.9 and above:
 
 ```bash
-curl  -LO https://github.com/aws-samples/easy-model-deployer/releases/download/dev/emd-0.6.0-py3-none-any.whl && pip install emd-0.6.0-py3-none-any.whl"[all]"
+pip install https://github.com/aws-samples/easy-model-deployer/releases/download/main/emd-0.6.0-py3-none-any.whl
 ```
 
 Visit our [documentation](https://aws-samples.github.io/easy-model-deployer/) to learn more.
@@ -72,6 +66,11 @@ emd bootstrap
 ```
 Notes: This is going to set up the necessary resources for model deployment. Whenever you change EMD version, run this command again.
 ![alt text](docs/images/emd-bootstrap.png)
+
+#### Quickly see what models are supported by ```emd list-supported-models```. This command will output all information related to deployment. The following command is recommended to just check the model type. (Plese check [Supported Models](docs/en/supported_models.md) for complete information.)
+```bash
+emd list-supported-models | jq -r '.[] | "\(.model_id)\t\(.model_type)"' | column -t -s $'\t' | sort
+```
 
 #### Choose deployment parameters interactively by ```emd deploy``` or deploy with one command
 ```bash
