@@ -1,21 +1,28 @@
-[project]
-name = "emd"
+[tool.poetry]
+name = "aws-emd"
+version = "0.7.0"
 description = "Deploy Model Anywhere on AWS"
-version = "0.6.0"
 authors = [
-    {name = "Yi Yan",email = "<yiyanz@amazon.com>"},
-    {name = "Jie Tang", email="<tangjiee@amazon.com>"},
-    {name="Xuan Zhou",email="<zhouxss@amazon.com>"}
+    "Yi Yan <yiyanz@amazon.com>",
+    "Jie Tang <tangjiee@amazon.com>",
+    "Xuan Zhou <zhouxss@amazon.com>"
 ]
 readme = "README.md"
-
-[tool.poetry]
 packages = [
     { include = "**/*", from = "src/emd", to = "emd" },
     { include = "pipeline", from = "src", to = "emd" },
     { include = "s5cmd", from = "assets", to = "emd/pipeline" }
 ]
 exclude = [".venv"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -42,10 +49,6 @@ modelscope = "^1.21.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+
 [tool.poetry.scripts]
-emd = "emd.cli:app"
-[project.scripts]
-emd = "emd.cli:app"
+aws-emd = "emd.cli:app"
