@@ -7,6 +7,7 @@ class OpenAICompitableEngine(Engine):
     environment_variables:str = ""
     cli_args: str = ""
     default_cli_args: str = ""
+    custom_gpu_num: Union[int,None] = None
 
 class VllmEngine(OpenAICompitableEngine):
     pass
@@ -295,7 +296,7 @@ vllm_embedding_engine064 = VllmEngine(**{
             "base_image_host":"public.ecr.aws",
             "use_public_ecr":True,
             "docker_login_region":"us-east-1",
-            "default_cli_args": " --disable-log-stats"
+            "default_cli_args": " --max_num_seq 30 --disable-log-stats"
 })
 
 vllm_embedding_engine066 = VllmEngine(**{

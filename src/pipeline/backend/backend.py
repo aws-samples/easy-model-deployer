@@ -65,14 +65,18 @@ class OpenAICompitableProxyBackendBase(BackendBase):
         self.api_key = self.execute_model.executable_config.current_engine.api_key
         self.cli_args = self.execute_model.executable_config.current_engine.cli_args
         self.default_cli_args = self.execute_model.executable_config.current_engine.default_cli_args
+        self.custom_gpu_num = self.execute_model.executable_config.current_engine.custom_gpu_num
         self.environment_variables = self.execute_model.executable_config.current_engine.environment_variables
         self.engine_type = self.execute_model.executable_config.current_engine.engine_type
         # self.gpu_num = torch.cuda.device_count()
         self.model_type = self.execute_model.model_type
         self.proc = None
 
+
     @property
     def gpu_num(self):
+        if self.custom_gpu_num is not None:
+            return self.custom_gpu_num
         return get_gpu_num()
 
     def create_proxy_server_start_command(self,model_path):

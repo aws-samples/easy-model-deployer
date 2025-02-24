@@ -47,33 +47,3 @@ Model.register(
         model_series=BGE_SERIES
     )
 )
-
-# Model.register(
-#     dict(
-#         model_id = "bge-reranker-v2-gemma",
-#         supported_engines=[vllm_embedding_engine066],
-#         supported_instances=[
-#             g5dxlarge_instance,
-#             g5d2xlarge_instance,
-#             g5d4xlarge_instance,
-#             g5d8xlarge_instance,
-#             # g5d12xlarge_instance,
-#             g5d16xlarge_instance,
-#             # g5d24xlarge_instance,
-#             # g5d48xlarge_instance,
-#             local_instance
-#         ],
-#         supported_services=[
-#             sagemaker_service,
-#             local_service
-#         ],
-#         supported_frameworks=[
-#             fastapi_framework
-#         ],
-#         huggingface_model_id="BAAI/bge-reranker-v2-gemma",
-#         require_huggingface_token=False,
-#         application_scenario="RAG",
-#         model_type=ModelType.RERANK,
-#         model_series_name=ModelSeries.BGE
-#     )
-# )

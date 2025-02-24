@@ -14,13 +14,17 @@ from typing import (
 )
 
 import os
+import sys
 import json
 from operator import itemgetter
+import asyncio
+from copy import deepcopy
 
 from langchain_core.callbacks import (
     AsyncCallbackManagerForLLMRun,
     CallbackManagerForLLMRun,
 )
+from langchain_core.runnables import RunnableParallel
 from langchain_core.language_models import BaseChatModel, SimpleChatModel,LanguageModelInput
 from langchain_core.messages import (
     AIMessageChunk,
@@ -31,6 +35,7 @@ from langchain_core.messages import (
     ToolMessage,
     convert_to_messages
 )
+from langchain_core.callbacks.manager import Callbacks
 from langchain_core.messages.ai import (
     InputTokenDetails,
     OutputTokenDetails,
@@ -78,10 +83,15 @@ from langchain_core.utils.function_calling import (
     convert_to_openai_function,
     convert_to_openai_tool,
 )
+from langchain_core.documents import BaseDocumentCompressor,Document
 from emd.utils.aws_service_utils import check_stack_exists,get_model_stack_info
 from emd.models import Model
 from emd.constants import MODEL_DEFAULT_TAG
 from emd.sdk.clients.sagemaker_client import SageMakerClient
+from emd.utils.logger_utils import get_logger
+from langchain_core.embeddings import Embeddings
+
+logger = get_logger(__name__)
 
 
 def _convert_dict_to_message(_dict: Mapping[str, Any]) -> BaseMessage:
@@ -210,8 +220,8 @@ def _convert_delta_to_message_chunk(
         return default_class(content=content)  # type: ignore[call-arg]
 
 
-class SageMakerVllmChatModelBase(BaseChatModel):
 
+class SageMakerVllmModelBase(BaseModel):
     sagemaker_client: Union[SageMakerClient,None] = None
 
     model_id: Union[str,None] = None
@@ -260,7 +270,6 @@ class SageMakerVllmChatModelBase(BaseChatModel):
         """Configuration for this pydantic object."""
         extra = "allow"
 
-
     @model_validator(mode='before')
     def validate_environment(cls, values: Dict) -> Dict:
         """Dont do anything if client provided externally"""
@@ -280,22 +289,23 @@ class SageMakerVllmChatModelBase(BaseChatModel):
             )
         return values
 
+    async def run_tasks_in_executor(self,tasks:list[dict]):
+        loop = asyncio.get_event_loop()
+        results = []
+        for task in tasks:
+            result = loop.run_in_executor(
+                None,
+                task['func'],
+                *task.get('args',tuple())
+            )
+            results.append(result)
+        return await asyncio.gather(*results)
+
+
+class SageMakerVllmChatModelBase(SageMakerVllmModelBase,BaseChatModel):
 
     def prepare_input_body(self,model_kwargs,messages: List[BaseMessage]) -> Dict:
         raise NotImplementedError
-
-
-    def _sagemaker_endpoint_invoke(self,request_options:dict,stream=False):
-        enable_print_messages = os.getenv("ENABLE_PRINT_MESSAGES", 'False').lower() in ('true', '1', 't')
-        if enable_print_messages:
-            print("request body: ", json.loads(request_options['Body']))
-        if stream:
-            return self.client.invoke_endpoint_with_response_stream(
-                **request_options
-            )
-        else:
-            return self.client.invoke_endpoint(**request_options)
-
 
     def _generate(
         self,
@@ -555,3 +565,170 @@ class SageMakerVllmChatModel(SageMakerVllmChatModelBase):
         return {
             **model_kwargs,"messages":_messages
         }
+
+
+
+class SageMakerVllmEmbeddings(SageMakerVllmModelBase,Embeddings):
+    normalize: bool = False
+
+    def _embedding_func(self, text: str) -> List[float]:
+        """Call out to SageMaker embedding endpoint."""
+
+        input_body: Dict[str, Any] = {
+            "input": [text],
+        }
+
+        try:
+            response_dict = self.sagemaker_client.invoke(input_body)
+            return response_dict['data'][0]['embedding']
+
+        except Exception as e:
+            logger.error(f"Error raised by inference endpoint: {e}")
+            raise e
+
+    def _normalize_vector(self, embeddings: List[float]) -> List[float]:
+        """Normalize the embedding to a unit vector."""
+        import numpy as np
+        emb = np.array(embeddings)
+        norm_emb = emb / np.linalg.norm(emb)
+        return norm_emb.tolist()
+
+
+    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+        """Compute doc embeddings using a SageMaker model.
+
+        Args:
+            texts: The list of texts to embed
+
+        Returns:
+            List of embeddings, one for each text.
+        """
+        tasks = [
+            {
+                'func':self.embed_query,
+                "args":[text]
+            }
+            for text in texts
+        ]
+        return asyncio.run(
+            self.run_tasks_in_executor(tasks)
+        )
+
+    def embed_query(self, text: str) -> List[float]:
+        """Compute query embeddings using a Bedrock model.
+
+        Args:
+            text: The text to embed.
+
+        Returns:
+            Embeddings for the text.
+        """
+        embedding = self._embedding_func(text)
+
+        if self.normalize:
+            return self._normalize_vector(embedding)
+
+        return embedding
+
+    async def aembed_query(self, text: str) -> List[float]:
+        """Asynchronous compute query embeddings using a Bedrock model.
+
+        Args:
+            text: The text to embed.
+
+        Returns:
+            Embeddings for the text.
+        """
+
+        return await run_in_executor(None, self.embed_query, text)
+
+    async def aembed_documents(self, texts: List[str]) -> List[List[float]]:
+        """Asynchronous compute doc embeddings using a Bedrock model.
+
+        Args:
+            texts: The list of texts to embed
+
+        Returns:
+            List of embeddings, one for each text.
+        """
+
+        result = await asyncio.gather(*[self.aembed_query(text) for text in texts])
+
+        return list(result)
+
+
+class SageMakerVllmRerank(SageMakerVllmModelBase,BaseDocumentCompressor):
+    top_n: Optional[int] = sys.maxsize
+
+    def rerank(
+        self,
+        documents: Sequence[Union[str, Document]],
+        query: str,
+        top_n: Optional[int] = None
+    ) -> List[Dict[str, Any]]:
+        """Returns an ordered list of documents based on their relevance to the query.
+
+        Args:
+            query: The query to use for reranking.
+            documents: A sequence of documents to rerank.
+            top_n: The number of top-ranked results to return. Defaults to self.top_n.
+
+        Returns:
+            List[Dict[str, Any]]: A list of ranked documents with relevance scores.
+        """
+        if len(documents) == 0:
+            return []
+
+        serialized_documents = [
+            doc.page_content
+            if isinstance(doc,Document)
+            else doc
+            for doc in documents
+        ]
+        tasks = [
+            {
+                "func":self.sagemaker_client.invoke,
+                "args":[{
+                    "encoding_format": "float",
+                    "text_1": query,
+                    "text_2": doc
+                }]
+            }
+            for doc in documents
+        ]
+        rets = asyncio.run(self.run_tasks_in_executor(tasks))
+
+        rets = [
+            {
+                "index": i,
+                "relevance_score": ret["data"][0]["score"]
+            }
+            for i,ret in enumerate(rets)
+        ]
+
+        return rets
+
+    def compress_documents(
+        self,
+        documents: Sequence[Document],
+        query: str,
+        callbacks: Optional[Callbacks] = None,
+    ) -> Sequence[Document]:
+        """
+        Compress documents using Bedrock's rerank API.
+
+        Args:
+            documents: A sequence of documents to compress.
+            query: The query to use for compressing the documents.
+            callbacks: Callbacks to run during the compression process.
+
+        Returns:
+            A sequence of compressed documents.
+        """
+        compressed = []
+        for res in self.rerank(documents, query):
+            doc = documents[res["index"]]
+            doc_copy = Document(doc.page_content, metadata=deepcopy(doc.metadata))
+            doc_copy.metadata["relevance_score"] = res["relevance_score"]
+            compressed.append(doc_copy)
+        return compressed
