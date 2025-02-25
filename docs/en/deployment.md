@@ -46,7 +46,7 @@ It is recommended to launch the instance using the AMI "**Deep Learning OSS Nvid
 emd deploy --allow-local-deploy
 ```
 
-There some EMD configuration sample settings for model deployment in the following two sections: [Non-reasoning Model deployment configuration](#non-reasoning-model-deployment-configuration) and [Reasoning Model deployment configuration](#reasoning-model-deployment-configuration). 
+There some EMD configuration sample settings for model deployment in the following two sections: [Non-reasoning Model deployment configuration](#non-reasoning-model-deployment-configuration) and [Reasoning Model deployment configuration](#reasoning-model-deployment-configuration).
 Wait for the model deployment to complete.
 
 ### Non-reasoning Model deployment configuration
