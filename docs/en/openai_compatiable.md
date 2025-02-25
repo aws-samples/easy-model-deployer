@@ -4,7 +4,7 @@
 ## Use EMD to invoke model
 
 ```bash
-emd invoke MODEL_ID MODEL_TAG (Optional) 
+emd invoke MODEL_ID MODEL_TAG (Optional)
 ```
 
 ### For LLM models
@@ -12,11 +12,11 @@ emd invoke MODEL_ID MODEL_TAG (Optional)
 emd invoke  DeepSeek-R1-Distill-Qwen-7B
 ...
 Invoking model DeepSeek-R1-Distill-Qwen-7B with tag dev
-Write a prompt, press Enter to generate a response (Ctrl+C to abort), 
+Write a prompt, press Enter to generate a response (Ctrl+C to abort),
 User: how to solve the problem of making more profit
 Assistant:<think>
 
-Okay, so I need to figure out how to make more profit. Profit is basically the money left after subtracting costs from revenue, right? So, increasing profit means either making more money from sales or reducing the 
+Okay, so I need to figure out how to make more profit. Profit is basically the money left after subtracting costs from revenue, right? So, increasing profit means either making more money from sales or reducing the
 expenses. Let me think about how I can approach this.
 ...
 ```
@@ -41,11 +41,11 @@ Invoking model DeepSeek-R1-Distill-Qwen-7B with tag dev
 emd invoke  DeepSeek-R1-Distill-Qwen-7B
 ...
 Invoking model DeepSeek-R1-Distill-Qwen-7B with tag dev
-Write a prompt, press Enter to generate a response (Ctrl+C to abort), 
+Write a prompt, press Enter to generate a response (Ctrl+C to abort),
 User: how to solve the problem of making more profit
 Assistant:<think>
 
-Okay, so I need to figure out how to make more profit. Profit is basically the money left after subtracting costs from revenue, right? So, increasing profit means either making more money from sales or reducing the 
+Okay, so I need to figure out how to make more profit. Profit is basically the money left after subtracting costs from revenue, right? So, increasing profit means either making more money from sales or reducing the
 expenses. Let me think about how I can approach this.
 ...
 ```
@@ -55,11 +55,11 @@ expenses. Let me think about how I can approach this.
 emd invoke  DeepSeek-R1-Distill-Qwen-7B
 ...
 Invoking model DeepSeek-R1-Distill-Qwen-7B with tag dev
-Write a prompt, press Enter to generate a response (Ctrl+C to abort), 
+Write a prompt, press Enter to generate a response (Ctrl+C to abort),
 User: how to solve the problem of making more profit
 Assistant:<think>
 
-Okay, so I need to figure out how to make more profit. Profit is basically the money left after subtracting costs from revenue, right? So, increasing profit means either making more money from sales or reducing the 
+Okay, so I need to figure out how to make more profit. Profit is basically the money left after subtracting costs from revenue, right? So, increasing profit means either making more money from sales or reducing the
 expenses. Let me think about how I can approach this.
 ...
 ```
@@ -71,4 +71,4 @@ Deploy models to the cloud with EMD will use the following components in Amazon 
 
 ## Use the langchain interface to invoke model
 
-## Use the 
+## Use the

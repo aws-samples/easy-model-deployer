@@ -2,7 +2,7 @@
 # Usse EMD client to invoke deployed models
 
 ```bash
-emd invoke MODEL_ID MODEL_TAG (Optional) 
+emd invoke MODEL_ID MODEL_TAG (Optional)
 ```
 
 ## LLM models
@@ -10,11 +10,11 @@ emd invoke MODEL_ID MODEL_TAG (Optional)
 emd invoke  DeepSeek-R1-Distill-Qwen-7B
 ...
 Invoking model DeepSeek-R1-Distill-Qwen-7B with tag dev
-Write a prompt, press Enter to generate a response (Ctrl+C to abort), 
+Write a prompt, press Enter to generate a response (Ctrl+C to abort),
 User: how to solve the problem of making more profit
 Assistant:<think>
 
-Okay, so I need to figure out how to make more profit. Profit is basically the money left after subtracting costs from revenue, right? So, increasing profit means either making more money from sales or reducing the 
+Okay, so I need to figure out how to make more profit. Profit is basically the money left after subtracting costs from revenue, right? So, increasing profit means either making more money from sales or reducing the
 expenses. Let me think about how I can approach this.
 ...
 ```
@@ -42,7 +42,7 @@ Enter prompt: What's in this image?
 emd invoke txt2video-LTX
 ...
 Invoking model txt2video-LTX with tag dev
-Write a prompt, press Enter to generate a response (Ctrl+C to abort), 
+Write a prompt, press Enter to generate a response (Ctrl+C to abort),
 User: Two police officers in dark blue uniforms and matching hats enter a dimly lit room through a doorway on the left side of the frame. The first officer, with short brown hair and a mustache, steps inside first, followed by his partner, who has a shaved head and a goatee. Both officers have serious expressions and maintain a steady pace as they move deeper into the room. The camera remains stationary, capturing them from a slightly low angle as they enter. The room has exposed brick walls and a corrugated metal ceiling, with a barred window visible in the background. The lighting is low-key, casting shadows on the officers' faces and emphasizing the grim atmosphere. The scene appears to be from a film or television show.
 ...
 ```
