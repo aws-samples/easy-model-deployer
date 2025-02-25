@@ -21,7 +21,7 @@ expenses. Let me think about how I can approach this.
 
 ## VLM models
 1. upload image to a s3 path
-![alt text](../images/sample.png)
+![alt text](sample.png)
 ```bash
 aws s3 cp image.jpg s3://your-bucket/image.jpg
 ```

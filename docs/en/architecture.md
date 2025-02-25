@@ -2,7 +2,7 @@
 # Architecture
 Deploy models to the cloud with EMD will use the following components in Amazon Web Services:
 
-![alt text](../images/emd-architecture.png)
+![alt text](emd-architecture.png)
 
 1. User/Client initiates model deployment task, triggering pipeline to start model building.
 

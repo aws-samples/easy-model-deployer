@@ -26,7 +26,6 @@ print(chain.invoke(messages))
 
 ## VLM models
 1. upload image to a s3 path
-![alt text](../images/sample.png)
 ```bash
 aws s3 cp image.jpg s3://your-bucket/image.jpg
 ```
@@ -65,24 +64,11 @@ print(f"embed_documents: {t2-t1}")
 ##  Rerank models
 ```python
 import time
-from emd.integrations.langchain_clients import SageMakerVllmEmbeddings
 from emd.integrations.langchain_clients import SageMakerVllmRerank
-embedding_model = SageMakerVllmEmbeddings(
-    model_id="bge-m3",
-    # model_tag='dev-2'
+docs = ["hi",'The giant panda (Ailuropoda melanoleuca), sometimes called a panda bear or simply panda, is a bear species endemic to China.']
+query = 'what is panda?'
+rerank_model = SageMakerVllmRerank(
+    model_id="bge-reranker-v2-m3"
 )
-text = 'The giant panda (Ailuropoda melanoleuca), sometimes called a panda bear or simply panda, is a bear species endemic to China.'
-t0 = time.time()
-r1 = embedding_model.embed_query(text)
-t1 = time.time()
-embedding_model.embed_documents([text]*1000)
-t2 = time.time()
-print(f"embed_query: {t1-t0}")
-print(f"embed_documents: {t2-t1}")
-# docs = ["hi",'The giant panda (Ailuropoda melanoleuca), sometimes called a panda bear or simply panda, is a bear species endemic to China.']
-# query = 'what is panda?'
-# rerank_model = SageMakerVllmRerank(
-#     model_id="bge-reranker-v2-m3"
-# )
-# print(rerank_model.rerank(query=query,documents=docs))
+print(rerank_model.rerank(query=query,documents=docs))
 ```
