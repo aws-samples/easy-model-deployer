@@ -4,7 +4,8 @@ site_dir: ./site/en
 theme:
   language: en
 nav:
-  - About: about.md
-  - Supported Model: supported_models.md
+  - Architecture: architecture.md
   - Installation: installation.md
-  - Usage: usage.md
+  - Deployment: deployment.md
+  - Invocation: invocation.md
+  - Supported Model: supported_models.md
