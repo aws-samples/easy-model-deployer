@@ -7,5 +7,7 @@ nav:
   - Architecture: architecture.md
   - Installation: installation.md
   - Deployment: deployment.md
-  - Invocation: invocation.md
+  - EMD-Client: emd_client.md
+  - Langchain-Interface: langchain_interface.md
+  - OpenAI-Compatiable: openai_compatiable.md
   - Supported Model: supported_models.md
