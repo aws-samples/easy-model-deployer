@@ -1,5 +1,4 @@
-
-# Invocation guidelines
+# Usse Lanchain interface to invoke deployed models
 
 ## Use EMD to invoke model
 
