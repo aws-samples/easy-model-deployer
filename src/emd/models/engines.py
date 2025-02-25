@@ -139,8 +139,8 @@ tgi_deepseek_r1_llama_70b_engine301 = TgiEngine(
         "base_image_host":"public.ecr.aws",
         "use_public_ecr":True,
         "docker_login_region":"us-east-1",
-        # "model_files_modify_hook":"emd.models.utils.model_files_modify_hooks.replace_chat_template_hook",
-        # "model_files_modify_hook_kwargs":{"chat_template":"emd/models/chat_templates/llama3d3_add_prefill_chat_templates.jinja"},
+        "model_files_modify_hook":"emd.models.utils.model_files_modify_hooks.replace_chat_template_hook",
+        "model_files_modify_hook_kwargs":{"chat_template":"emd/models/chat_templates/deepseek_r1_distill.jinja"},
         "default_cli_args": " --max-total-tokens 16000 --max-concurrent-requests 10",
         # "environment_variables": "export VLLM_ATTENTION_BACKEND=FLASHINFER && export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
 }
