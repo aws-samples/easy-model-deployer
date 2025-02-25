@@ -36,7 +36,7 @@ Enter prompt: What's in this image?
 ...
 ```
 
-### Video(Txt2edding) models
+### Video(Txt2Video) models
 1. input prompt for video generation
 ```bash
 emd invoke txt2video-LTX

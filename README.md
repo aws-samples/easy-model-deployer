@@ -87,7 +87,7 @@ Notes: EMD allows to launch multiple deployment tasks at the same time.
 ```bash
 emd invoke DeepSeek-R1-Distill-Qwen-1.5B
 ```
-Notes: Find *ModelId* in the output of ```emd status```.
+Notes: Find *ModelId* in the output of ```emd status```. Refer to [EMD Client](docs/en/emd_client.md), [Langchain interface](docs/en/langchain_interface.md) and [OpenAI compatible interface](docs/en/openai_compatiable.md) for more details.
 ![alt text](docs/images/emd-invoke.png)
 
 #### Delete the deployed model

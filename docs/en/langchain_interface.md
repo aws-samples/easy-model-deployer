@@ -1,9 +1,5 @@
 
-# Usse EMD client to invoke deployed models
-
-```bash
-emd invoke MODEL_ID MODEL_TAG (Optional)
-```
+# Usse Langchain interface to invoke deployed models
 
 ## LLM models
 ```python
@@ -45,7 +41,7 @@ Enter prompt: What's in this image?
 ...
 ```
 
-### Video(Txt2edding) models
+### Video(Txt2Video) models
 Not supported
 
 ##  Embedding models
