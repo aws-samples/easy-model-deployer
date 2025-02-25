@@ -65,3 +65,18 @@ Enter the text_a (string): What is the capital of France?
 Enter the text_b (string): The capital of France is Paris.
 ...
 ```
+
+##  ASR models(whisper)
+1. upload audio to a s3 path
+```bash
+aws s3 cp xx.wav s3://your-bucket/xx.wav
+```
+
+2. invoke the model
+```bash
+emd invoke whisper
+...
+Enter the s3 path to the audio file: s3://your-bucket/xx.wav
+Enter model [large-v3-turbo/large-v3]: large-v3-turbo
+...
+```

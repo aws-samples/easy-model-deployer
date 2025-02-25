@@ -1,74 +1,75 @@
 
-# Invocation guidelines
+# Test OpenAI compatible interface
 
-## Use EMD to invoke model
+### LLM models
+```python
+client = openai.OpenAI(
+        api_key=api_key,
+        base_url="http://127.0.0.1:9000/v1"
+    )
+    response = client.chat.completions.create(
+        model="DeepSeek-R1-Distill-Qwen-1.5B",
+        messages=[{"role": "system", "content": "You are a helpful assistant."},
+                  {"role": "user", "content": prompt}],
+        stream=False
+    )
+    print(response)
 
-```bash
-emd invoke MODEL_ID MODEL_TAG (Optional)
+
+
+3:10
+import openai
+# 替换为你的 OpenAI API 密钥
+api_key = "your_openai_api_key"
+def chat_with_openai_stream(prompt):
+    client = openai.OpenAI(
+        api_key=api_key,
+        # base_url="http://127.0.0.1:8080/v1"
+        # base_url="http://127.0.0.1:8080/v1"
+        base_url="http://ec2-54-189-171-204.us-west-2.compute.amazonaws.com:8080/v1"
+    )
+    response = client.chat.completions.create(
+        # model="DeepSeek-R1-Distill-Qwen-1.5B",
+        model="Qwen2.5-72B-Instruct-AWQ",
+        # model="Qwen2.5-1.5B-Instruct",
+        messages=[
+            # {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": prompt}
+        ],
+        stream=True,
+        temperature=0.6
+    )
+    print("AI: ", end="", flush=True)
+    print(response)
+    for chunk in response:
+        # print(sfbdfb)
+        # print(type(chunk))
+        content = chunk.choices[0].delta.content
+        think = getattr(chunk.choices[0].delta,"reasoning_content",None)
+        if think is not None:
+            print(think,end="",flush=True)
+        else:
+            print(content, end="", flush=True)
+        # if chunk.choices[0].delta.content, end="", flush=True
+        # print(chunk)
+        # if "choices" in chunk and len(chunk["choices"]) > 0:
+        #     delta = chunk["choices"][0]["delta"]
+        #     if "content" in delta:
+        #         print(delta["content"], end="", flush=True)
+    print("\n")  # 打印换行
+def chat_with_openai(prompt):
+    client = openai.OpenAI(
+        api_key=api_key,
+        base_url="http://127.0.0.1:9000/v1"
+    )
+    response = client.chat.completions.create(
+        model="DeepSeek-R1-Distill-Qwen-1.5B",
+        messages=[{"role": "system", "content": "You are a helpful assistant."},
+                  {"role": "user", "content": prompt}],
+        stream=False
+    )
+    print(response)
+# 测试调用
+chat_with_openai_stream("你好")
+# chat_with_openai("你好")
 ```
-
-### For LLM models
-```bash
-emd invoke  DeepSeek-R1-Distill-Qwen-7B
-...
-Invoking model DeepSeek-R1-Distill-Qwen-7B with tag dev
-Write a prompt, press Enter to generate a response (Ctrl+C to abort),
-User: how to solve the problem of making more profit
-Assistant:<think>
-
-Okay, so I need to figure out how to make more profit. Profit is basically the money left after subtracting costs from revenue, right? So, increasing profit means either making more money from sales or reducing the
-expenses. Let me think about how I can approach this.
-...
-```
-
-### For VLM models
-1. upload image to a s3 path
-![alt text](../images/sample.png)
-```bash
-aws s3 cp image.jpg s3://your-bucket/image.jpg
-```
-
-2. invoke the model
-```bash
-emd invoke  Qwen2-VL-7B-Instruct
-...
-Invoking model DeepSeek-R1-Distill-Qwen-7B with tag dev
-...
-```
-
-### For Embedding models
-```bash
-emd invoke  DeepSeek-R1-Distill-Qwen-7B
-...
-Invoking model DeepSeek-R1-Distill-Qwen-7B with tag dev
-Write a prompt, press Enter to generate a response (Ctrl+C to abort),
-User: how to solve the problem of making more profit
-Assistant:<think>
-
-Okay, so I need to figure out how to make more profit. Profit is basically the money left after subtracting costs from revenue, right? So, increasing profit means either making more money from sales or reducing the
-expenses. Let me think about how I can approach this.
-...
-```
-
-### For Embedding models
-```bash
-emd invoke  DeepSeek-R1-Distill-Qwen-7B
-...
-Invoking model DeepSeek-R1-Distill-Qwen-7B with tag dev
-Write a prompt, press Enter to generate a response (Ctrl+C to abort),
-User: how to solve the problem of making more profit
-Assistant:<think>
-
-Okay, so I need to figure out how to make more profit. Profit is basically the money left after subtracting costs from revenue, right? So, increasing profit means either making more money from sales or reducing the
-expenses. Let me think about how I can approach this.
-...
-```
-
-### F
-
-
-Deploy models to the cloud with EMD will use the following components in Amazon Web Services:
-
-## Use the langchain interface to invoke model
-
-## Use the

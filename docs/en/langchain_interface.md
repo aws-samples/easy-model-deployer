@@ -46,16 +46,7 @@ Enter prompt: What's in this image?
 ```
 
 ### Video(Txt2edding) models
-1. input prompt for video generation
-```bash
-emd invoke txt2video-LTX
-...
-Invoking model txt2video-LTX with tag dev
-Write a prompt, press Enter to generate a response (Ctrl+C to abort),
-User: Two police officers in dark blue uniforms and matching hats enter a dimly lit room through a doorway on the left side of the frame. The first officer, with short brown hair and a mustache, steps inside first, followed by his partner, who has a shaved head and a goatee. Both officers have serious expressions and maintain a steady pace as they move deeper into the room. The camera remains stationary, capturing them from a slightly low angle as they enter. The room has exposed brick walls and a corrugated metal ceiling, with a barred window visible in the background. The lighting is low-key, casting shadows on the officers' faces and emphasizing the grim atmosphere. The scene appears to be from a film or television show.
-...
-```
-2. download generated video from **output_path**
+Not supported
 
 ##  Embedding models
 ```python
