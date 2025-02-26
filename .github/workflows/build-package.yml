@@ -50,10 +50,10 @@ jobs:
       uses: actions/github-script@v6
       with:
         script: |
-          const { context, github } = require('@actions/github');
           const artifactUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
           github.rest.issues.createComment({
-            ...context.repo,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
             issue_number: context.issue.number,
             body: `A new wheel package has been built for this PR: [Download the wheel](${artifactUrl})`
           });
