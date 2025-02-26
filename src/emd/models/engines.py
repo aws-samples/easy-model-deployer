@@ -9,11 +9,14 @@ class OpenAICompitableEngine(Engine):
     default_cli_args: str = ""
     custom_gpu_num: Union[int,None] = None
 
+
 class VllmEngine(OpenAICompitableEngine):
     pass
 
+
 class LMdeployEngine(OpenAICompitableEngine):
     pass
+
 
 class TgiEngine(OpenAICompitableEngine):
     support_inf2_instance:bool = True
@@ -286,13 +289,14 @@ lmdeploy_intervl2d5_awq_engine064 = LMdeployEngine(
 )
 
 
-vllm_baichuan_engine071 = VllmEngine(**{
+vllm_M1_14B_engine066 = VllmEngine(**{
             "engine_type":EngineType.VLLM,
             "engine_dockerfile_config": {"VERSION":"v0.6.6-baichuan-m1"},
             "engine_cls":"vllm.vllm_backend.VLLMBackend",
             "base_image_host":"public.ecr.aws",
             "use_public_ecr":True,
             "docker_login_region":"us-east-1",
+            "custom_gpu_num":2,
             "default_cli_args": " --disable-log-stats --trust-remote-code"
 })
 
@@ -350,16 +354,6 @@ huggingface_baichuan_engine_4d41d2 = HuggingFaceLLMEngine(**{
             "pretrained_tokenizer_init_kwargs":{"trust_remote_code":True}
 })
 
-
-# huggingface_llm_engine_4d47d0 = HuggingFaceLLMEngine(**{
-#             "engine_type":EngineType.HUGGINGFACE,
-#             "engine_cls":"huggingface.llm.transformer_llm_backend.TransformerLLMBackend",
-#             "python_name":"python3",
-#             "base_image_host":"public.ecr.aws",
-#             "use_public_ecr":True,
-#             "docker_login_region":"us-east-1",
-#             "engine_dockerfile_config": {"VERSION":"4.47.0"},
-# })
 
 comfyui_engine = ComfyuiEngine(**{
             "engine_type":EngineType.COMFYUI,
