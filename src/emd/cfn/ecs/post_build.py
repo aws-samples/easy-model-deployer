@@ -5,6 +5,7 @@ import os
 import argparse
 
 # Post build script for ECS, it will deploy the VPC and ECS cluster.
+# TODO import src/emd/model/utils
 
 CFN_ROOT_PATH = 'cfn'
 WAIT_SECONDS = 10
@@ -41,7 +42,7 @@ def create_or_update_stack(client, stack_name, template_path, parameters=[]):
     try:
         response = client.describe_stacks(StackName=stack_name)
         stack_status = response['Stacks'][0]['StackStatus']
-        if stack_status in ['ROLLBACK_COMPLETE', 'ROLLBACK_FAILED', 'DELETE_FAILED']:
+        if stack_status in ['ROLLBACK_COMPLETE', 'ROLLBACK_FAILED', 'DELETE_FAILED', 'DELETE_IN_PROGRESS']:
             print(f"Stack {stack_name} is in {stack_status} state. Deleting the stack to allow for recreation.")
             client.delete_stack(StackName=stack_name)
             while True:
@@ -78,7 +79,8 @@ def create_or_update_stack(client, stack_name, template_path, parameters=[]):
                 StackName=stack_name,
                 TemplateBody=template_body,
                 Capabilities=['CAPABILITY_NAMED_IAM'],
-                Parameters=parameters
+                Parameters=parameters,
+                EnableTerminationProtection=True
             )
 
             stack_id = response['StackId']

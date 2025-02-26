@@ -1,5 +1,12 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: EMD bootstrap environment for model deployment
+Description: |
+  Easy Model Deployer bootstrap environment.
+  If you delete this stack, you will will not able to deploy new models.
+  
+  Note: Termination Protection is enabled for this stack by default. 
+  To disable it, go to the AWS CloudFormation Console, select the stack, 
+  click "Stack actions", then "Edit termination protection", 
+  and uncheck "Enable termination protection".
 Parameters:
   ArtifactBucketName:
     Type: String
