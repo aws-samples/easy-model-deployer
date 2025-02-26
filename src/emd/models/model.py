@@ -17,8 +17,7 @@ import boto3
 from .utils.text_utilities import normalize
 from emd.constants import (
     MODEL_STACK_NAME_PREFIX,
-    MODEL_DEFAULT_TAG,
-    VERSION_MODIFY
+    MODEL_DEFAULT_TAG
 )
 
 from emd.revision import convert_stack_name_to_version_name
@@ -355,11 +354,11 @@ class Model(ModelBase,Generic[T]):
         return normalize(model_id).lower()
 
     @classmethod
-    def get_model_stack_name_prefix(cls,model_id,model_tag=MODEL_DEFAULT_TAG, model_deploy_version=VERSION_MODIFY):
+    def get_model_stack_name_prefix(cls,model_id,model_tag=MODEL_DEFAULT_TAG):
         model_id_with_tag = model_id
         if model_tag and model_tag != MODEL_DEFAULT_TAG:
             model_id_with_tag = f"{model_id_with_tag}-{model_tag}"
-        return f"{MODEL_STACK_NAME_PREFIX}-{model_deploy_version}-{cls.normalize_model_id(model_id_with_tag)}"
+        return f"{MODEL_STACK_NAME_PREFIX}-{cls.normalize_model_id(model_id_with_tag)}"
 
     @classmethod
     def get_deploy_version_from_stack_name(cls,stack_name):

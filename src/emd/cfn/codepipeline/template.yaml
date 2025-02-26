@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CodePipeline for model deployment
+Description: EMD bootstrap environment for model deployment
 Parameters:
   ArtifactBucketName:
     Type: String

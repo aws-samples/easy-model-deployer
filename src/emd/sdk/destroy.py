@@ -16,7 +16,6 @@ from emd.utils.aws_service_utils import (
     get_stack_info
 )
 from emd.models.utils.constants import ServiceType
-from emd.constants import VERSION_MODIFY
 from emd.models import Model
 
 logger = get_logger(__name__)
@@ -64,9 +63,9 @@ def destroy_ecs(model_id,model_tag,stack_name):
     cf_client.delete_stack(StackName=stack_name)
     logger.warning(f"model: {model_id}, model_tag: {model_tag} is a ECS service, if the destruction fails, please destroy it manually using the guide at https://amzn-chn.feishu.cn/docx/YjTadv82Po7IBXxmS1RcmMGHndg")
 
-def destroy(model_id:str,model_tag=MODEL_DEFAULT_TAG,waiting_until_complete=True, model_deploy_version=VERSION_MODIFY):
+def destroy(model_id:str,model_tag=MODEL_DEFAULT_TAG,waiting_until_complete=True):
     check_env_stack_exist_and_complete()
-    stack_name = Model.get_model_stack_name_prefix(model_id,model_tag=model_tag,model_deploy_version=model_deploy_version)
+    stack_name = Model.get_model_stack_name_prefix(model_id,model_tag=model_tag)
     if not check_stack_exists(stack_name):
         stop_pipeline_execution(model_id,model_tag,waiting_until_complete=waiting_until_complete)
         return
