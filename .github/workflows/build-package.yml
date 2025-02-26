@@ -20,8 +20,7 @@ jobs:
 
     - name: Install Poetry
       run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        echo "::add-path::${HOME}/.local/bin"
+        curl -sSL https://install.python-poetry.org | python3 
 
     - name: Install dependencies
       run: poetry install
