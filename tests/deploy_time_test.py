@@ -6,7 +6,7 @@ import pandas as pd
 
 
 extra_params = {
-    "model_parmas":{"need_prepare_model":False}
+    "model_params":{"need_prepare_model":False}
 }
 
 tasks = [
@@ -223,8 +223,9 @@ df = pd.DataFrame(
         "invoke_time": ret['invoke_time'],
         "test_code": ret['code'],
         "error": ret['error']
-    }]
+    }
     for ret in test_ret
+    ]
     )
 print("=="*50 + "test results" + "=="*50)
 print(str(df.to_markdown(index=False)))
