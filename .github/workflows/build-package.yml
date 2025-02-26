@@ -24,9 +24,14 @@ jobs:
 
     - name: Build wheel
       run: poetry build -f wheel
+      
+    - name: Extract version
+      id: get_version
+      run: |
+        echo "VERSION=$(python -c 'import re; exec(open(\"src/emd/revision.py\").read()); print(VERSION)')" >> $GITHUB_ENV
 
     - name: Upload wheel artifact
       uses: actions/upload-artifact@v4
       with:
-        name: emd-${{ github.sha }}
+        name: emd-${{ env.VERSION }}-${{ github.sha }}
         path: dist/*.whl
