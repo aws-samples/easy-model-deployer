@@ -4,7 +4,7 @@ from emd.models import Model
 from emd.models.utils.constants import ModelType
 import traceback
 from emd.utils.logger_utils import get_logger
-
+import time
 
 logger = get_logger(__name__)
 
@@ -15,6 +15,8 @@ class DeployConfig(BaseModel):
     service_type:str
     framework_type:str
     model_tag:str
+    extra_params: dict
+
 
 
 class InvokeConfig(BaseModel):
@@ -26,6 +28,7 @@ class Task(BaseModel):
     invoke_config: InvokeConfig
 
 
+
 def deploy(task:Task):
     model_id = task.deploy_config.model_id
     print("=="*50 + f"deploy: {model_id}" + "=="*50)
@@ -35,7 +38,8 @@ def deploy(task:Task):
         engine_type=task.deploy_config.engine_type,
         service_type=task.deploy_config.service_type,
         framework_type=task.deploy_config.framework_type,
-        model_tag=task.deploy_config.model_tag
+        model_tag=task.deploy_config.model_tag,
+        extra_params=task.deploy_config.extra_params
     )
 
 def invoke(task:Task):
@@ -87,16 +91,28 @@ def destroy(task:Task):
     )
 
 def test_one_task(task:Task):
+    print(f"task: \n{task.model_dump()}")
     model_id = task.deploy_config.model_id
     ret = {
         "code":0,
         "task":task,
-        "error":0
+        "error":"",
+        "deploy_time":None,
+        "invoke_time":None,
+        "destroy_time":None
     }
     try:
+        t0 = time.time()
         deploy(task)
+        t1 = time.time()
+        ret['deploy_time'] = t1-t0
         invoke(task)
+        t2 = time.time()
+        ret['invoke_time'] = t2-t1
         destroy(task)
+        t3 = time.time()
+        ret['destroy_time'] = t3-t2
+
         logger.info(f"task: {model_id} success")
     except Exception as e:
         error = traceback.format_exc()
@@ -109,7 +125,18 @@ def test_one_task(task:Task):
             error = traceback.format_exc()
             logger.error(f"task: {model_id} destroy failed:\n{error}")
 
-
+    result = f"""\
+<deploy_test_result>
+<model_id>{model_id}</model_id>
+<test_code>{ret['code']}</test_code>
+<test_error>{ret['error']}</test_error>
+<deploy_time>{ret['deploy_time']}</deploy_time>
+<invoke_time>{ret['invoke_time']}</invoke_time>
+<destroy_time>{ret['destroy_time']}</destroy_time>
+</deploy_test_result>
+"""
+    logger.info(f"task: {model_id} test result:\n{result}")
+    ret['summary'] = result
     return ret
 
 
@@ -178,7 +205,17 @@ if __name__ == "__main__":
     for ret in test_ret:
         task = ret['task']
         model_id = task.deploy_config.model_id
-        print(f"model_id: {model_id}\ntest code:{ret['code']}\nerror:{ret['error']}")
+        result = f"""\
+<deploy_test_result>
+<model_id>{model_id}</model_id>
+<test_code>{ret['code']}</test_code>
+<test_error>{ret['error']}</test_error>
+<deploy_time>{ret['deploy_time']}</deploy_time>
+<invoke_time>{ret['invoke_time']}</invoke_time>
+<destroy_time>{ret['destroy_time']}</destroy_time>
+</deploy_test_result>
+"""
+        # print(f"<model_id: {model_id}\ntest code:{ret['code']}\nerror:{ret['error']}")
         print("=="*50)
 
     if all([ret['code'] == 0 for ret in test_ret]):

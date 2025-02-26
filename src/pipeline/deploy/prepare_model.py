@@ -135,6 +135,7 @@ def run(model:Model):#, model_s3_bucket, backend_type, service_type, region,args
     service_type = model.executable_config.current_service.service_type
     engine_type = model.executable_config.current_engine.engine_type
     model_s3_bucket = model.executable_config.model_s3_bucket
+    logger.info(f"need_prepare_model: {need_prepare_model}, model_files_s3_path: {model_files_s3_path}, service_type: {service_type}, engine_type: {engine_type}, model_s3_bucket: {model_s3_bucket}")
     # if  args.service_type == ServiceType.LOCAL or (args.model.need_prepare_model and not args.skip_prepare_model):
     if service_type == ServiceType.LOCAL or (need_prepare_model and model_files_s3_path is None):
         if engine_type == EngineType.OLLAMA:

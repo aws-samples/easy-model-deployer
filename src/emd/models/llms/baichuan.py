@@ -1,7 +1,7 @@
 from .. import Model
 from ..engines import (
     huggingface_baichuan_engine_4d41d2,
-    vllm_baichuan_engine071
+    vllm_M1_14B_engine066
 )
 from ..services import (
     sagemaker_service,
@@ -31,7 +31,7 @@ from ..model_series import BAICHAUN_SERIES
 Model.register(
     dict(
         model_id = "Baichuan-M1-14B-Instruct",
-        supported_engines=[vllm_baichuan_engine071,huggingface_baichuan_engine_4d41d2],
+        supported_engines=[vllm_M1_14B_engine066,huggingface_baichuan_engine_4d41d2],
         supported_instances=[
             g5d12xlarge_instance,
             g5d24xlarge_instance,
@@ -47,7 +47,7 @@ Model.register(
         supported_frameworks=[
             fastapi_framework
         ],
-        allow_china_region=False,
+        allow_china_region=True,
         huggingface_model_id="baichuan-inc/Baichuan-M1-14B-Instruct",
         # modelscope_model_id="Qwen/QwQ-32B-Preview",
         require_huggingface_token=False,
