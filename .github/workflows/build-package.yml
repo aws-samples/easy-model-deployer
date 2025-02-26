@@ -1,42 +1,36 @@
-name: Build and Store Package
+name: Build and Upload Wheel
 
 on:
   push:
     branches:
-      - main  # or your default branch name
+      - main  # Change this to your default branch if it's not 'main'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'  # Specify your Python version
-      
-      - name: Install Poetry
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 -
-      
-      - name: Build package
-        run: poetry build
-      
-      - name: Get commit hash
-        id: vars
-        shell: bash
-        run: echo "sha_short=\$(git rev-parse --short HEAD)" >> \$GITHUB_OUTPUT
-      
-      - name: Upload wheel as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: wheel-\${{ steps.vars.outputs.sha_short }}
-          path: dist/*.whl
-          retention-days: 90  # artifacts will be stored for 90 days
 
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          files: dist/*.whl
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'  # Specify your Python version
+
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "::add-path::${HOME}/.local/bin"
+
+    - name: Install dependencies
+      run: poetry install
+
+    - name: Build wheel
+      run: poetry build -f wheel
+
+    - name: Upload wheel artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: my-package-${{ github.sha }}
+        path: dist/*.whl
