@@ -24,13 +24,14 @@ jobs:
         run: poetry build
       
       - name: Get commit hash
-        id: commit
-        run: echo "::set-output name=hash::\$(git rev-parse --short HEAD)"
+        id: vars
+        shell: bash
+        run: echo "sha_short=\$(git rev-parse --short HEAD)" >> \$GITHUB_OUTPUT
       
       - name: Upload wheel as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: wheel-\${{ steps.commit.outputs.hash }}
+          name: wheel-\${{ steps.vars.outputs.sha_short }}
           path: dist/*.whl
           retention-days: 90  # artifacts will be stored for 90 days
 
