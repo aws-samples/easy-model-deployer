@@ -94,27 +94,27 @@ tasks = [
                 }],
             }
         },
-        {
-            "deploy_config":{
-                "model_id": "Qwen2.5-32B-Instruct",
-                "instance_type":"g5.12xlarge",
-                "engine_type":"vllm",
-                "service_type":"sagemaker",
-                "framework_type":"fastapi",
-                "model_tag":"batch_test",
+        # {
+        #     "deploy_config":{
+        #         "model_id": "Qwen2.5-32B-Instruct",
+        #         "instance_type":"g5.12xlarge",
+        #         "engine_type":"vllm",
+        #         "service_type":"sagemaker",
+        #         "framework_type":"fastapi",
+        #         "model_tag":"batch_test",
 
-            },
-            "invoke_config":{
-                "pyloads":[{
-                    "messages": [
-                        {
-                            "role": "user",
-                            "content": "Explain async programming in Python"
-                        }
-                    ]
-                }],
-            }
-        },
+        #     },
+        #     "invoke_config":{
+        #         "pyloads":[{
+        #             "messages": [
+        #                 {
+        #                     "role": "user",
+        #                     "content": "Explain async programming in Python"
+        #                 }
+        #             ]
+        #         }],
+        #     }
+        # },
         # {
         #     "deploy_config":{
         #         "model_id": "Qwen2.5-72B-Instruct",

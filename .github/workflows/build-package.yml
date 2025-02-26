@@ -1,0 +1,59 @@
+name: Build and Upload Wheel
+
+on:
+  push:
+    branches:
+      - main  # Change this to your default branch if it's not 'main'
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'  # Specify your Python version
+
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3
+
+    - name: Build wheel
+      run: poetry build -f wheel
+
+    - name: Extract version
+      id: get_version
+      run: |
+        VERSION=$(python -c 'exec(open("src/emd/revision.py").read()); print(VERSION)')
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+    - name: Update commit hash
+      run: |
+        COMMIT_HASH=${GITHUB_SHA::8}
+        sed -i "s/COMMIT_HASH = \".*\"/COMMIT_HASH = \"$COMMIT_HASH\"/" src/emd/revision.py
+        echo "SHORT_SHA=$COMMIT_HASH" >> $GITHUB_ENV
+
+    - name: Upload wheel artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: emd-${{ env.VERSION }}-${{ env.SHORT_SHA }}
+        path: dist/*.whl
+
+    - name: Comment on PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const artifactUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+          github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: `A wheel package has been built for this PR, you can: [Download the wheel](${artifactUrl}) for testing`
+          });
