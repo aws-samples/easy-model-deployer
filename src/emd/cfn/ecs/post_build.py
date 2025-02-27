@@ -3,6 +3,7 @@ import time
 import json
 import os
 import argparse
+import sys
 from emd.models.utils.serialize_utils import load_extra_params
 
 # Post build script for ECS, it will deploy the VPC and ECS cluster.
@@ -26,10 +27,10 @@ def wait_for_stack_completion(client, stack_name):
             print(f"Stack {stack_name} deployment complete")
             break
         else:
-            raise Exception(
+            print(
                 f"Post build stage failed. The stack {stack_name} is in an unexpected status: {stack_status}. Please visit the AWS CloudFormation Console to delete the stack."
             )
-
+            sys.exit(1)
 
 def get_stack_outputs(client, stack_name):
     response = client.describe_stacks(StackName=stack_name)
@@ -78,9 +79,10 @@ def create_or_update_stack(client, stack_name, template_path, parameters=[]):
             print(f"Started deployment of stack {stack_name} with ID {stack_id}")
             wait_for_stack_completion(client, stack_name)
         else:
-            raise Exception(
+            print(
                 f"Post build stage failed. The stack {stack_name} is in an unexpected status: {stack_status}. Please visit the AWS CloudFormation Console to delete the stack."
             )
+            sys.exit(1)
 
 
 def update_parameters_file(parameters_path, updates):
