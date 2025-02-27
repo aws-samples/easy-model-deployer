@@ -51,8 +51,7 @@ def create_or_update_stack(client, stack_name, template_path, parameters=[]):
                 StackName=stack_name,
                 TemplateBody=template_body,
                 Capabilities=["CAPABILITY_NAMED_IAM"],
-                Parameters=parameters,
-                EnableTerminationProtection=True,
+                Parameters=parameters
             )
 
             print(f"Started update of stack {stack_name}")

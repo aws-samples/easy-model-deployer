@@ -195,9 +195,9 @@ def deploy(
         {"name": "FrameworkType", "value": framework_type},
         {"name": "Region", "value": region},
     ]
-    logger.info(
-        f"start pipeline execution.\nvariables:\n{json.dumps(variables,ensure_ascii=False,indent=2)}"
-    )
+    # logger.info(
+    #     f"start pipeline execution.\nvariables:\n{json.dumps(variables,ensure_ascii=False,indent=2)}"
+    # )
 
     start_deploy_time = time.time()
 
