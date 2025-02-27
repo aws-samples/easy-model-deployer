@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Create a SageMaker Endpoint using an ECR image URI
+Description: Easy Model Deployer model deployment stack for Amazon SageMaker. The invoke endpoint can be found in the stack Outputs. Please go to https://github.com/aws-samples/easy-model-deployer for more information.
 
 Parameters:
   ECRImageURI:

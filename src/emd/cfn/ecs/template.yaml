@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Deploy an ECS cluster with GPU-optimized AMI to run EMD model in a new VPC with secure networking.
+Description: Easy Model Deployer model deployment stack for Amazon ECS. The invoke URL can be found in the stack Outputs. Please go to https://github.com/aws-samples/easy-model-deployer for more information.
 Parameters:
   VPCID:
     Type: AWS::EC2::VPC::Id
@@ -302,7 +302,7 @@ Resources:
             - !Ref ServiceSecurityGroup
           Subnets: !Ref Subnets
       DeploymentConfiguration:
-        MaximumPercent: 200
+        MaximumPercent: 100
         MinimumHealthyPercent: 75
       DesiredCount: !Ref DesiredCount
       TaskDefinition: !Ref TaskDefinition

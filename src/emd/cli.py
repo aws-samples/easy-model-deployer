@@ -108,7 +108,7 @@ def callback(ctx: typer.Context):
         # Show main help
         console.print(ctx.get_help())
         console.print(
-            " [dim]Further help: [link=https://github.com/aws-samples/easy-model-deployer/]https://github.com/aws-samples/easy-model-deployer/[/link][/dim]",
+            " [dim]Further help: [link=https://github.com/aws-samples/easy-model-deployer]https://github.com/aws-samples/easy-model-deployer[/link][/dim]\n",
         )
 
 if __name__ == "__main__":
