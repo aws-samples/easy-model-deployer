@@ -43,14 +43,10 @@ def status(
             "model_id":d['model_id'],
             "model_tag":d['model_tag'],
             "status": f"{d['status']} ({d['stage_name']})",
-            "region":d['region'],
             "service_type":d['service_type'],
             "instance_type":d['instance_type'],
-            "engine_type":d['engine_type'],
-            "framework_type":d['framework_type'],
             "create_time":d['create_time'],
             "outputs":d['outputs'],
-            "deploy_version":d['deploy_version']
         })
 
     for d in completed:
@@ -58,28 +54,19 @@ def status(
             "model_id":d['model_id'],
             "model_tag":d['model_tag'],
             "status": d['stack_status'],
-            "region":d['region'],
             "service_type":d['service_type'],
             "instance_type":d['instance_type'],
-            "engine_type":d['engine_type'],
-            "framework_type":d['framework_type'],
             "create_time":d['create_time'],
             "outputs":d['outputs'],
-            "deploy_version":d['deploy_version']
         })
 
     account_id = get_account_id()
     table = Table(show_lines=True, expand=True)
     table.add_column("ModelId", justify="left",overflow='fold')
     table.add_column("ModelTag", justify="left",overflow='fold')
-    table.add_column("DeployVersion", justify="left",overflow='fold')
     table.add_column("Status", justify="left",overflow='fold')
-    table.add_column("Region", justify="left",overflow='fold')
-    table.add_column("Account", justify="left",overflow='fold')
-    table.add_column("Service", justify="left",overflow='fold')
+    table.add_column("Service", justify="left",overflow='fold',max_width=19)
     table.add_column("Instance", justify="left",overflow='fold')
-    table.add_column("Engine", justify="left",overflow='fold')
-    table.add_column("Framework", justify="left",overflow='fold')
     table.add_column("CreateTime", justify="left",overflow='fold')
     table.add_column("Outputs", justify="left",overflow='fold')
 
@@ -87,16 +74,11 @@ def status(
     for d in data:
         table.add_row(
             d['model_id'],
-            "" if d['model_tag'] == MODEL_DEFAULT_TAG else d['model_tag'],
-            d['deploy_version'],
+            d['model_tag'],
             d['status'],
-            d['region'],
-            str(account_id),
             d['service_type'],
             d['instance_type'],
-            d['engine_type'],
-            d['framework_type'],
-            d['create_time'],
+            d['create_time'].replace(" ", "\n"),
             d['outputs']
         )
         # table.add_row([d['model_id'], d['status']])
