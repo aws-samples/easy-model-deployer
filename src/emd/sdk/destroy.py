@@ -61,7 +61,6 @@ def stop_pipeline_execution(
 def destroy_ecs(model_id,model_tag,stack_name):
     cf_client = boto3.client('cloudformation')
     cf_client.delete_stack(StackName=stack_name)
-    logger.warning(f"model: {model_id}, model_tag: {model_tag} is a ECS service, if the destruction fails, please destroy it manually using the guide at https://amzn-chn.feishu.cn/docx/YjTadv82Po7IBXxmS1RcmMGHndg")
 
 def destroy(model_id:str,model_tag=MODEL_DEFAULT_TAG,waiting_until_complete=True):
     check_env_stack_exist_and_complete()
