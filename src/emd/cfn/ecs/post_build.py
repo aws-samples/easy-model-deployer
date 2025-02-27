@@ -47,12 +47,15 @@ def create_or_update_stack(client, stack_name, template_path, parameters=[]):
             with open(template_path, "r") as template_file:
                 template_body = template_file.read()
 
-            response = client.update_stack(
-                StackName=stack_name,
-                TemplateBody=template_body,
-                Capabilities=["CAPABILITY_NAMED_IAM"],
-                Parameters=parameters
-            )
+            try:
+                response = client.update_stack(
+                    StackName=stack_name,
+                    TemplateBody=template_body,
+                    Capabilities=["CAPABILITY_NAMED_IAM"],
+                    Parameters=parameters
+                )
+            except Exception as e:
+                print(f"No updates are to be performed for stack {stack_name}.")
 
             print(f"Started update of stack {stack_name}")
             wait_for_stack_completion(client, stack_name)

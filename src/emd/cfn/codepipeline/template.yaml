@@ -50,6 +50,7 @@ Resources:
                   - cloudformation:DescribeStacks
                   - cloudformation:CreateStack
                   - cloudformation:DeleteStack
+                  - cloudformation:UpdateStack
                   - ec2:*
                   - ecs:*
                   - iam:CreateRole
