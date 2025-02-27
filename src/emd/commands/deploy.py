@@ -387,7 +387,9 @@ def deploy(
                     choices=[
                         Choice(
                             title=instance.instance_type,
-                            description=instance.description,
+                            description=(instance.description + '\n\n' +
+                                "Note: If your deployment takes over 20 minutes, check your AWS service quotas, especially for G or P instances. Quotas are based on vCPUs, not instance count. Ensure your requests fit the limits. See Amazon EC2 instance type quotas for detail: https://docs.aws.amazon.com/ec2/latest/instances/ec2-instance-quota-types.html."
+                            )
                         )
                         for instance in supported_instances
                     ],
