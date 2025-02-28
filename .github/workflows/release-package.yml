@@ -55,4 +55,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh release create ${{ env.TAG_NAME }} dist/${{ env.TAG_NAME }}-py3-none-any.whl --title "Release ${{ env.TAG_NAME }}" --notes "Automated release of ${{ env.TAG_NAME }}"
+        gh release create ${{ env.TAG_NAME }} dist/${{ env.TAG_NAME }}-py3-none-any.whl --title "Release ${{ env.TAG_NAME }}" --notes "Release on tag ${{ env.TAG_NAME }}"
