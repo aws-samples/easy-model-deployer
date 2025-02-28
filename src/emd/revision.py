@@ -1,5 +1,5 @@
 # import importlib.metadata
-VERSION = "0.6.0" #importlib.metadata.version("emd")
+VERSION = "0.6.0"
 COMMIT_HASH = "8c02decb"
 
 def convert_version_name_to_stack_name(version_name:str):
