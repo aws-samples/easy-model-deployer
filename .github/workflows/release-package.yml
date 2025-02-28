@@ -46,7 +46,7 @@ jobs:
     - name: Rename wheel
       run: |
         WHEEL_FILE=$(ls dist/*.whl)
-        mv "$WHEEL_FILE" "dist/${{ env.TAG_NAME }}.whl"
+        mv "$WHEEL_FILE" "dist/${{ env.TAG_NAME }}-py3-none-any.whl"
 
     - name: Install GitHub CLI
       run: sudo apt-get install -y gh
@@ -55,4 +55,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh release create ${{ env.TAG_NAME }} dist/${{ env.TAG_NAME }}.whl --title "Release ${{ env.TAG_NAME }}" --notes "Automated release of ${{ env.TAG_NAME }}"
+        gh release create ${{ env.TAG_NAME }} dist/${{ env.TAG_NAME }}-py3-none-any.whl --title "Release ${{ env.TAG_NAME }}" --notes "Automated release of ${{ env.TAG_NAME }}"
