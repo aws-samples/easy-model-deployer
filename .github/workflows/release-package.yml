@@ -35,18 +35,14 @@ jobs:
       run: |
         sed -i 's/VERSION = ".*"/VERSION = "'"${{ env.VERSION }}"'"/' src/emd/revision.py
         sed -i 's/COMMIT_HASH = ".*"/COMMIT_HASH = "'"${{ env.COMMIT_HASH }}"'"/' src/emd/revision.py
+        sed -i 's/version = ".*"/version = "'"${{ env.VERSION }}"'"/' pyproject.toml
 
     - name: Build wheel
-      run: poetry build -f wheel
+      run: poetry build
 
     - name: Get tag name
       id: get_tag
       run: echo "TAG_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
-
-    - name: Rename wheel
-      run: |
-        WHEEL_FILE=$(ls dist/*.whl)
-        mv "$WHEEL_FILE" "dist/${{ env.TAG_NAME }}-py3-none-any.whl"
 
     - name: Install GitHub CLI
       run: sudo apt-get install -y gh
@@ -55,4 +51,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh release create ${{ env.TAG_NAME }} dist/${{ env.TAG_NAME }}-py3-none-any.whl --title "Release ${{ env.TAG_NAME }}" --notes "Release on tag ${{ env.TAG_NAME }}"
+        gh release create ${{ env.TAG_NAME }} dist/*.whl dist/*.gz --title "Release ${{ env.TAG_NAME }}" --notes "Release on tag ${{ env.TAG_NAME }}"
