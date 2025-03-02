@@ -48,14 +48,29 @@ vllm_engine064 = VllmEngine(**{
             "docker_login_region":"us-east-1",
             "default_cli_args": " --max_num_seq 10",
             "environment_variables": "export VLLM_ATTENTION_BACKEND=FLASHINFER && export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
+})
+
+vllm_engine064_on_inf2 = VllmEngine(**{
+            "engine_type":EngineType.VLLM,
+            "engine_dockerfile_config": {"VERSION":"neuronx-v0.7.3"},
+            "engine_cls":"vllm.vllm_backend.VLLMBackend",
+            "base_image_host":"public.ecr.aws",
+            "use_public_ecr":True,
+            "docker_login_region":"us-east-1",
+            "default_cli_args": " --max_num_seq 10",
+            "environment_variables": "export VLLM_ATTENTION_BACKEND=FLASHINFER && export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
+})
+
+vllm_qwen2d5_engine064 = VllmEngine(**{
+            **vllm_engine064.model_dump(),
+            "default_cli_args": " --chat-template emd/models/chat_templates/qwen_2d5_add_prefill_chat_template.jinja --max_model_len 16000 --disable-log-stats --enable-auto-tool-choice --tool-call-parser hermes"
 }
 )
 
-vllm_qwen2d5_engine064 = VllmEngine(**{
-             **vllm_engine064.model_dump(),
-            "default_cli_args": " --chat-template emd/models/chat_templates/qwen_2d5_add_prefill_chat_template.jinja --max_model_len 16000 --disable-log-stats --enable-auto-tool-choice --tool-call-parser hermes"
+vllm_qwen2d5_engine064_on_inf2 = VllmEngine(**{
+             **vllm_engine064_on_inf2.model_dump(),
+            "default_cli_args": "--tensor-parallel-size 2 --device neuron --chat-template emd/models/chat_templates/qwen_2d5_add_prefill_chat_template.jinja --max_model_len 16000 --disable-log-stats --enable-auto-tool-choice --tool-call-parser hermes"
 })
-
 
 vllm_deepseek_r1_distill_qwen_engine071 = VllmEngine(**{
             **vllm_engine064.model_dump(),
