@@ -4,15 +4,19 @@ Easy Model Deployer - Simple, Efficient, and Easy-to-Integrate
 
 ---
 
-*Latest News* 🔥
+**Latest News**
 
 - [2025/03] We officially released EMD!
 
 ---
 
-## About
+## Introduction
 
-EMD (Easy Model Deployer) is a lightweight tool designed to simplify model deployment. Built for developers who need reliable and scalable model serving without complex setup.
+Easy Model Deployer is a lightweight tool designed to simplify model deployment. Built for developers who need reliable and scalable model serving without complex setup.
+
+**Supported Models**
+
+For a detailed list of supported models, please refer to [Supported Models](docs/en/supported_models.md)
 
 **Key Features**
 - One-click deployment of models to the cloud (Amazon SageMaker, Amazon ECS, Amazon EC2)
@@ -20,10 +24,6 @@ EMD (Easy Model Deployer) is a lightweight tool designed to simplify model deplo
 - Rich inference engine (vLLM, TGI, Lmdeploy, etc.)
 - Different instance types (CPU/GPU/AWS Inferentia)
 - Convenient integration (OpenAI Compatible API, LangChain client, etc.)
-
-**Notes**
-
-- OpenAI Compatible API is supported only for Amazon ECS and Amazon EC2 deployment.
 
 ## Table of Contents
 
@@ -33,71 +33,111 @@ EMD (Easy Model Deployer) is a lightweight tool designed to simplify model deplo
 - [Contributing](#contributing)
 
 
-
 ## Getting Started
 
 ### Installation
 
-Install EMD with `pip`, currently only support for Python 3.9 and above:
+Install EMD with `pip`, currently support for Python 3.9 and above:
 
 ```bash
-pip install https://github.com/aws-samples/easy-model-deployer/releases/download/main/emd-0.6.0-py3-none-any.whl
+pip install https://github.com/aws-samples/easy-model-deployer/releases/download/main/emd-0.7.1-py3-none-any.whl
 ```
 
 Visit our [documentation](https://aws-samples.github.io/easy-model-deployer/en/installation/) to learn more.
 
 ### Usage
 
-#### Choose your default aws profile.
+#### Set AWS Profile
 ```bash
 emd config set-default-profile-name
 ```
-Notes: If you don't set aws profile, it will use the default profile in your env (suitable for Temporary Credentials). Whenever you want to switch deployment accounts, run ```emd config set-default-profile-name```
-![alt text](docs/images/emd-config.png)
+> **Note:** If you don't set AWS profile, EMD will use the default profile in your environment (suitable for Temporary Credentials). Whenever you want to change the profile, you can run this command again.
 
-#### Bootstrap emd stack
+![config](docs/images/emd-config.png)
+
+#### Bootstrap
+
+Setting up necessary resources for model deployment.
+
 ```bash
 emd bootstrap
 ```
-Notes: This is going to set up the necessary resources for model deployment. Whenever you change EMD version, run this command again.
-![alt text](docs/images/emd-bootstrap.png)
 
-#### Quickly see what models are supported by ```emd list-supported-models```. This command will output all information related to deployment. The following command is recommended to just check the model type. (Plese check [Supported Models](docs/en/supported_models.md) for complete information.)
+![cli](docs/images/cli.gif)
+
+> **Note:** Once you upgrade the EMD, you need to run this command again.
+
+
+#### Deploy Models
+
+Deploy models with an interactive CLI or one command.
+
 ```bash
-emd list-supported-models | jq -r '.[] | "\(.model_id)\t\(.model_type)"' | column -t -s $'\t' | sort
+emd deploy
 ```
 
-#### Choose deployment parameters interactively by ```emd deploy``` or deploy with one command
-```bash
-emd deploy --model-id DeepSeek-R1-Distill-Qwen-1.5B --instance-type g5.8xlarge --engine-type vllm --framework-type fastapi --service-type sagemaker --extra-params {} --skip-confirm
-```
-Notes: Get complete parameters by ```emd deploy --help``` and find the values of the required parameters [here](docs/en/supported_models.md)
-When you see "Waiting for model: ...",  it means the deployment task has started, you can quit the current task by ctrl+c.
-![alt text](docs/images/emd-deploy.png)
-Notes: For more details about the deployment parameters, please refer to [Deployment parameters](docs/en/deployment.md).
+![deploy](docs/images/emd-deploy.png)
 
-#### Check deployment status.
+
+> **Note:** To view all available parameters, run `emd deploy --help`.
+> When you see the message "Waiting for model: ...", it means the deployment task has started and you can stop the terminal output by pressing `Ctrl+C`.
+> For more information on deployment parameters, please refer to the [Deployment parameters](docs/en/deployment.md).
+
+
+#### Deployment Status
+
+Check the status of the model deployment task.
+
 ```bash
 emd status
 ```
-![alt text](docs/images/emd-status.png)
-Notes: EMD allows to launch multiple deployment tasks at the same time.
 
-#### Quick functional verfication or check our [documentation](https://aws-samples.github.io/easy-model-deployer/) for integration examples.
+![alt text](docs/images/emd-status.png)
+
+> **Note:** The EMD allows launch multiple deployment tasks simultaneously.
+
+#### Quick invocation
+
+Invoke the deployed model for testing by CLI.
+
 ```bash
 emd invoke DeepSeek-R1-Distill-Qwen-1.5B
 ```
-Notes: Find *ModelId* in the output of ```emd status```. Refer to [EMD Client](docs/en/emd_client.md), [Langchain interface](docs/en/langchain_interface.md) and [OpenAI compatible interface](docs/en/openai_compatiable.md) for more details.
+
 ![alt text](docs/images/emd-invoke.png)
 
-#### Delete the deployed model
+> **Note:** You can find the *ModelId* in the output by `emd status`.
+
+- [Integration examples](https://aws-samples.github.io/easy-model-deployer/)
+- [EMD client](docs/en/emd_client.md)
+- [Langchain interface](docs/en/langchain_interface.md)
+- [OpenAI compatible interface](docs/en/openai_compatiable.md).
+
+> **Notes** OpenAI Compatible API is supported only for Amazon ECS and Amazon EC2 deployment types.
+
+#### Delete Model
+
+Delete the deployed model.
+
 ```bash
 emd destroy DeepSeek-R1-Distill-Qwen-1.5B
 ```
-Notes: Find *ModelId* in the output of ```emd status```.
-![alt text](docs/images/emd-destroy.png)
 
+> **Note:** You can find the *ModelId* in the output by `emd status`.
 
+#### List Supported Models
+
+Quickly see what models are supported, this command will output all information related to deployment. (Plese browse [Supported Models](docs/en/supported_models.md) for more information.)
+
+```bash
+emd list-supported-models
+```
+
+The following command is recommended to just list the model types.
+
+```bash
+emd list-supported-models | jq -r '.[] | "\(.model_id)\t\(.model_type)"' | column -t -s $'\t' | sort
+```
 
 ## Documentation
 
