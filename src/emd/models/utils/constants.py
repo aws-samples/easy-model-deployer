@@ -45,6 +45,13 @@ class EngineType(ConstantBase):
 
 
 class InstanceType(ConstantBase):
+    G4DNXLARGE = "g4dn.xlarge"
+    G4DN2XLARGE = "g4dn.2xlarge"
+    G4DN4XLARGE = "g4dn.4xlarge"
+    G4DN8XLARGE = "g4dn.8xlarge"
+    G4DN16XLARGE = "g4dn.16xlarge"
+    G4DN12XLARGE = "g4dn.12xlarge"
+
     G5d48XLARGE = "g5.48xlarge"
     G5d24XLARGE = "g5.24xlarge"
     G5d12XLARGE = "g5.12xlarge"
@@ -53,7 +60,17 @@ class InstanceType(ConstantBase):
     G5dXLARGE = "g5.xlarge"
     G5d4XLARGE = "g5.4xlarge"
     G5d8XLARGE = "g5.8xlarge"
+
+    G6eXLARGE = "g6e.xlarge"
     G6e2XLARGE = "g6e.2xlarge"
+    G6e4XLARGE = "g6e.4xlarge"
+    G6e8XLARGE = "g6e.8xlarge"
+    G6e16XLARGE = "g6e.16xlarge"
+    G6e12XLARGE = "g6e.12xlarge"
+    G6e24XLARGE = "g6e.24xlarge"
+    G6e48XLARGE = "g6e.48xlarge"
+
+
     INF2D8XLARGE = "inf2.8xlarge"
     INF2DXLARGE = "inf2.xlarge"
     INF2D24XLARGE = "inf2.24xlarge"
@@ -93,18 +110,6 @@ class InstanceType(ConstantBase):
         else:
             raise NotImplementedError(service)
 
-    # @classmethod
-    # def get_instance_description(cls,instance_type:str):
-    #     descriptions_map = {
-    #         cls.G5d48XLARGE: "Amazon EC2 G5 instances are powered by the latest generation of Amazon GPU-optimized processors, the AWS Graviton5 processors.",
-    #         cls.G5d24XLARGE: "Amazon EC2 G5 instances are powered by the latest generation of Amazon GPU-optimized processors, the AWS Graviton5 processors.",
-    #         cls.G5d12XLARGE: "Amazon EC2 G5 instances are powered by the latest generation of Amazon GPU-optimized processors, the AWS Graviton5 processors.",
-    #         cls.G5d2XLARGE: "Amazon EC2 G5 instances are powered by the latest generation of Amazon GPU-optimized processors, the AWS Graviton5 processors.",
-    #         cls.G5d4XLARGE: "Amazon EC2 G5 instances are powered by the latest generation of Amazon GPU-optimized processors, the AWS Graviton5 processors.",
-    #     }
-    #     return descriptions_map[instance_type]
-
-
 class ServiceType(ConstantBase):
     SAGEMAKER = "sagemaker"
     SAGEMAKER_ASYNC = "sagemaker_async"
@@ -112,11 +117,9 @@ class ServiceType(ConstantBase):
     ECS = "ecs"
     LOCAL = "local"
 
-
 class FrameworkType(ConstantBase):
     FASTAPI = "fastapi"
     CUSTOM = "custom"
-
 
 class ModelType(ConstantBase):
     LLM = "llm"
@@ -126,10 +129,8 @@ class ModelType(ConstantBase):
     EMBEDDING = "embedding"
     VIDEO = "video"
 
-
 class ServiceCode(ConstantBase):
     SAGEMAKER = "sagemaker"
-
 
 class ModelFilesDownloadSource(ConstantBase):
     HUGGINGFACE = "huggingface"
@@ -137,6 +138,7 @@ class ModelFilesDownloadSource(ConstantBase):
     AUTO = "auto"
 
 class ServiceQuotaCode(ConstantBase):
+
     G5dXLARGE_ENDPOINT = "L-1928E07B"
     G5d2XLARGE_ENDPOINT = "L-9614C779"
     G5d4XLARGE_ENDPOINT = "L-C1B9A48D"
@@ -153,6 +155,13 @@ class ServiceQuotaCode(ConstantBase):
     @classmethod
     def get_service_quota_code(cls, instance_type: str):
         mapping = {
+            InstanceType.G4DNXLARGE:"L-B67CFA0C",
+            InstanceType.G4DN2XLARGE:"L-EA346344",
+            InstanceType.G4DN4XLARGE:"L-31522FA6",
+            InstanceType.G4DN8XLARGE:"L-7D28AD75",
+            InstanceType.G4DN16XLARGE:"L-8679F6F3",
+            InstanceType.G4DN12XLARGE:"L-07BEB181",
+
             InstanceType.G5dXLARGE: cls.G5dXLARGE_ENDPOINT,
             InstanceType.G5d2XLARGE: cls.G5d2XLARGE_ENDPOINT,
             InstanceType.G5d4XLARGE: cls.G5d4XLARGE_ENDPOINT,
@@ -161,7 +170,15 @@ class ServiceQuotaCode(ConstantBase):
             InstanceType.G5d16XLARGE: cls.G5d16XLARGE_ENDPOINT,
             InstanceType.G5d24XLARGE: cls.G5d24XLARGE_ENDPOINT,
             InstanceType.G5d48XLARGE: cls.G5d48XLARGE_ENDPOINT,
+            InstanceType.G6eXLARGE: "G6e2XLARGE",
             InstanceType.G6e2XLARGE: cls.G6e2XLARGE_ENDPOINT,
+            InstanceType.G6e4XLARGE: "L-93531071",
+            InstanceType.G6e8XLARGE: "L-96A28D02",
+            InstanceType.G6e16XLARGE: "L-2930A179",
+            InstanceType.G6e12XLARGE: "L-60313EA3",
+            InstanceType.G6e24XLARGE: "L-AE407E8B",
+            InstanceType.G6e48XLARGE: "L-E0C458EA",
+
             InstanceType.INF2DXLARGE: cls.INF2DXLARGE_ENDPOINT,
             InstanceType.INF2D8XLARGE: cls.INF2D8XLARGE_ENDPOINT,
             InstanceType.INF2D24XLARGE: cls.INF2D24XLARGE_ENDPOINT,

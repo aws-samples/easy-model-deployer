@@ -23,6 +23,7 @@ from ..instances import (
     g5d16xlarge_instance,
     g5d24xlarge_instance,
     g5d48xlarge_instance,
+    g4dn2xlarge_instance,
     g6e2xlarge_instance,
     inf2d8xlarge_instance,
     inf2d24xlarge_instance,
@@ -379,6 +380,7 @@ Model.register(
             g5d8xlarge_instance,
             # g5d12xlarge_instance,
             g5d16xlarge_instance,
+            g4dn2xlarge_instance,
             # g5d24xlarge_instance,
             # g5d48xlarge_instance,
             local_instance
