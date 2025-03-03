@@ -11,7 +11,7 @@ increment_version() {
     local patch=$(echo $version | cut -d. -f3)
     
     # Increment minor version
-    minor=$((minor + 1))
+    patch=$((patch + 1))
     echo "${major}.${minor}.${patch}"
 }
 

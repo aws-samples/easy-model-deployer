@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "easy-model-deployer"
-version = "0.6.0"
+version = "0.6.1"
 description = "Deploy Model Anywhere on AWS"
 authors = [
     "Yi Yan <yiyanz@amazon.com>",
