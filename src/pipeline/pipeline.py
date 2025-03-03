@@ -165,7 +165,6 @@ def run_prepare_model_and_build_image(args):
                     import traceback
                     print(traceback.format_exc(),flush=True)
                     os.system("kill -9 %d" % os.getpid())
-
         return ret
 
 

@@ -97,3 +97,49 @@ framework type: fastapi
 framework type: fastapi
 ? (Optional) Additional deployment parameters (JSON string or local file path), you can skip by pressing Enter: {"engine_params":{"api_key":"<YOUR_API_KEY>", "default_cli_args": "--max-total-tokens 30000 --max-concurrent-requests 30"}}
 ```
+
+
+# Advanced deployments
+- Customize model download methods
+  You can load models from different locations by adding appropriate values in the extra-params parameter
+  1. Load model from S3
+     ```json
+     {
+       "model_params": {
+        "model_files_s3_path":"<S3_PATH>"
+        }
+      }
+    ```
+  2. Load model from local path (only applicable for local deployment)
+     ```json
+     {
+       "model_params": {
+        "model_files_local_path":"<LOCAL_PATH>"
+        }
+      }
+    ```
+  3. Skip downloading and uploading model files in codebuild, which will significantly reduce deployment time
+  ```json
+     {
+       "model_params": {
+        "need_prepare_model":false
+        }
+      }
+    ```
+  4. Specify the download source for model files
+  ```json
+     {
+       "model_params": {
+        "model_files_download_source":"huggingface|modelscope|auto(default)"
+        }
+      }
+    ```
+  5. Specify the model ID on huggingface or modelscope
+  ```json
+     {
+       "model_params": {
+        "huggingface_model_id":"model id on huggingface",
+        "modelscope_model_id":"model id on modelscope"
+      }
+      }
+    ```
