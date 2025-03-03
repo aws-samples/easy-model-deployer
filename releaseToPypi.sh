@@ -60,6 +60,7 @@ echo "Successfully published version ${new_version} to PyPI!"
 # Waitting 30 seconds for verification
 echo "Verifying installation..."
 sleep 30
-pip install --no-cache-dir aws-emd==${new_version}
+pip install --no-cache-dir easy-model-deployer==${new_version}
 
-echo "Done! Try running: aws-emd --help"
+echo "Done! Try running: emd --help"
+echo "Note to push the latest version in pyproject.toml as ${new_version}, please update it manually."

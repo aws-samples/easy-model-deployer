@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "aws-emd"
-version = "0.7.0"
+name = "easy-model-deployer"
+version = "0.6.0"
 description = "Deploy Model Anywhere on AWS"
 authors = [
     "Yi Yan <yiyanz@amazon.com>",
@@ -51,4 +51,4 @@ modelscope = "^1.21.1"
 pytest = "^8.0.0"
 
 [tool.poetry.scripts]
-aws-emd = "emd.cli:app"
+emd = "emd.cli:app"
