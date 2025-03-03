@@ -4,9 +4,7 @@ Easy Model Deployer - Simple, Efficient, and Easy-to-Integrate
 
 ---
 
-**Latest News**
-
-- [2025/03] We officially released EMD!
+![cli](docs/images/cli.gif)
 
 ---
 
@@ -62,8 +60,6 @@ Setting up necessary resources for model deployment.
 ```bash
 emd bootstrap
 ```
-
-![cli](docs/images/cli.gif)
 
 > **Note:** Once you upgrade the EMD, you need to run this command again.
 
