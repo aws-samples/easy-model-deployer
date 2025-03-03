@@ -46,7 +46,7 @@ Deploy models to the cloud with EMD will use the following components in Amazon 
 Install EMD with `pip`, currently only support for Python 3.9 and above:
 
 ```bash
-pip install --no-cache-dir aws-emd==0.7.0
+pip install --no-cache-dir easy-model-deployer
 ```
 
 Visit our [documentation](https://aws-samples.github.io/easy-model-deployer/) to learn more.
