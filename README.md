@@ -40,7 +40,7 @@ For a detailed list of supported models, please refer to [Supported Models](docs
 Install EMD with `pip`, currently support for Python 3.9 and above:
 
 ```bash
-pip install https://github.com/aws-samples/easy-model-deployer/releases/download/main/emd-0.7.1-py3-none-any.whl
+pip install https://github.com/aws-samples/easy-model-deployer/releases/download/emd-0.7.1/emd-0.7.1-py3-none-any.whl
 ```
 
 Visit our [documentation](https://aws-samples.github.io/easy-model-deployer/en/installation/) to learn more.
