@@ -79,6 +79,19 @@ emd deploy
 > When you see the message "Waiting for model: ...", it means the deployment task has started and you can stop the terminal output by pressing `Ctrl+C`.
 > For more information on deployment parameters, please refer to the [Deployment parameters](docs/en/deployment.md).
 
+#### List Supported Models
+
+Quickly see what models are supported, this command will output all information related to deployment. (Plese browse [Supported Models](docs/en/supported_models.md) for more information.)
+
+```bash
+emd list-supported-models
+```
+
+The following command is recommended to just list the model types.
+
+```bash
+emd list-supported-models | jq -r '.[] | "\(.model_id)\t\(.model_type)"' | column -t -s $'\t' | sort
+
 
 #### Deployment Status
 
@@ -121,18 +134,6 @@ emd destroy DeepSeek-R1-Distill-Qwen-1.5B
 
 > **Note:** You can find the *ModelId* in the output by `emd status`.
 
-#### List Supported Models
-
-Quickly see what models are supported, this command will output all information related to deployment. (Plese browse [Supported Models](docs/en/supported_models.md) for more information.)
-
-```bash
-emd list-supported-models
-```
-
-The following command is recommended to just list the model types.
-
-```bash
-emd list-supported-models | jq -r '.[] | "\(.model_id)\t\(.model_type)"' | column -t -s $'\t' | sort
 ```
 
 ## Documentation
