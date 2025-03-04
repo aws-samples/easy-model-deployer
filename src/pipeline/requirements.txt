@@ -6,6 +6,7 @@
 
 boto3
 huggingface_hub
+hf_transfer
 openai
 jinja2
 modelscope

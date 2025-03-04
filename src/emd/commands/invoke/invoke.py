@@ -11,7 +11,7 @@ from emd.models.utils.constants import ModelType
 from emd.utils.logger_utils import make_layout
 from emd.utils.decorators import catch_aws_credential_errors,check_emd_env_exist,load_aws_profile
 
-app = typer.Typer()
+app = typer.Typer(pretty_exceptions_enable=False)
 console = Console()
 layout = make_layout()
 

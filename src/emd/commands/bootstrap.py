@@ -8,7 +8,9 @@ from emd.utils.decorators import catch_aws_credential_errors, load_aws_profile
 from emd.utils.logger_utils import make_layout
 from emd.utils.aws_service_utils import get_current_region
 
-app = typer.Typer()
+app = typer.Typer(
+    pretty_exceptions_enable=False
+)
 console = Console()
 layout = make_layout()
 

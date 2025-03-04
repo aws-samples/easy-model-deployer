@@ -2,14 +2,14 @@ import typer
 from rich.console import Console
 from rich.panel import Panel
 
-from emd.constants import MODEL_DEFAULT_TAG, VERSION_MODIFY
+from emd.constants import MODEL_DEFAULT_TAG
 from typing_extensions import Annotated
 from emd.sdk.destroy import destroy as sdk_destroy
 from emd.utils.decorators import catch_aws_credential_errors,check_emd_env_exist,load_aws_profile
 from emd.utils.logger_utils import make_layout
 from emd.revision import convert_version_name_to_stack_name
 
-app = typer.Typer()
+app = typer.Typer(pretty_exceptions_enable=False)
 console = Console()
 layout = make_layout()
 
@@ -25,11 +25,7 @@ def destroy(
     ],
     model_tag: Annotated[
         str, typer.Argument(help="Model tag")
-    ] = MODEL_DEFAULT_TAG,
-    model_deploy_version: Annotated[
-        str, typer.Option("-v", "--deploy-version", help="The version of the model deployment to destroy"),
-    ] = VERSION_MODIFY
+    ] = MODEL_DEFAULT_TAG
     ):
-    model_deploy_version = convert_version_name_to_stack_name(model_deploy_version)
     # console.print("[bold blue]Checking AWS environment...[/bold blue]")
-    sdk_destroy(model_id,model_tag=model_tag,waiting_until_complete=True, model_deploy_version=model_deploy_version)
+    sdk_destroy(model_id,model_tag=model_tag,waiting_until_complete=True)

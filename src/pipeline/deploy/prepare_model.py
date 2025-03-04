@@ -135,6 +135,7 @@ def run(model:Model):#, model_s3_bucket, backend_type, service_type, region,args
     service_type = model.executable_config.current_service.service_type
     engine_type = model.executable_config.current_engine.engine_type
     model_s3_bucket = model.executable_config.model_s3_bucket
+    logger.info(f"need_prepare_model: {need_prepare_model}, model_files_s3_path: {model_files_s3_path}, service_type: {service_type}, engine_type: {engine_type}, model_s3_bucket: {model_s3_bucket}")
     # if  args.service_type == ServiceType.LOCAL or (args.model.need_prepare_model and not args.skip_prepare_model):
     if service_type == ServiceType.LOCAL or (need_prepare_model and model_files_s3_path is None):
         if engine_type == EngineType.OLLAMA:
@@ -143,9 +144,10 @@ def run(model:Model):#, model_s3_bucket, backend_type, service_type, region,args
         if not need_prepare_model and service_type == ServiceType.LOCAL:
             logger.info("Force to download model when deploy in local")
 
-        if model.model_files_local_path is not None:
-            logger.info(f"Model {model.model_id} already prepared, skip prepare model step. need_prepare_model:{need_prepare_model}, model_files_local_path: {model.model_files_local_path}")
-            return
+        if  model.model_files_local_path is not None:
+            if service_type == ServiceType.LOCAL:
+                logger.info(f"Model {model.model_id} already prepared in local, skip prepare model step. need_prepare_model:{need_prepare_model}, model_files_local_path: {model.model_files_local_path}")
+                return
         if model_files_s3_path is not None and service_type == ServiceType.LOCAL:
             # donwload model files from s3 to local
             model_dir = EMD_MODELS_LOCAL_DIR_TEMPLATE.format(model_id=model.model_id)

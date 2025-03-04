@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: EMD ECS Cluster - Ensure all associated models are deleted before removing this stack.
+Description: Easy Model Deployer ECS Cluster - Ensure all associated models are deleted before removing this stack. Please go to https://github.com/aws-samples/easy-model-deployer for more information.
 Parameters:
   VPCID:
     Type: AWS::EC2::VPC::Id

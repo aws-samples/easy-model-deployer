@@ -13,7 +13,7 @@ from emd.models.utils.constants import (
 from emd.models import Model, ExecutableConfig
 
 from utils.common import str2bool
-from emd.constants import EMD_MODELS_LOCAL_DIR_TEMPLATE
+from emd.constants import EMD_DEFAULT_CONTAINER_PREFIX, EMD_MODELS_LOCAL_DIR_TEMPLATE
 from emd.models import Instance
 from emd.utils.logger_utils import get_logger
 from emd.utils.accelerator_utils import check_cuda_exists,check_neuron_exists,get_neuron_core_num
@@ -79,12 +79,16 @@ def run(
             model_dir = reguar_model_dir
         model_dir_abs = os.path.abspath(model_dir)
         model_dir_in_image = f"/{model_dir}"
+        container_name = f"{EMD_DEFAULT_CONTAINER_PREFIX}-{model_id.replace('/', '-')}-{int(time.time())}"  # emd-Qwen2.5-72B-Instruct-AWQ-1740116480
         running_cmd = (
             f"docker run --shm-size 1g"
+            f" --restart always"  # Always restart in case EC2 restart for patching
+            f" --name {container_name}"
             f" -e model_id={model_id}  -e model_tag={model_tag}"
             f" -e MODEL_DIR={model_dir_in_image}"
             f" -e AWS_ACCESS_KEY_ID={aws_access_key_id} -e AWS_SECRET_ACCESS_KEY={aws_secret_access_key}"
-            f" -it {accelerator_cli_args} -v {model_dir_abs}:{model_dir_in_image} -p 8080:8080 {img_uri}"
+            f" -dit {accelerator_cli_args} -v {model_dir_abs}:{model_dir_in_image} -p 8080:8080 {img_uri}" # daemon run with attached logging
+            f" && docker logs -f {container_name}"
         )
         logger.info(f"Running {running_cmd}")
         os.system(running_cmd)

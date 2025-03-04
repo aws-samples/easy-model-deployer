@@ -21,23 +21,22 @@ class TgiBackend(OpenAICompitableProxyBackendBase):
         self.entrypoint = self.execute_model.executable_config.current_engine.entrypoint
     def get_shard_num(self):
         if check_cuda_exists():
-            return get_gpu_num()
+            return self.gpu_num
         elif check_neuron_exists():
-            return get_neuron_core_num()
+            return self.neuron_core_num
         else:
             raise RuntimeError("No cuda or neuron device found")
+
     def create_proxy_server_start_command(self,model_path):
-        # entrypoint = "text-generation-launcher"
-        # if Instance.check_inf2_instance(self.instance_type) or check_neuron_exists():
-        #     entrypoint = "/tgi-entrypoint.sh"
-        # shard_num = self.get_shard_num()
-        serve_command = f'{self.entrypoint} --trust-remote-code --model-id {model_path} --port {self.server_port} {self.default_cli_args} {self.cli_args}'
+        shard_num_cli_args = ""
+        if check_cuda_exists():
+            shard_num_cli_args = f"--num-shard {self.get_shard_num()}"
+        serve_command = f'{self.entrypoint} --trust-remote-code --model-id {model_path} --port {self.server_port} {self.default_cli_args} {shard_num_cli_args} {self.cli_args}'
         if self.environment_variables:
             serve_command = f'{self.environment_variables} && {serve_command}'
         if self.api_key:
             serve_command += f" --api-key {self.api_key}"
         return serve_command
-
 
     def convert_model_to_neuron(self,model_path,output_path):
         convert_cmd = "optimum-cli export neuron" \

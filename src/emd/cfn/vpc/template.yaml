@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: EMD Networking - Ensure all associated models are deleted before removing this stack.
+Description: Easy Model Deployer Networking - Ensure all associated models are deleted before removing this stack. Please go to https://github.com/aws-samples/easy-model-deployer for more information.
 # This template creates a VPC, 2 public subnets in 2 different
 # availability zones (to be used with EMD), and S3 endpoint to allow
 # the ECS cluster to access the S3 bucket.

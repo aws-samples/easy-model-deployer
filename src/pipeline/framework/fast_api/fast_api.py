@@ -10,6 +10,7 @@ from fastapi import FastAPI, Request, status, Header, Depends
 from fastapi.responses import JSONResponse, Response, StreamingResponse
 from emd.utils.logger_utils import get_logger
 from fastapi.concurrency import run_in_threadpool
+from emd.utils.framework_utils import get_model_specific_path
 
 model_id = os.environ.get("model_id")
 model_tag = os.environ.get("model_tag")
@@ -90,12 +91,24 @@ async def invocations(request: Request, authorization: str = Depends(get_authori
 
     return await invoke(payload)
 
+endpoints = {
+    "ping": {"func": ping, "methods": ["GET"]},
+    "health": {"func": health, "methods": ["GET"]},
+    # Note: The functions for the POST endpoints all use "invocations".
+    "invocations": {"func": invocations, "methods": ["POST"]},
+    "v1/chat/completions": {"func": invocations, "methods": ["POST"]},
+    "v1/embeddings": {"func": invocations, "methods": ["POST"]},
+    "score": {"func": invocations, "methods": ["POST"]},
+}
+
 if model_id and model_tag:
-    app.add_api_route(
-        path=f"/{model_id}/{model_tag}/v1/chat/completions",
-        endpoint=invocations,
-        methods=["POST"]
-    )
+    for base_path, route_info in endpoints.items():
+        path = get_model_specific_path(model_id, model_tag, base_path)
+        app.add_api_route(
+            path=path,
+            endpoint=route_info["func"],
+            methods=route_info["methods"]
+        )
 
 if __name__ == "__main__":
     args = parse_args()

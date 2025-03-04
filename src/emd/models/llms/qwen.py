@@ -23,6 +23,7 @@ from ..instances import (
     g5d16xlarge_instance,
     g5d24xlarge_instance,
     g5d48xlarge_instance,
+    g4dn2xlarge_instance,
     g6e2xlarge_instance,
     inf2d8xlarge_instance,
     inf2d24xlarge_instance,
@@ -107,35 +108,35 @@ Model.register(
     )
 )
 
-Model.register(
-    dict(
-        model_id = "Qwen2.5-72B-Instruct-AWQ-inf2",
-        supported_engines=[
-            tgi_qwen2d5_72b_on_inf2
-        ],
-        supported_instances=[
-            inf2d24xlarge_instance,
-            local_instance
-        ],
-        supported_services=[
-            sagemaker_service,
-            sagemaker_async_service,
-            ecs_service,
-            local_service
-        ],
-        supported_frameworks=[
-            fastapi_framework
-        ],
-        allow_china_region=True,
-        huggingface_model_id="Qwen/Qwen2.5-72B-Instruct-AWQ",
-        modelscope_model_id="Qwen/Qwen2.5-72B-Instruct-AWQ",
-        require_huggingface_token=False,
-        application_scenario="Agent, tool use, translation, summary",
-        description="The latest series of Qwen LLMs, offers base and tuned models from 0.5B to 72B\n parameters, featuring enhanced knowledge, improved coding and math skills, better instruction\n following, long-text generation, structured data handling, 128K token context support, and\n multilingual capabilities for 29+ languages.",
-        model_type=ModelType.LLM,
-        model_series=QWEN2D5_SERIES
-    )
-)
+# Model.register(
+#     dict(
+#         model_id = "Qwen2.5-72B-Instruct-AWQ-inf2",
+#         supported_engines=[
+#             tgi_qwen2d5_72b_on_inf2
+#         ],
+#         supported_instances=[
+#             inf2d24xlarge_instance,
+#             local_instance
+#         ],
+#         supported_services=[
+#             sagemaker_service,
+#             sagemaker_async_service,
+#             ecs_service,
+#             local_service
+#         ],
+#         supported_frameworks=[
+#             fastapi_framework
+#         ],
+#         allow_china_region=True,
+#         huggingface_model_id="Qwen/Qwen2.5-72B-Instruct-AWQ",
+#         modelscope_model_id="Qwen/Qwen2.5-72B-Instruct-AWQ",
+#         require_huggingface_token=False,
+#         application_scenario="Agent, tool use, translation, summary",
+#         description="The latest series of Qwen LLMs, offers base and tuned models from 0.5B to 72B\n parameters, featuring enhanced knowledge, improved coding and math skills, better instruction\n following, long-text generation, structured data handling, 128K token context support, and\n multilingual capabilities for 29+ languages.",
+#         model_type=ModelType.LLM,
+#         model_series=QWEN2D5_SERIES
+#     )
+# )
 
 
 Model.register(
@@ -165,6 +166,7 @@ Model.register(
         application_scenario="Agent, tool use, translation, summary",
         description="The latest series of Qwen LLMs, offers base and tuned models from 0.5B to 72B\n parameters, featuring enhanced knowledge, improved coding and math skills, better instruction\n following, long-text generation, structured data handling, 128K token context support, and\n multilingual capabilities for 29+ languages.",
         model_type=ModelType.LLM,
+        need_prepare_model=False,
         model_series=QWEN2D5_SERIES
     )
 )
@@ -229,33 +231,33 @@ Model.register(
     )
 )
 
-Model.register(
-    dict(
-        model_id = "Qwen2.5-32B-Instruct-inf2",
-        supported_engines=[tgi_qwen2d5_72b_on_inf2],
-        supported_instances=[
-            inf2d24xlarge_instance,
-            local_instance
-        ],
-        supported_services=[
-            sagemaker_service,
-            sagemaker_async_service,
-            ecs_service,
-            local_service
-        ],
-        supported_frameworks=[
-            fastapi_framework
-        ],
-        allow_china_region=True,
-        huggingface_model_id="Qwen/Qwen2.5-32B-Instruct",
-        modelscope_model_id="Qwen/Qwen2.5-32B-Instruct",
-        require_huggingface_token=False,
-        application_scenario="Agent, tool use, translation, summary",
-        description="The latest series of Qwen LLMs, offers base and tuned models from 0.5B to 72B\n parameters, featuring enhanced knowledge, improved coding and math skills, better instruction\n following, long-text generation, structured data handling, 128K token context support, and\n multilingual capabilities for 29+ languages.",
-        model_type=ModelType.LLM,
-        model_series=QWEN2D5_SERIES
-    )
-)
+# Model.register(
+#     dict(
+#         model_id = "Qwen2.5-32B-Instruct-inf2",
+#         supported_engines=[tgi_qwen2d5_72b_on_inf2],
+#         supported_instances=[
+#             inf2d24xlarge_instance,
+#             local_instance
+#         ],
+#         supported_services=[
+#             sagemaker_service,
+#             sagemaker_async_service,
+#             ecs_service,
+#             local_service
+#         ],
+#         supported_frameworks=[
+#             fastapi_framework
+#         ],
+#         allow_china_region=True,
+#         huggingface_model_id="Qwen/Qwen2.5-32B-Instruct",
+#         modelscope_model_id="Qwen/Qwen2.5-32B-Instruct",
+#         require_huggingface_token=False,
+#         application_scenario="Agent, tool use, translation, summary",
+#         description="The latest series of Qwen LLMs, offers base and tuned models from 0.5B to 72B\n parameters, featuring enhanced knowledge, improved coding and math skills, better instruction\n following, long-text generation, structured data handling, 128K token context support, and\n multilingual capabilities for 29+ languages.",
+#         model_type=ModelType.LLM,
+#         model_series=QWEN2D5_SERIES
+#     )
+# )
 
 Model.register(
     dict(
@@ -378,6 +380,7 @@ Model.register(
             g5d8xlarge_instance,
             # g5d12xlarge_instance,
             g5d16xlarge_instance,
+            g4dn2xlarge_instance,
             # g5d24xlarge_instance,
             # g5d48xlarge_instance,
             local_instance

@@ -10,7 +10,8 @@ from emd.utils.cli_styles import custom_style
 
 app = typer.Typer(
     no_args_is_help=True,
-    add_completion=False
+    add_completion=False,
+    pretty_exceptions_enable=False
 )
 console = Console()
 

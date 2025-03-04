@@ -103,7 +103,7 @@ def print_aws_profile():
     account_id = response["Account"]
     region = get_current_region()
     if region is None:
-        console.print("[red]Error: Unable to determine AWS region.[/red]")
+        console.print("[yellow]warning: Unable to determine AWS region.[/yellow]")
         raise typer.Exit(1)
     console.print(Panel.fit(
         f"[bold green]Account ID:[/bold green] {account_id}\n"
@@ -118,32 +118,15 @@ def print_aws_profile():
 def load_aws_profile(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
-        # profile_name = None
-        # try:
-        #     profile_name = profile_manager.load_profile_name_from_local()
-        # except FileNotFoundError:
-        #     pass
-        # except Exception as e:
-        #     logger.error(f"Error loading AWS profile: {str(e)}")
-
-        # if profile_name:
-        #     os.environ["AWS_PROFILE"] = profile_name
-
-        print_aws_profile()
-        # try:
-        #     sts = boto3.client("sts")
-        #     response = sts.get_caller_identity()
-        #     profile_name = os.environ.get("AWS_PROFILE")
-        #     account_id = response["Account"]
-        #     region = get_current_region()
-        #     if region is None:
-        #         console.print("[red]Error: Unable to determine AWS region.[/red]")
-        #         raise typer.Exit(1)
-        #     console.print(f"AWS Account: {account_id}\nAWS Region: {region}\n AWS Profile: {profile_name}")
-        # except (ClientError, NoCredentialsError):
-        #     console.print("[red]Error: AWS credentials not found or invalid.[/red]")
-        #     console.print("Please configure your AWS credentials using:")
-        #     console.print("  `aws configure`")
-        #     raise typer.Exit(1)
+        try:
+            print_aws_profile()
+        except:
+            if kwargs.get("allow_local_deploy") or kwargs.get("only_allow_local_deploy",False):
+                logger.warning("Unable to load AWS profile. Proceeding with local deployment.")
+                kwargs['only_allow_local_deploy'] = True
+                return fn(*args, **kwargs)
+            console = Console()
+            console.print("[red]Error: Unable to load AWS profile.[/red]")
+            raise typer.Exit(1)
         return fn(*args, **kwargs)
     return wrapper

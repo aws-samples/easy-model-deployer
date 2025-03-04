@@ -27,6 +27,7 @@ class TransformerLLMBackend(BackendBase):
         )
         self.model_id = self.execute_model.model_id
         self.model_s3_bucket = self.execute_model.executable_config.model_s3_bucket
+        self.model_files_s3_path = self.execute_model.model_files_s3_path
         self.service_type = self.execute_model.executable_config.current_service.service_type
         self.gpu_num = torch.cuda.device_count()
         self.model_type = self.execute_model.model_type
@@ -41,7 +42,12 @@ class TransformerLLMBackend(BackendBase):
         model_dir = os.environ.get("MODEL_DIR") or EMD_MODELS_LOCAL_DIR_TEMPLATE.format(model_id=self.model_id)
         if self.service_type != ServiceType.LOCAL:
             logger.info(f"Downloading model from s3")
-            download_dir_from_s3_by_s5cmd(self.model_s3_bucket, model_dir)
+            download_dir_from_s3_by_s5cmd(
+                local_dir=model_dir,
+                bucket_name = self.model_s3_bucket,
+                s3_key = model_dir,
+                model_files_s3_path=self.model_files_s3_path
+            )
         model_abs_path = os.path.abspath(model_dir)
 
         # TODO add model iint args from model's definition
