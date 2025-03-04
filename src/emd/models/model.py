@@ -206,7 +206,7 @@ class Model(ModelBase,Generic[T]):
 
     @classmethod
     def get_supported_models(cls) -> dict:
-        return {model_id: model.model_dump() for model_id,model in cls.model_map.items()}
+        return {model_id: model.model_type for model_id,model in cls.model_map.items()}
 
     def find_current_engine(self,engine_type:str) -> dict:
         supported_engines:List[Engine]  = self.supported_engines
