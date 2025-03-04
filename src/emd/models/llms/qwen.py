@@ -7,7 +7,7 @@ from ..engines import (
     tgi_qwen2d5_on_inf2,
     tgi_qwen2d5_72b_on_inf2,
     vllm_qwen2d5_72b_engine064,
-    vllm_qwen2d5_engine064_g4dn
+    # vllm_qwen2d5_engine064_g4dn
 )
 from ..services import (
     sagemaker_service,
@@ -371,33 +371,33 @@ Model.register(
 )
 
 
-Model.register(
-    dict(
-        model_id = "Qwen2.5-14B-Instruct-AWQ-g4dn",
-        supported_engines=[vllm_qwen2d5_engine064_g4dn],
-        supported_instances=[
-            g4dn2xlarge_instance,
-            local_instance
-        ],
-        supported_services=[
-            sagemaker_service,
-            sagemaker_async_service,
-            ecs_service,
-            local_service
-        ],
-        supported_frameworks=[
-            fastapi_framework
-        ],
-        allow_china_region=True,
-        huggingface_model_id="Qwen/Qwen2.5-14B-Instruct-AWQ",
-        modelscope_model_id="Qwen/Qwen2.5-14B-Instruct-AWQ",
-        require_huggingface_token=False,
-        application_scenario="Agent, tool use, translation, summary",
-        description="The latest series of Qwen LLMs, offers base and tuned models from 0.5B to 72B\n parameters, featuring enhanced knowledge, improved coding and math skills, better instruction\n following, long-text generation, structured data handling, 128K token context support, and\n multilingual capabilities for 29+ languages.",
-        model_type=ModelType.LLM,
-        model_series=QWEN2D5_SERIES
-    )
-)
+# Model.register(
+#     dict(
+#         model_id = "Qwen2.5-14B-Instruct-AWQ-g4dn",
+#         supported_engines=[vllm_qwen2d5_engine064_g4dn],
+#         supported_instances=[
+#             g4dn2xlarge_instance,
+#             local_instance
+#         ],
+#         supported_services=[
+#             sagemaker_service,
+#             sagemaker_async_service,
+#             ecs_service,
+#             local_service
+#         ],
+#         supported_frameworks=[
+#             fastapi_framework
+#         ],
+#         allow_china_region=True,
+#         huggingface_model_id="Qwen/Qwen2.5-14B-Instruct-AWQ",
+#         modelscope_model_id="Qwen/Qwen2.5-14B-Instruct-AWQ",
+#         require_huggingface_token=False,
+#         application_scenario="Agent, tool use, translation, summary",
+#         description="The latest series of Qwen LLMs, offers base and tuned models from 0.5B to 72B\n parameters, featuring enhanced knowledge, improved coding and math skills, better instruction\n following, long-text generation, structured data handling, 128K token context support, and\n multilingual capabilities for 29+ languages.",
+#         model_type=ModelType.LLM,
+#         model_series=QWEN2D5_SERIES
+#     )
+# )
 
 
 Model.register(
