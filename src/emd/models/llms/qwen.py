@@ -6,7 +6,7 @@ from ..engines import (
     tgi_qwen2d5_72b_engine064,
     tgi_qwen2d5_on_inf2,
     tgi_qwen2d5_72b_on_inf2,
-    vllm_qwen2d5_72b_engine064,
+    vllm_qwen2d5_72b_engine064
 )
 from ..services import (
     sagemaker_service,
@@ -378,11 +378,7 @@ Model.register(
             g5d2xlarge_instance,
             g5d4xlarge_instance,
             g5d8xlarge_instance,
-            # g5d12xlarge_instance,
             g5d16xlarge_instance,
-            g4dn2xlarge_instance,
-            # g5d24xlarge_instance,
-            # g5d48xlarge_instance,
             local_instance
         ],
         supported_services=[
@@ -404,6 +400,8 @@ Model.register(
         model_series=QWEN2D5_SERIES
     )
 )
+
+
 Model.register(
     dict(
         model_id = "Qwen2.5-14B-Instruct",

@@ -128,13 +128,14 @@ def worker(fn,*args,**kwargs):
     thread.start()
     while True:
         if shared_event.is_set():
-            print("There exists any process got wrong...",flush=True)
-            os.system("kill -9 %d" % os.getpid())
+            # print("There exists any process got wrong...",flush=True)
+            raise RuntimeError("There exists any process got wrong...")
         if not thread.is_alive():
             if thread.err is not None:
                 shared_event.set()
                 print("Current process got wrong...",flush=True)
-                os.system("kill -9 %d" % os.getpid())
+                raise RuntimeError("Current process got wrong...")
+                # os.system("kill -9 %d" % os.getpid())
             break
         time.sleep(0.1)
     return thread.ret
@@ -164,8 +165,9 @@ def run_prepare_model_and_build_image(args):
                 except:
                     import traceback
                     print(traceback.format_exc(),flush=True)
-                    os.system("kill -9 %d" % os.getpid())
+                    sys.exit(1)
 
+                    # os.system("kill -9 %d" % os.getpid())
         return ret
 
 

@@ -4,7 +4,8 @@ from ..engines import (
     vllm_deepseek_r1_distill_llama_engine071,
     ollama_deepseek_r1_qwen2d5_1d5b_engine057,
     llama_cpp_deepseek_r1_1d58_bit_engine_b9ab0a4,
-    llama_cpp_deepseek_r1_distill_engineb9ab0a4
+    llama_cpp_deepseek_r1_distill_engineb9ab0a4,
+    tgi_deepseek_r1_llama_70b_engine301
 )
 from ..services import (
     sagemaker_service,
@@ -37,7 +38,10 @@ from ..model_series import LLAMA3_SERIES
 Model.register(
     dict(
         model_id = "DeepSeek-R1-Distill-Qwen-32B",
-        supported_engines=[vllm_deepseek_r1_distill_qwen_engine071],
+        supported_engines=[
+            vllm_deepseek_r1_distill_qwen_engine071,
+            tgi_deepseek_r1_llama_70b_engine301
+        ],
         supported_instances=[
             g5d12xlarge_instance,
             g5d24xlarge_instance,
