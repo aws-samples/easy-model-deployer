@@ -18,7 +18,7 @@
 
 Easy Model Deployer is a lightweight tool designed to simplify the deployment of **Open-Source LLMs** ([Supported Models](docs/en/supported_models.md)) and Custom Models. It provides **OpenAI's Completions API** and [**LangChain Interface**](https://github.com/langchain-ai/langchain). Built for developers who need reliable and scalable model serving without complex setup, it seamlessly integrates with AWS services for efficient model deployment.
 
-![cli](docs/images/cli-all.avif)
+![cli](docs/images/cli-all.gif)
 
 **Key Features**
 - One-click deployment of models to the cloud (Amazon SageMaker, Amazon ECS, Amazon EC2)
