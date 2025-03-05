@@ -12,16 +12,14 @@ Easy Model Deployer - Simple, Efficient, and Easy-to-Integrate
 
 Easy Model Deployer is a lightweight tool designed to simplify model deployment. Built for developers who need reliable and scalable model serving without complex setup.
 
-**Supported Models**
-
-For a detailed list of supported models, please refer to [Supported Models](docs/en/supported_models.md)
-
 **Key Features**
 - One-click deployment of models to the cloud (Amazon SageMaker, Amazon ECS, Amazon EC2)
 - Diverse model types (LLMs, VLMs, Embeddings, Vision, etc.)
 - Rich inference engine (vLLM, TGI, Lmdeploy, etc.)
 - Different instance types (CPU/GPU/AWS Inferentia)
 - Convenient integration (OpenAI Compatible API, LangChain client, etc.)
+
+> **Note:** For a detailed list of supported models, please refer to [Supported Models](docs/en/supported_models.md)
 
 ## Table of Contents
 
@@ -77,7 +75,8 @@ emd deploy
 
 > **Note:** To view all available parameters, run `emd deploy --help`.
 > When you see the message "Waiting for model: ...", it means the deployment task has started and you can stop the terminal output by pressing `Ctrl+C`.
-> For more information on deployment parameters, please refer to the [Deployment parameters](docs/en/deployment.md).
+> For more information on deployment parameters, please refer to the [Deployment parameters](docs/en/installation.md).
+> For best practice examples of using command line parameters, please refer to the [Best Deployment Practices](docs/en/best_deployment_practices.md).
 
 #### List Supported Models
 

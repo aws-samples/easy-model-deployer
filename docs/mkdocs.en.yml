@@ -6,7 +6,7 @@ theme:
 nav:
   - Architecture: architecture.md
   - Installation: installation.md
-  - Deployment: deployment.md
+  - Best-Deployment-Practices: best_deployment_practices.md
   - EMD-Client: emd_client.md
   - Langchain-Interface: langchain_interface.md
   - OpenAI-Compatiable: openai_compatiable.md
