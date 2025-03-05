@@ -1,20 +1,24 @@
-<h3 align="center">
-Easy Model Deployer - Simple, Efficient, and Easy-to-Integrate
-</h3>
+<p align="center">
+    <h3 align="center">Easy Model Deployer: Simple, Efficient, and Easy-to-Integrate</h3>
+</p>
 
----
+<p align="center">
+  <a href="https://aws-samples.github.io/easy-model-deployer/en/installation"><strong>Documentation</strong></a> ·
+  <a href="https://github.com/aws-samples/easy-model-deployer/releases"><strong>Changelog</strong></a>
+</p>
 
-![cli](docs/images/cli.gif)
-
----
+<p align="center">
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellowgreen.svg" alt="MIT License"></a>
+  <a href="https://github.com/aws-samples/easy-model-deployer/releases"><img src="https://img.shields.io/github/v/release/aws-samples/easy-model-deployer?include_prereleases"></a>
+  <a href="https://github.com/aws-samples/easy-model-deployer/actions/workflows/release-package.yml"><img src="https://github.com/aws-samples/easy-model-deployer/actions/workflows/release-package.yml/badge.svg" alt="Build Status"></a>
+  <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/aws-samples/easy-model-deployer">
+</p>
 
 ## Introduction
 
-Easy Model Deployer is a lightweight tool designed to simplify model deployment. Built for developers who need reliable and scalable model serving without complex setup.
+Easy Model Deployer is a lightweight tool designed to simplify the deployment of **Open-Source LLMs** ([Supported Models](docs/en/supported_models.md)) and Custom Models. It provides **OpenAI's Completions API** and [**LangChain Interface**](https://github.com/langchain-ai/langchain). Built for developers who need reliable and scalable model serving without complex setup, it seamlessly integrates with AWS services for efficient model deployment.
 
-**Supported Models**
-
-For a detailed list of supported models, please refer to [Supported Models](docs/en/supported_models.md)
+![cli](docs/images/cli.gif)
 
 **Key Features**
 - One-click deployment of models to the cloud (Amazon SageMaker, Amazon ECS, Amazon EC2)
@@ -23,17 +27,8 @@ For a detailed list of supported models, please refer to [Supported Models](docs
 - Different instance types (CPU/GPU/AWS Inferentia)
 - Convenient integration (OpenAI Compatible API, LangChain client, etc.)
 
-## Table of Contents
 
-- [Installation](#installation)
-- [Usage](#usage)
-- [Documentation](#documentation)
-- [Contributing](#contributing)
-
-
-## Getting Started
-
-### Installation
+## 🚀 Quick Install
 
 Install EMD with `pip`, currently support for Python 3.9 and above:
 
@@ -43,28 +38,33 @@ pip install https://github.com/aws-samples/easy-model-deployer/releases/download
 
 Visit our [documentation](https://aws-samples.github.io/easy-model-deployer/en/installation/) to learn more.
 
-### Usage
+## 🔧 Usage
 
-#### Set AWS Profile
+### (Optional) Configure AWS Profile
+
+>If you have already configured your AWS credentials using the AWS CLI, you can skip this step.
+
+You can configure the AWS profile by EMD. If you don't set any AWS profile, the EMD will use the default credentials in your terminal, you can also configure your credentials by [`aws configure`](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html#cli-configure-files-methods).
+
+
 ```bash
 emd config set-default-profile-name
 ```
-> **Note:** If you don't set AWS profile, EMD will use the default profile in your environment (suitable for Temporary Credentials). Whenever you want to change the profile, you can run this command again.
 
-![config](docs/images/emd-config.png)
+### Bootstrap
 
-#### Bootstrap
+Prepare the essential resources required for model deployment.
 
-Setting up necessary resources for model deployment.
+For more information, please refer to [Architecture](https://aws-samples.github.io/easy-model-deployer/en/architecture/).
 
 ```bash
 emd bootstrap
 ```
 
-> **Note:** Once you upgrade the EMD, you need to run this command again.
+> **💡 Tip** Once you upgrade the EMD by `pip`, you need to run this command again.
 
 
-#### Deploy Models
+### Deploy Model
 
 Deploy models with an interactive CLI or one command.
 
@@ -77,9 +77,37 @@ emd deploy
 
 > **Note:** To view all available parameters, run `emd deploy --help`.
 > When you see the message "Waiting for model: ...", it means the deployment task has started and you can stop the terminal output by pressing `Ctrl+C`.
-> For more information on deployment parameters, please refer to the [Deployment parameters](docs/en/deployment.md).
+> For more information on deployment parameters, please refer to the [Deployment parameters](docs/en/installation.md).
+> For best practice examples of using command line parameters, please refer to the [Best Deployment Practices](docs/en/best_deployment_practices.md).
 
-#### List Supported Models
+### Show Status
+
+Check the status of the model deployment task.
+
+```bash
+emd status
+```
+
+> **💡 Tip** The EMD allows launch multiple deployment tasks simultaneously.
+
+### Quick Invocation
+
+Invoke the deployed model for testing by CLI.
+
+```bash
+emd invoke DeepSeek-R1-Distill-Qwen-1.5B
+```
+
+> **💡 Tip** You can find the *ModelId* in the output by `emd status`.
+
+- [Integration examples](https://aws-samples.github.io/easy-model-deployer/)
+- [EMD client](docs/en/emd_client.md)
+- [Langchain interface](docs/en/langchain_interface.md)
+- [OpenAI compatible interface](docs/en/openai_compatiable.md).
+
+> **💡 Tip** OpenAI Compatible API is supported only for Amazon ECS and Amazon EC2 deployment types.
+
+### List Supported Models
 
 Quickly see what models are supported, this command will output all information related to deployment. (Plese browse [Supported Models](docs/en/supported_models.md) for more information.)
 
@@ -91,40 +119,9 @@ The following command is recommended to just list the model types.
 
 ```bash
 emd list-supported-models | jq -r '.[] | "\(.model_id)\t\(.model_type)"' | column -t -s $'\t' | sort
-
-
-#### Deployment Status
-
-Check the status of the model deployment task.
-
-```bash
-emd status
 ```
 
-![alt text](docs/images/emd-status.png)
-
-> **Note:** The EMD allows launch multiple deployment tasks simultaneously.
-
-#### Quick invocation
-
-Invoke the deployed model for testing by CLI.
-
-```bash
-emd invoke DeepSeek-R1-Distill-Qwen-1.5B
-```
-
-![alt text](docs/images/emd-invoke.png)
-
-> **Note:** You can find the *ModelId* in the output by `emd status`.
-
-- [Integration examples](https://aws-samples.github.io/easy-model-deployer/)
-- [EMD client](docs/en/emd_client.md)
-- [Langchain interface](docs/en/langchain_interface.md)
-- [OpenAI compatible interface](docs/en/openai_compatiable.md).
-
-> **Notes** OpenAI Compatible API is supported only for Amazon ECS and Amazon EC2 deployment types.
-
-#### Delete Model
+### Delete Model
 
 Delete the deployed model.
 
@@ -132,15 +129,13 @@ Delete the deployed model.
 emd destroy DeepSeek-R1-Distill-Qwen-1.5B
 ```
 
-> **Note:** You can find the *ModelId* in the output by `emd status`.
+> **💡 Tip** You can find the *ModelId* in the output by `emd status`.
 
-```
-
-## Documentation
+## 📖 Documentation
 
 For advanced configurations and detailed guides, visit our [documentation site](https://aws-samples.github.io/easy-model-deployer/).
 
 
-## Contributing
+## 🤝 Contributing
 
 We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
