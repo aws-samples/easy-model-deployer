@@ -6,7 +6,7 @@ from ..engines import (
     tgi_qwen2d5_72b_engine064,
     tgi_qwen2d5_on_inf2,
     tgi_qwen2d5_72b_on_inf2,
-    vllm_qwen2d5_72b_engine064,
+    vllm_qwen2d5_72b_engine064
 )
 from ..services import (
     sagemaker_service,
@@ -23,6 +23,7 @@ from ..instances import (
     g5d16xlarge_instance,
     g5d24xlarge_instance,
     g5d48xlarge_instance,
+    g4dn2xlarge_instance,
     g6e2xlarge_instance,
     inf2d8xlarge_instance,
     inf2d24xlarge_instance,
@@ -165,6 +166,7 @@ Model.register(
         application_scenario="Agent, tool use, translation, summary",
         description="The latest series of Qwen LLMs, offers base and tuned models from 0.5B to 72B\n parameters, featuring enhanced knowledge, improved coding and math skills, better instruction\n following, long-text generation, structured data handling, 128K token context support, and\n multilingual capabilities for 29+ languages.",
         model_type=ModelType.LLM,
+        need_prepare_model=False,
         model_series=QWEN2D5_SERIES
     )
 )
@@ -376,10 +378,7 @@ Model.register(
             g5d2xlarge_instance,
             g5d4xlarge_instance,
             g5d8xlarge_instance,
-            # g5d12xlarge_instance,
             g5d16xlarge_instance,
-            # g5d24xlarge_instance,
-            # g5d48xlarge_instance,
             local_instance
         ],
         supported_services=[
@@ -401,6 +400,8 @@ Model.register(
         model_series=QWEN2D5_SERIES
     )
 )
+
+
 Model.register(
     dict(
         model_id = "Qwen2.5-14B-Instruct",

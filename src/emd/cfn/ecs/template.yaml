@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Deploy an ECS cluster with GPU-optimized AMI to run EMD model in a new VPC with secure networking.
+Description: Easy Model Deployer model deployment stack for Amazon ECS. The invoke URL can be found in the stack Outputs. Please go to https://github.com/aws-samples/easy-model-deployer for more information.
 Parameters:
   VPCID:
     Type: AWS::EC2::VPC::Id
@@ -262,10 +262,10 @@ Resources:
             sharedMemorySize: 1024
           healthCheck:
             command: ["CMD-SHELL","curl -f http://localhost:8080/health || exit 1"]
-            interval: 60
+            interval: 120
             retries: 10
             timeout: 60
-            startPeriod: 30
+            startPeriod: 120
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -302,7 +302,7 @@ Resources:
             - !Ref ServiceSecurityGroup
           Subnets: !Ref Subnets
       DeploymentConfiguration:
-        MaximumPercent: 200
+        MaximumPercent: 100
         MinimumHealthyPercent: 75
       DesiredCount: !Ref DesiredCount
       TaskDefinition: !Ref TaskDefinition
@@ -318,7 +318,7 @@ Resources:
   ServiceTargetGroup:
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
     Properties:
-      HealthCheckIntervalSeconds: 10
+      HealthCheckIntervalSeconds: 120
       HealthCheckPath: /ping
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 5

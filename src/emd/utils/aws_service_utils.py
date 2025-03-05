@@ -306,8 +306,6 @@ def get_model_stacks():
                 for output in status_info.get("Outputs", [])
             }
             outputs_d["outputs"] = str(stack_output_d)
-            outputs_d["deploy_version"] = outputs_d.get("DeployVersion", "") or \
-                Model.get_deploy_version_from_stack_name(stack_name)
 
             if outputs_d["stack_status"] == "ROLLBACK_COMPLETE":
                 # find failed event

@@ -128,13 +128,14 @@ def worker(fn,*args,**kwargs):
     thread.start()
     while True:
         if shared_event.is_set():
-            print("There exists any process got wrong...")
-            os.system("kill -9 %d" % os.getpid())
+            # print("There exists any process got wrong...",flush=True)
+            raise RuntimeError("There exists any process got wrong...")
         if not thread.is_alive():
             if thread.err is not None:
                 shared_event.set()
-                print("Current process got wrong...")
-                os.system("kill -9 %d" % os.getpid())
+                print("Current process got wrong...",flush=True)
+                raise RuntimeError("Current process got wrong...")
+                # os.system("kill -9 %d" % os.getpid())
             break
         time.sleep(0.1)
     return thread.ret
@@ -156,10 +157,17 @@ def run_prepare_model_and_build_image(args):
             feature2.name = "run_build_image"
 
             for future in as_completed([feature1,feature2]):
-                r = future.result()
-                print(f"{future.name}: {r}")
-                if future.name == "run_build_image":
-                    ret = r
+                try:
+                    r = future.result()
+                    print(f"{future.name}: {r}")
+                    if future.name == "run_build_image":
+                        ret = r
+                except:
+                    import traceback
+                    print(traceback.format_exc(),flush=True)
+                    sys.exit(1)
+
+                    # os.system("kill -9 %d" % os.getpid())
         return ret
 
 

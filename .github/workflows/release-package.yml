@@ -1,0 +1,54 @@
+name: Release Package
+
+on:
+  push:
+    tags:
+      - 'emd-*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3
+
+    - name: Get tag name and commit hash
+      id: vars
+      run: |
+        TAG_NAME=${GITHUB_REF##*/}
+        VERSION=${TAG_NAME#emd-}
+        echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
+        echo "VERSION=${VERSION}" >> $GITHUB_ENV
+        echo "COMMIT_HASH=$(git rev-parse --short=8 HEAD)" >> $GITHUB_ENV
+
+    - name: Update version and commit hash
+      run: |
+        sed -i 's/VERSION = ".*"/VERSION = "'"${{ env.VERSION }}"'"/' src/emd/revision.py
+        sed -i 's/COMMIT_HASH = ".*"/COMMIT_HASH = "'"${{ env.COMMIT_HASH }}"'"/' src/emd/revision.py
+        sed -i '/^version = /s/version = ".*"/version = "'"${{ env.VERSION }}"'"/' pyproject.toml
+
+    - name: Build wheel
+      run: poetry build
+
+    - name: Get tag name
+      id: get_tag
+      run: echo "TAG_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
+
+    - name: Install GitHub CLI
+      run: sudo apt-get install -y gh
+
+    - name: Create GitHub Release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release create ${{ env.TAG_NAME }} dist/*.whl dist/*.gz --title "Release ${{ env.TAG_NAME }}" --notes "Release on tag ${{ env.TAG_NAME }}"

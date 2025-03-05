@@ -30,6 +30,7 @@ import json
 
 app = typer.Typer(
     add_completion=False,
+    pretty_exceptions_enable=False
 )
 console = Console()
 
@@ -73,11 +74,13 @@ app.add_typer(
     name="config",
     help="Set default config",
 )
-# app.add_typer(
-#     version.app,
-#     name="version",
-#     help="Show version",
-# )
+
+app.add_typer(
+    version.app,
+    name="version",
+    help="Show version",
+)
+
 @app.command(help="List supported models")
 @catch_aws_credential_errors
 def list_supported_models(model_id: Annotated[
@@ -104,6 +107,9 @@ def callback(ctx: typer.Context):
         )
         # Show main help
         console.print(ctx.get_help())
+        console.print(
+            " [dim]Further help: [link=https://github.com/aws-samples/easy-model-deployer]https://github.com/aws-samples/easy-model-deployer[/link][/dim]\n",
+        )
 
 if __name__ == "__main__":
     bootstrap.bootstrap()

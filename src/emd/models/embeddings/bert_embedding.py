@@ -34,6 +34,7 @@ Model.register(
         ],
         supported_services=[
             sagemaker_service,
+            ecs_service,
             local_service
         ],
         supported_frameworks=[

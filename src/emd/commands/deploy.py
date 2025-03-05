@@ -11,12 +11,8 @@ import json
 import re
 from collections import defaultdict
 
-from emd.constants import MODEL_TAG_PATTERN,MODEL_DEFAULT_TAG
+from emd.constants import MODEL_TAG_PATTERN,MODEL_DEFAULT_TAG,LOCAL_REGION
 from emd.utils.aws_service_utils import get_current_region
-# from emd.utils.aws_service_management import (
-#     check_aws_environment,
-#     log_pipeline_execution_details,
-# )
 from typing_extensions import Annotated
 from emd.models import Model
 from emd.models.services import Service
@@ -33,7 +29,7 @@ from emd.utils.decorators import catch_aws_credential_errors,check_emd_env_exist
 from emd.utils.logger_utils import make_layout
 from emd.utils.exceptions import ModelNotSupported,ServiceNotSupported,InstanceNotSupported
 
-app = typer.Typer()
+app = typer.Typer(pretty_exceptions_enable=False)
 console = Console()
 layout = make_layout()
 
@@ -66,7 +62,11 @@ def supported_models_filter(region:str,support_models:list[Model]):
         ret.append(model)
     return ret
 
-def supported_services_filter(region,allow_local_deploy,supported_services:list[Service]):
+def supported_services_filter(
+        region,
+        allow_local_deploy,
+        only_allow_local_deploy,
+        supported_services:list[Service]):
     ret = []
     is_cn_region = check_cn_region(region)
     for service in supported_services:
@@ -75,11 +75,18 @@ def supported_services_filter(region,allow_local_deploy,supported_services:list[
         if service.service_type == ServiceType.LOCAL and not allow_local_deploy:
             continue
         ret.append(service)
+
+    if only_allow_local_deploy:
+        ret = [service for service in ret if service.service_type == ServiceType.LOCAL]
     if not ret:
         raise ServiceNotSupported(region)
     return ret
 
-def supported_instances_filter(region,allow_local_deploy:bool,supported_instances:list[Instance]):
+def supported_instances_filter(
+        region,
+        allow_local_deploy:bool,
+        only_allow_local_deploy:bool,
+        supported_instances:list[Instance]):
     ret = []
     is_cn_region = check_cn_region(region)
     for instance in supported_instances:
@@ -90,6 +97,8 @@ def supported_instances_filter(region,allow_local_deploy:bool,supported_instance
             continue
         ret.append(instance)
 
+    if only_allow_local_deploy:
+        ret = [instance for instance in ret if instance.instance_type == InstanceType.LOCAL]
     if not ret:
         raise InstanceNotSupported(region)
     return ret
@@ -223,11 +232,15 @@ def deploy(
     allow_local_deploy:Annotated[
         Optional[bool], typer.Option("--allow-local-deploy", help="allow local instance")
     ] = False,
-
+    only_allow_local_deploy: Annotated[
+        Optional[bool], typer.Option("--only-allow-local-deploy", help="only allow local instance")
+    ] = False
 ):
-    # console.print("[bold blue]Checking AWS environment...[/bold blue]")
-
-    region = get_current_region()
+    if only_allow_local_deploy:
+        allow_local_deploy = True
+        region = LOCAL_REGION
+    else:
+        region = get_current_region()
     vpc_id = None
     # ask model id
     model_id = ask_model_id(region,model_id=model_id)
@@ -239,7 +252,12 @@ def deploy(
     model = Model.get_model(model_id)
     # support services
     supported_services:list[Service] = model.supported_services
-    supported_services = supported_services_filter(region,allow_local_deploy,supported_services)
+    supported_services = supported_services_filter(
+        region,
+        allow_local_deploy,
+        only_allow_local_deploy,
+        supported_services
+    )
     if service_type is None:
         if len(supported_services) > 1:
             service_name = select_with_help(
@@ -341,14 +359,19 @@ def deploy(
 
     # support instance
     supported_instances = model.supported_instances
-    supported_instances = supported_instances_filter(region,allow_local_deploy,supported_instances)
+    supported_instances = supported_instances_filter(
+        region,
+        allow_local_deploy,
+        only_allow_local_deploy,
+        supported_instances
+    )
     if service_type == ServiceType.LOCAL:
         if check_cuda_exists():
             if os.environ.get('CUDA_VISIBLE_DEVICES'):
                 console.print(f"[bold blue]local gpus: {os.environ.get('CUDA_VISIBLE_DEVICES')}[/bold blue]")
             else:
                 gpu_num = get_gpu_num()
-                support_gpu_num = supported_instances[0].gpu_num
+                support_gpu_num = model.supported_instances[0].gpu_num
                 default_gpus_str = ",".join([str(i) for i in range(min(gpu_num,support_gpu_num))])
                 gpus_to_deploy = questionary.text(
                         "input the local gpu ids to deploy the model (e.g. 0,1,2):",
@@ -364,7 +387,9 @@ def deploy(
                     choices=[
                         Choice(
                             title=instance.instance_type,
-                            description=instance.description,
+                            description=(instance.description + '\n\n' +
+                                "Note: If your deployment takes over 20 minutes, check your AWS service quotas, especially for G or P instances. Quotas are based on vCPUs, not instance count. Ensure your requests fit the limits. See Amazon EC2 instance type quotas for detail: https://docs.aws.amazon.com/ec2/latest/instances/ec2-instance-quota-types.html."
+                            )
                         )
                         for instance in supported_instances
                     ],
@@ -498,19 +523,19 @@ def deploy(
             raise typer.Exit(0)
 
     # log the deployment parameters
-    engine_info = model.find_current_engine(engine_type)
-    framework_info = model.find_current_framework(framework_type)
+    # engine_info = model.find_current_engine(engine_type)
+    # framework_info = model.find_current_framework(framework_type)
 
-    engine_info_str = json.dumps(engine_info,indent=2,ensure_ascii=False)
-    framework_info_str = json.dumps(framework_info, indent=2, ensure_ascii=False)
-    extra_params_info = json.dumps(extra_params, indent=2, ensure_ascii=False)
-    console.print(f"[bold blue]Deployment parameters:[/bold blue]")
-    console.print(f"[bold blue]model_id: {model_id},model_tag: {model_tag}[/bold blue]")
-    console.print(f"[bold blue]instance_type: {instance_type}[/bold blue]")
-    console.print(f"[bold blue]service_type: {service_type}[/bold blue]")
-    console.print(f"[bold blue]engine info:\n {engine_info_str}[/bold blue]")
-    console.print(f"[bold blue]framework info:\n {framework_info_str}[/bold blue]")
-    console.print(f"[bold blue]extra_params:\n {extra_params_info}[/bold blue]")
+    # engine_info_str = json.dumps(engine_info,indent=2,ensure_ascii=False)
+    # framework_info_str = json.dumps(framework_info, indent=2, ensure_ascii=False)
+    # extra_params_info = json.dumps(extra_params, indent=2, ensure_ascii=False)
+    # console.print(f"[bold blue]Deployment parameters:[/bold blue]")
+    # console.print(f"[bold blue]model_id: {model_id},model_tag: {model_tag}[/bold blue]")
+    # console.print(f"[bold blue]instance_type: {instance_type}[/bold blue]")
+    # console.print(f"[bold blue]service_type: {service_type}[/bold blue]")
+    # console.print(f"[bold blue]engine info:\n {engine_info_str}[/bold blue]")
+    # console.print(f"[bold blue]framework info:\n {framework_info_str}[/bold blue]")
+    # console.print(f"[bold blue]extra_params:\n {extra_params_info}[/bold blue]")
     # Start pipeline execution
     if service_type != ServiceType.LOCAL:
         response = sdk_deploy(

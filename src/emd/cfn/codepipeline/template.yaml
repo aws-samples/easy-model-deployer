@@ -1,5 +1,8 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CodePipeline for model deployment
+Description: |
+  Easy Model Deployer bootstrap environment.
+  If you delete this stack, you will not be able to deploy any new models.
+
 Parameters:
   ArtifactBucketName:
     Type: String
@@ -47,6 +50,7 @@ Resources:
                   - cloudformation:DescribeStacks
                   - cloudformation:CreateStack
                   - cloudformation:DeleteStack
+                  - cloudformation:UpdateStack
                   - ec2:*
                   - ecs:*
                   - iam:CreateRole
@@ -195,7 +199,7 @@ Resources:
           phases:
             pre_build:
               commands:
-                - echo Build started on `date`
+                - echo model build pipeline started on `date`
             build:
               commands:
                 - |-
@@ -214,21 +218,24 @@ Resources:
                   pip install --upgrade pip
                   pip install -r requirements.txt
                   python pipeline.py --region $region --model_id $model_id --model_tag $ModelTag --framework_type $FrameworkType --service_type $service --backend_type $backend_name  --model_s3_bucket $model_s3_bucket --instance_type $instance_type --extra_params "$extra_params" --skip_deploy
-                  cd ..
-                  echo pipeline build completed on `date`
+                  # cd ..
+                  echo model build pipeline completed on `date`
 
             post_build:
               commands:
                 - |-
+                  echo post build started on `date`
                   SERVICE_TYPE=$(echo "$ServiceType" | tr '[:upper:]' '[:lower:]')
+                  if [ -f ../cfn/$ServiceType/post_build.py ]; then
+                    # copy post_build.py to pipeline so that the post_build.py can use the same module
+                    cp ../cfn/$ServiceType/post_build.py $ServiceType_post_build.py
+                    python $ServiceType_post_build.py --region $region --model_id $model_id --model_tag $ModelTag --framework_type $FrameworkType --service_type $service --backend_type $backend_name --model_s3_bucket $model_s3_bucket --instance_type $instance_type --extra_params "$extra_params"
+                  fi
+                  cd ..
                   cp cfn/$ServiceType/template.yaml template.yaml
                   cp pipeline/parameters.json parameters.json
-                  if [ -f cfn/$ServiceType/post_build.py ]; then
-                    cp cfn/$ServiceType/post_build.py post_build.py
-                    python post_build.py --region $region --model_id $model_id --model_tag $ModelTag --framework_type $FrameworkType --service_type $service --backend_type $backend_name --model_s3_bucket $model_s3_bucket --instance_type $instance_type --extra_params "$extra_params"
-                  fi
                   cat parameters.json
-                  echo Build completed on `date`
+                  echo post build completed on `date`
 
           artifacts:
             files:

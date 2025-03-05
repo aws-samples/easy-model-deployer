@@ -16,7 +16,7 @@ import threading
 # import httpx
 from emd.models.utils.constants import ModelType,ServiceType
 from emd.models import Engine
-from emd.utils.accelerator_utils import get_gpu_num
+from emd.utils.accelerator_utils import get_gpu_num,get_neuron_core_num
 
 
 from utils.common import download_dir_from_s3_by_s5cmd
@@ -66,6 +66,7 @@ class OpenAICompitableProxyBackendBase(BackendBase):
         self.cli_args = self.execute_model.executable_config.current_engine.cli_args
         self.default_cli_args = self.execute_model.executable_config.current_engine.default_cli_args
         self.custom_gpu_num = self.execute_model.executable_config.current_engine.custom_gpu_num
+        self.custom_neuron_core_num = self.execute_model.executable_config.current_engine.custom_neuron_core_num
         self.environment_variables = self.execute_model.executable_config.current_engine.environment_variables
         self.engine_type = self.execute_model.executable_config.current_engine.engine_type
         # self.gpu_num = torch.cuda.device_count()
@@ -78,6 +79,12 @@ class OpenAICompitableProxyBackendBase(BackendBase):
         if self.custom_gpu_num is not None:
             return self.custom_gpu_num
         return get_gpu_num()
+
+    @property
+    def neuron_core_num(self):
+        if self.custom_neuron_core_num is not None:
+            return self.custom_neuron_core_num
+        return get_neuron_core_num()
 
     def create_proxy_server_start_command(self,model_path):
         raise NotImplementedError("This method should be implemented by subclasses.")

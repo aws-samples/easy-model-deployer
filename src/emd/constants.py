@@ -1,6 +1,5 @@
 from .revision import VERSION, convert_version_name_to_stack_name
-VERSION_MODIFY = convert_version_name_to_stack_name(VERSION)
-ENV_STACK_NAME = f'EMD-Env-{VERSION_MODIFY}'
+ENV_STACK_NAME = f'EMD-Env'
 MODEL_STACK_NAME_PREFIX = f"EMD-Model"
 ENV_BUCKET_NAME_PREFIX = "emd-env-artifactbucket"
 CODEPIPELINE_NAME = f"{ENV_STACK_NAME}-Pipeline"

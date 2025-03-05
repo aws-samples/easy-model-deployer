@@ -107,7 +107,7 @@ def create_env_stack(
                 {'ParameterKey': 'CodePipelineRoleName', 'ParameterValue': CODEPIPELINE_ROLE_NAME_TEMPLATE.format(region=region)},
                 {'ParameterKey': 'CloudFormationRoleName', 'ParameterValue': CLOUDFORMATION_ROLE_NAME_TEMPLATE.format(region=region)}
     ]
-    logger.info(f"boostrap stack params: {json.dumps(stack_params,ensure_ascii=False,indent=2)}")
+    # logger.info(f"boostrap stack params: {json.dumps(stack_params,ensure_ascii=False,indent=2)}")
     def create_stack():
         response = cloudformation.create_stack(
             StackName=stack_name,

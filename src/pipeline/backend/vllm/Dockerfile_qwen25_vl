@@ -1,0 +1,16 @@
+FROM public.ecr.aws/aws-gcr-solutions/dmaa-vllm/vllm-openai:{{VERSION}} AS vllm-base
+
+# Create a new stage based on vllm-base
+FROM vllm-base AS sagemaker-serving
+
+# Ensure the serve script has executable permissions
+# RUN chmod +x /usr/bin/serve
+RUN pip install boto3 hf_transfer modelscope qwen-vl-utils==0.0.10
+
+# Expose port 8080
+EXPOSE 8080
+WORKDIR /opt/ml/code
+
+
+# Set the serve script as the entrypoint
+ENTRYPOINT ["/usr/bin/serve"]

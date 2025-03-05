@@ -64,7 +64,7 @@ def prepare_deploy(
     # check if model_id is inprogress in pipeline execution
     if check_stack_exists(model_stack_name):
         raise RuntimeError(
-            f"model: {model_id}, tag: {model_tag} is exists, please delete model first"
+            f"A model with the ID: {model_id} and tag: {model_tag} already exists. Kindly use a different tag to proceed."
         )
 
     client = boto3.client("codepipeline")
@@ -195,9 +195,9 @@ def deploy(
         {"name": "FrameworkType", "value": framework_type},
         {"name": "Region", "value": region},
     ]
-    logger.info(
-        f"start pipeline execution.\nvariables:\n{json.dumps(variables,ensure_ascii=False,indent=2)}"
-    )
+    # logger.info(
+    #     f"start pipeline execution.\nvariables:\n{json.dumps(variables,ensure_ascii=False,indent=2)}"
+    # )
 
     start_deploy_time = time.time()
 
