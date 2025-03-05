@@ -75,10 +75,10 @@ emd deploy
 ![deploy](docs/images/cli-deploy.gif)
 
 
-> **Note:** To view all available parameters, run `emd deploy --help`.
+> **💡 Tip** To view all available parameters, run `emd deploy --help`.
 > When you see the message "Waiting for model: ...", it means the deployment task has started and you can stop the terminal output by pressing `Ctrl+C`.
-> For more information on deployment parameters, please refer to the [Deployment parameters](docs/en/installation.md).
-> For best practice examples of using command line parameters, please refer to the [Best Deployment Practices](docs/en/best_deployment_practices.md).
+> - For more information on deployment parameters, please refer to the [Deployment parameters](docs/en/installation.md).
+> - For best practice examples of using command line parameters, please refer to the [Best Deployment Practices](docs/en/best_deployment_practices.md).
 
 ### Show Status
 
