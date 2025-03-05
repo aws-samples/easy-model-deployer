@@ -1,7 +1,7 @@
 [project]
 name = "emd"
-description = "Deploy Model Anywhere on AWS"
-version = "0.6.0"
+description = "Easy Model Deployer"
+version = "0.0.0"
 authors = [
     {name = "Yi Yan",email = "<yiyanz@amazon.com>"},
     {name = "Jie Tang", email="<tangjiee@amazon.com>"},
