@@ -3,9 +3,9 @@ name = "easy-model-deployer"
 version = "0.7.1"
 description = "Deploy Model Anywhere on AWS"
 authors = [
-    {name = "Yi Yan",email = "<yiyanz@amazon.com>"},
-    {name = "Jie Tang", email="<tangjiee@amazon.com>"},
-    {name="Xuan Zhou",email="<zhouxss@amazon.com>"}
+    "Yi Yan <yiyanz@amazon.com>",
+    "Jie Tang <tangjiee@amazon.com>",
+    "Xuan Zhou <zhouxss@amazon.com>"
 ]
 readme = "README.md"
 packages = [
