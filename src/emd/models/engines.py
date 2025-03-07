@@ -108,7 +108,7 @@ vllm_qwen25vl72b_engine073 = VllmEngine(**{
 vllm_qwq_engine073 = VllmEngine(**{
             **vllm_qwen25vl72b_engine073.model_dump(),
             "environment_variables": "export VLLM_ATTENTION_BACKEND=FLASHINFER && export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True",
-            "default_cli_args": " --chat-template emd/models/chat_templates/qwq_32b_add_prefill_chat_template.jinja --max_model_len 16000 --disable-log-stats --enable-auto-tool-choice --tool-call-parser hermes"
+            "default_cli_args": " --chat-template emd/models/chat_templates/qwq_32b_add_prefill_chat_template.jinja --max_model_len 16000  --max_num_seq 10 --disable-log-stats --enable-auto-tool-choice --tool-call-parser hermes"
 })
 
 

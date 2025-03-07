@@ -10,7 +10,7 @@ This document provides examples of best practices for deploying models using EMD
 #### QwQ-32B
 
 ```bash
-emd deploy --model-id Qwen2.5-7B-Instruct --instance-type g5.2xlarge --engine-type vllm --service-type sagemaker
+emd deploy --model-id QwQ-32B --instance-type g5.12xlarge --engine-type vllm --service-type sagemaker
 ```
 
 
