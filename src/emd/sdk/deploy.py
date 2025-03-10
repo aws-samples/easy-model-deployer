@@ -67,7 +67,7 @@ def prepare_deploy(
             f"A model with the ID: {model_id} and tag: {model_tag} already exists. Kindly use a different tag to proceed."
         )
 
-    client = boto3.client("codepipeline")
+    client = boto3.client("codepipeline", region_name=region)
     try:
         active_executuion_infos = get_pipeline_active_executions(
             pipeline_name=CODEPIPELINE_NAME,
