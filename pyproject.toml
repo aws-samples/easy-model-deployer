@@ -1,5 +1,5 @@
 [project]
-name = "emd"
+name = "easy-model-deployer"
 description = "Easy Model Deployer"
 version = "0.0.0"
 authors = [
