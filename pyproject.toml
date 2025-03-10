@@ -3,9 +3,9 @@ name = "easy-model-deployer"
 description = "Easy Model Deployer"
 version = "0.0.0"
 authors = [
-    "Yi Yan <yiyanz@amazon.com>",
-    "Jie Tang <tangjiee@amazon.com>",
-    "Xuan Zhou <zhouxss@amazon.com>"
+    {name = "Yi Yan",email = "<yiyanz@amazon.com>"},
+    {name = "Jie Tang", email="<tangjiee@amazon.com>"},
+    {name="Xuan Zhou",email="<zhouxss@amazon.com>"}
 ]
 readme = "README.md"
 packages = [
