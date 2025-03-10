@@ -31,7 +31,7 @@ def generate_model_table():
 
 def main():
     parser = argparse.ArgumentParser(description='Generate model documentation table')
-    parser.add_argument('-o', '--output',
+    parser.add_argument('-o', '--output',default="docs/en/supported_models.md",
                       help='Output file path. If not specified, prints to stdout')
 
     args = parser.parse_args()
