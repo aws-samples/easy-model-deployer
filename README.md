@@ -37,7 +37,8 @@ Easy Model Deployer is a lightweight tool designed to simplify the deployment of
 Install EMD with `pip`, currently support for Python 3.9 and above:
 
 ```bash
-pip install https://github.com/aws-samples/easy-model-deployer/releases/download/emd-0.7.1/emd-0.7.1-py3-none-any.whl
+pip install easy_model_deployer  # or pip3 install easy_model_deployer
+emd
 ```
 
 Visit our [documentation](https://aws-samples.github.io/easy-model-deployer/en/installation/) to learn more.
