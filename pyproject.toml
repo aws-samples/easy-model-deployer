@@ -2,7 +2,6 @@
 name = "easy-model-deployer"
 description = "Easy Model Deployer"
 version = "0.0.0"
-description = " A user-friendly Command-line/SDK tool that makes it quickly and easier to deploy open-source LLMs on AWS"
 authors = [
     "Yi Yan <yiyanz@amazon.com>",
     "Jie Tang <tangjiee@amazon.com>",
