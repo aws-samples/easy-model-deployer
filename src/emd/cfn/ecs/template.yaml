@@ -39,7 +39,7 @@ Parameters:
     Description: The emd model ID to be used for the ECS Endpoint
   ModelTag:
     Type: String
-    Default: "latest"
+    Default: "dev"
     Description: The model tag to be used for the ECS Endpoint
   FrameWorkType:
     Type: String

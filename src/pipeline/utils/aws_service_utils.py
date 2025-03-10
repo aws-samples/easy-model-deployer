@@ -33,7 +33,7 @@ def check_aws_environment():
 
 
 def get_account_id():
-    sts_client = boto3.client("sts")
+    sts_client = boto3.client("sts", region_name=get_current_region())
     account_id = sts_client.get_caller_identity()["Account"]
     return account_id
 

@@ -56,7 +56,7 @@ def check_aws_environment():
     """
     try:
         # Try to create a boto3 client and make a simple API call
-        sts = boto3.client("sts")
+        sts = boto3.client("sts", region_name=get_current_region())
         response = sts.get_caller_identity()
         logger.info("AWS environment is properly configured.")
         account_id = response["Account"]
@@ -69,7 +69,7 @@ def check_aws_environment():
 
 
 def get_account_id():
-    sts_client = boto3.client("sts")
+    sts_client = boto3.client("sts", region_name=get_current_region())
     account_id = sts_client.get_caller_identity()["Account"]
     return account_id
 
@@ -328,7 +328,7 @@ def get_model_stack_info(model_stack_name: str):
 
 
 def s3_bucket_version(bucket, s3_key):
-    s3_client = boto3.client("s3")
+    s3_client = boto3.client("s3", region_name=get_current_region())
     version_id: str = s3_client.head_object(Bucket=bucket, Key=s3_key)[
         "VersionId"
     ]
@@ -566,7 +566,7 @@ def get_current_region():
 
 
 def get_aws_account_id():
-    sts = boto3.client("sts")
+    sts = boto3.client("sts", region_name=get_current_region())
     response = sts.get_caller_identity()
     account_id = response["Account"]
     return account_id

@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: |
   Easy Model Deployer bootstrap environment.
   If you delete this stack, you will not be able to deploy any new models.
-
+  Please go to https://github.com/aws-samples/easy-model-deployer for more information.
 Parameters:
   ArtifactBucketName:
     Type: String
