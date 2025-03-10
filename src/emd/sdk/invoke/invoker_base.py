@@ -1,4 +1,4 @@
-from emd.utils.aws_service_utils import get_model_stack_info
+from emd.utils.aws_service_utils import get_model_stack_info, get_current_region
 from emd.models import Model
 from emd.constants import MODEL_DEFAULT_TAG
 from emd.models.utils.constants import ServiceType
@@ -45,10 +45,10 @@ class InvokerBase:
     def get_service_client(self,service_type:str):
         if service_type in [ServiceType.SAGEMAKER,ServiceType.SAGEMAKER_ASYNC]:
             from emd.sdk.clients.sagemaker_client import SageMakerClient
-            return SageMakerClient(model_stack_name=self.model_stack_name)
+            return SageMakerClient(model_stack_name=self.model_stack_name, region_name=get_current_region())
         elif service_type == ServiceType.ECS:
             from emd.sdk.clients.ecs_client import ECSClient
-            return ECSClient(model_stack_name=self.model_stack_name)
+            return ECSClient(model_stack_name=self.model_stack_name, region_name=get_current_region())
         else:
             raise ValueError(f"Service type {service_type} is not supported")
 
