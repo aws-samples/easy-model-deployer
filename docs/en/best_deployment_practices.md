@@ -3,6 +3,18 @@
 
 This document provides examples of best practices for deploying models using EMD for various use cases.
 
+## Famous Models
+
+### Qwen Series
+
+#### QwQ-32B
+
+```bash
+emd deploy --model-id QwQ-32B --instance-type g5.12xlarge --engine-type vllm --service-type sagemaker
+```
+
+
+
 
 ## Deploying to Specific GPU Types
 

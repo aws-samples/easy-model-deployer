@@ -14,6 +14,10 @@
   <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/aws-samples/easy-model-deployer">
 </p>
 
+## 🔥 Latest News
+
+- 2025-03-06: Deploy QwQ-32B with [one command line](docs/en/best_deployment_practices.md##famous-models###qwen-series###qwq-32b).
+
 ## Introduction
 
 Easy Model Deployer is a lightweight tool designed to simplify the deployment of **Open-Source LLMs** ([Supported Models](docs/en/supported_models.md)) and Custom Models. It provides **OpenAI's Completions API** and [**LangChain Interface**](https://github.com/langchain-ai/langchain). Built for developers who need reliable and scalable model serving without complex setup, it seamlessly integrates with AWS services for efficient model deployment.
