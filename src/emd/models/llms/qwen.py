@@ -6,7 +6,8 @@ from ..engines import (
     tgi_qwen2d5_72b_engine064,
     tgi_qwen2d5_on_inf2,
     tgi_qwen2d5_72b_on_inf2,
-    vllm_qwen2d5_72b_engine064
+    vllm_qwen2d5_72b_engine064,
+    vllm_qwq_engine073
 )
 from ..services import (
     sagemaker_service,
@@ -436,7 +437,7 @@ Model.register(
 Model.register(
     dict(
         model_id = "QwQ-32B-Preview",
-        supported_engines=[huggingface_llm_engine_4d41d2,vllm_qwen2d5_engine064],
+        supported_engines=[vllm_qwq_engine073],
         supported_instances=[
             g5d12xlarge_instance,
             g5d24xlarge_instance,
@@ -455,6 +456,36 @@ Model.register(
         allow_china_region=True,
         huggingface_model_id="Qwen/QwQ-32B-Preview",
         modelscope_model_id="Qwen/QwQ-32B-Preview",
+        require_huggingface_token=False,
+        application_scenario="large reasoning model",
+        description="large reasoning model provide by qwen team",
+        model_type=ModelType.LLM,
+        model_series=QWEN_REASONING_MODEL
+    )
+)
+
+Model.register(
+    dict(
+        model_id = "QwQ-32B",
+        supported_engines=[vllm_qwq_engine073],
+        supported_instances=[
+            g5d12xlarge_instance,
+            g5d24xlarge_instance,
+            g5d48xlarge_instance,
+            local_instance
+        ],
+        supported_services=[
+            sagemaker_service,
+            sagemaker_async_service,
+            ecs_service,
+            local_service
+        ],
+        supported_frameworks=[
+            fastapi_framework
+        ],
+        allow_china_region=True,
+        huggingface_model_id="Qwen/QwQ-32B",
+        modelscope_model_id="Qwen/QwQ-32B",
         require_huggingface_token=False,
         application_scenario="large reasoning model",
         description="large reasoning model provide by qwen team",

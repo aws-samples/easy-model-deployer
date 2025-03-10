@@ -18,7 +18,7 @@ source emd-env/bin/activate
 
 3. Install the required packages:
 ```bash
-pip install https://github.com/aws-samples/easy-model-deployer/releases/download/main/emd-0.6.0-py3-none-any.whl
+pip install https://github.com/aws-samples/easy-model-deployer/releases/download/emd-0.7.1/emd-0.7.1-py3-none-any.whl
 ```
 
 
