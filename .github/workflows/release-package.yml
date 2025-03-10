@@ -40,6 +40,11 @@ jobs:
     - name: Build wheel
       run: poetry build
 
+    - name: Upload to PIP
+      run: |
+        poetry config pypi-token.pypi "${PYPI_TOKEN}"
+        poetry publish
+
     - name: Get tag name
       id: get_tag
       run: echo "TAG_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
