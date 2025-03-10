@@ -41,6 +41,8 @@ jobs:
       run: poetry build
 
     - name: Upload to PIP
+      env:
+        PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
       run: |
         poetry config pypi-token.pypi "${PYPI_TOKEN}"
         poetry publish
