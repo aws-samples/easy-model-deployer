@@ -34,7 +34,7 @@ Easy Model Deployer is a lightweight tool designed to simplify the deployment of
 
 ## 🚀 Quick Install
 
-Install EMD with `pip`, currently support for Python 3.9 and above:
+Install Easy Model Deployer with `pip`, currently support for Python 3.9 and above:
 
 ```bash
 pip install easy_model_deployer  # or pip3 install easy_model_deployer
