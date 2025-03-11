@@ -25,12 +25,15 @@ class ConversationInvoker(InvokerBase):
             }
         ret = self._invoke(pyload)
         if not stream:
-            ai_message = ret['choices'][0]['message']
-            content = ai_message['content']
-            reasoning_content = ai_message.get('reasoning_content','')
-            if reasoning_content:
-                content = f"<think>\n{reasoning_content}\n</think>\n{content}"
-            return content
+            try:
+                ai_message = ret['choices'][0]['message']
+                content = ai_message['content']
+                reasoning_content = ai_message.get('reasoning_content','')
+                if reasoning_content:
+                        content = f"<think>\n{reasoning_content}\n</think>\n{content}"
+                return content
+            except Exception as e:
+                return ret
 
 
         def _stream_helper():
