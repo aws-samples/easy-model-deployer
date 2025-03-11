@@ -115,7 +115,8 @@ class ECSClient(ClientBase):
 
     def invoke(self,pyload:dict):
         stream = pyload.get('stream', False)
-        url = f"{self.base_url}/invocations"
+        model_specific_invocations_path = get_model_specific_path(self.model_id, self.model_tag, "invocations")
+        url = f"{self.base_url}{model_specific_invocations_path}"
         if stream:
             response = requests.post(
                 url,

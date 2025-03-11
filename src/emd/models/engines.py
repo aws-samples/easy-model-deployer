@@ -52,7 +52,7 @@ vllm_engine064 = VllmEngine(**{
             "use_public_ecr":True,
             "docker_login_region":"us-east-1",
             "default_cli_args": " --max_num_seq 10",
-            "environment_variables": "export VLLM_ATTENTION_BACKEND=FLASHINFER && export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
+            # "environment_variables": "export VLLM_ATTENTION_BACKEND=FLASHINFER && export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
 }
 )
 
@@ -67,7 +67,7 @@ vllm_qwen2d5_engine064 = VllmEngine(**{
 vllm_deepseek_r1_distill_qwen_engine071 = VllmEngine(**{
             **vllm_engine064.model_dump(),
             "engine_dockerfile_config": {"VERSION":"v0.7.1"},
-            "default_cli_args": "--max_num_seq 10 --enable-reasoning --reasoning-parser deepseek_r1 --max_model_len 16000 --disable-log-stats --chat-template emd/models/chat_templates/deepseek_r1_distill.jinja"
+            "default_cli_args": "--max_num_seq 256 --max_model_len 16000"
 })
 
 vllm_deepseek_r1_distill_llama_engine071 = vllm_deepseek_r1_distill_qwen_engine071
@@ -164,6 +164,7 @@ tgi_deepseek_r1_llama_70b_engine301 = TgiEngine(
         "model_files_modify_hook_kwargs":{"chat_template":"emd/models/chat_templates/deepseek_r1_distill.jinja"},
         "default_cli_args": " --max-total-tokens 16000 --max-concurrent-requests 10",
         # "environment_variables": "export VLLM_ATTENTION_BACKEND=FLASHINFER && export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
+        "environment_variables": "export PREFIX_CACHING=0"
 }
 )
 
