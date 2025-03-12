@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: |
   Easy Model Deployer bootstrap environment.
-  If you delete this stack, you will not be able to deploy any new models.
+  Before you delete this stack, please ensure you have deleted all the models deployed by EMD.
   Please go to https://github.com/aws-samples/easy-model-deployer for more information.
 Parameters:
   ArtifactBucketName:
@@ -203,6 +203,7 @@ Resources:
             build:
               commands:
                 - |-
+                  set -e
                   echo "Building Amazon ECR image..."
                   region=$ModelRegion
                   model_s3_bucket=$ModelBucketName
@@ -224,6 +225,7 @@ Resources:
             post_build:
               commands:
                 - |-
+                  set -e
                   echo post build started on `date`
                   SERVICE_TYPE=$(echo "$ServiceType" | tr '[:upper:]' '[:lower:]')
                   if [ -f ../cfn/$ServiceType/post_build.py ]; then

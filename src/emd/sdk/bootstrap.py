@@ -114,6 +114,7 @@ def create_env_stack(
             TemplateBody=template_body,
             Capabilities=['CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM'],
             OnFailure=on_failure,
+            EnableTerminationProtection=True,
             Parameters=stack_params
         )
         return response
