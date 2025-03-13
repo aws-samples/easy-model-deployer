@@ -33,7 +33,7 @@ def check_aws_environment():
 
 
 def get_account_id():
-    sts_client = boto3.client("sts")
+    sts_client = boto3.client("sts", region_name=get_current_region())
     account_id = sts_client.get_caller_identity()["Account"]
     return account_id
 
@@ -90,7 +90,7 @@ def get_role_create_template(
 
 
 def get_stack_info(stack_name):
-    cf = boto3.client('cloudformation')
+    cf = boto3.client('cloudformation', region_name=get_current_region())
     stack_info = cf.describe_stacks(StackName=stack_name)['Stacks'][0]
     return stack_info
 

@@ -10,12 +10,14 @@ from emd.utils.aws_service_utils import (
     check_env_stack_exist_and_complete
 )
 from emd.utils.aws_service_utils import get_account_id
-
+from emd.utils.aws_service_utils import get_current_region
 def get_pipeline_execution_status(
         pipeline_execution_id:str,
         pipeline_name:str = CODEPIPELINE_NAME,
         region=None
     ):
+    if region is None:
+        region = get_current_region()
     client = boto3.client('codepipeline', region_name=region)
     response = client.get_pipeline_execution(
         pipelineName=pipeline_name,

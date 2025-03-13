@@ -17,7 +17,7 @@ from emd.utils.aws_service_utils import (
 )
 from emd.models.utils.constants import ServiceType
 from emd.models import Model
-
+from emd.utils.aws_service_utils import get_current_region
 logger = get_logger(__name__)
 
 
@@ -36,7 +36,7 @@ def stop_pipeline_execution(
     cur_uuid = Model.get_model_stack_name_prefix(model_id,model_tag)
     if cur_uuid in active_executuion_infos_d:
         pipeline_execution_id = active_executuion_infos_d[cur_uuid]['pipeline_execution_id']
-        client = boto3.client('codepipeline')
+        client = boto3.client('codepipeline', region_name=get_current_region())
         try:
             client.stop_pipeline_execution(
                 pipelineName=pipeline_name,
@@ -59,7 +59,7 @@ def stop_pipeline_execution(
 
 
 def destroy_ecs(model_id,model_tag,stack_name):
-    cf_client = boto3.client('cloudformation')
+    cf_client = boto3.client('cloudformation', region_name=get_current_region())
     cf_client.delete_stack(StackName=stack_name)
 
 def destroy(model_id:str,model_tag=MODEL_DEFAULT_TAG,waiting_until_complete=True):
@@ -74,7 +74,7 @@ def destroy(model_id:str,model_tag=MODEL_DEFAULT_TAG,waiting_until_complete=True
     if parameters['ServiceType'] == ServiceType.ECS:
         return destroy_ecs(model_id, model_tag,stack_name)
 
-    cf_client = boto3.client('cloudformation')
+    cf_client = boto3.client('cloudformation', region_name=get_current_region())
     cf_client.delete_stack(StackName=stack_name)
 
     logger.info(f"Delete stack initiated: {stack_name}")

@@ -67,7 +67,7 @@ def prepare_deploy(
             f"A model with the ID: {model_id} and tag: {model_tag} already exists. Kindly use a different tag to proceed."
         )
 
-    client = boto3.client("codepipeline")
+    client = boto3.client("codepipeline", region_name=region)
     try:
         active_executuion_infos = get_pipeline_active_executions(
             pipeline_name=CODEPIPELINE_NAME,
@@ -114,7 +114,7 @@ def deploy(
     waiting_until_deploy_complete=True,
 ) -> dict:
     # Check if AWS environment is properly configured
-    logger.info("check if model is exists...")
+    logger.info("checking if model is exists...")
     assert (
         model_stack_name is None
     ), f"It is currently not supported to custom model stack name."
@@ -228,7 +228,8 @@ def deploy(
         while True:
             try:
                 status_info = get_pipeline_execution_status(
-                    pipeline_execution_id=response["pipelineExecutionId"]
+                    pipeline_execution_id=response["pipelineExecutionId"],
+                    region=region
                 )
             except client.exceptions.PipelineExecutionNotFoundException as e:
                 logger.info("Waiting for pipeline execution to start...")
@@ -244,7 +245,7 @@ def deploy(
                 log_info += f", status_summary: {status_summary}"
             if stage_name:
                 log_info += f", in stage: {stage_name}"
-            log_info += f", Execution ID: {execution_id}"
+            # log_info += f", Execution ID: {execution_id}"
             log_info += f", Duration time: {int(time.time() - start_deploy_time)}s"
             logger.info(log_info)
             if status_code == 0:

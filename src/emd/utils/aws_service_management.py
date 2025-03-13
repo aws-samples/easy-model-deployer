@@ -29,7 +29,7 @@ def check_aws_environment():
     """
     try:
         # Try to create a boto3 client and make a simple API call
-        sts = boto3.client('sts')
+        sts = boto3.client('sts', region_name=get_current_region())
         response = sts.get_caller_identity()
         typer.echo("AWS environment is properly configured.")
         account_id = response['Account']
@@ -47,7 +47,7 @@ def log_pipeline_execution_details(execution_id: str = None, logs: bool = False)
     Get the details of a pipeline execution and optionally log the events.
     """
     try:
-        sts = boto3.client("sts")
+        sts = boto3.client("sts", region_name=get_current_region())
         region = get_current_region()
         cfn = boto3.client("cloudformation", region_name=region)
         codepipeline = boto3.client("codepipeline", region_name=region)

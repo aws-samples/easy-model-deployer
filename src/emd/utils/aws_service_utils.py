@@ -56,7 +56,7 @@ def check_aws_environment():
     """
     try:
         # Try to create a boto3 client and make a simple API call
-        sts = boto3.client("sts")
+        sts = boto3.client("sts", region_name=get_current_region())
         response = sts.get_caller_identity()
         logger.info("AWS environment is properly configured.")
         account_id = response["Account"]
@@ -69,7 +69,7 @@ def check_aws_environment():
 
 
 def get_account_id():
-    sts_client = boto3.client("sts")
+    sts_client = boto3.client("sts", region_name=get_current_region())
     account_id = sts_client.get_caller_identity()["Account"]
     return account_id
 
@@ -123,7 +123,7 @@ def get_role_create_template(
 
 
 def get_stack_info(stack_name):
-    cf = boto3.client("cloudformation")
+    cf = boto3.client("cloudformation", region_name=get_current_region())
     stack_info = cf.describe_stacks(StackName=stack_name)["Stacks"][0]
     parameters = {}
     for parameter in stack_info["Parameters"]:
@@ -134,7 +134,7 @@ def get_stack_info(stack_name):
 
 def check_stack_exists(stack_name):
     try:
-        cf = boto3.client("cloudformation")
+        cf = boto3.client("cloudformation", region_name=get_current_region())
         cf.describe_stacks(StackName=stack_name)
         return True
     except ClientError as e:
@@ -150,7 +150,7 @@ def check_stack_status(stack_name) -> StackStatus:
     is_stack_exist = True
     stack_info = {}
     try:
-        cf = boto3.client("cloudformation")
+        cf = boto3.client("cloudformation", region_name=get_current_region())
         stack_info = cf.describe_stacks(StackName=stack_name)["Stacks"][0]
     except ClientError as e:
         if e.response["Error"][
@@ -163,7 +163,7 @@ def check_stack_status(stack_name) -> StackStatus:
 
 
 def get_pipeline_stages(pipeline_name: str) -> list[str]:
-    client = boto3.client("codepipeline")
+    client = boto3.client("codepipeline", region_name=get_current_region())
     response = client.get_pipeline_state(name=pipeline_name)
     stages = [i["stageName"] for i in response["stageStates"]]
     return stages
@@ -173,7 +173,7 @@ def get_pipeline_execution_info(
     pipeline_name: str, pipeline_execution_id: str, client=None
 ):
 
-    client = client or boto3.client("codepipeline")
+    client = client or boto3.client("codepipeline", region_name=get_current_region())
     execution_info = client.get_pipeline_execution(
         pipelineName=pipeline_name, pipelineExecutionId=pipeline_execution_id
     )["pipelineExecution"]
@@ -187,7 +187,7 @@ def get_pipeline_active_executions(
     filter_stoped=True,
     filter_failed=True,
 ) -> list[dict]:
-    client = client or boto3.client("codepipeline")
+    client = client or boto3.client("codepipeline", region_name=get_current_region())
     try:
         stage_states = client.get_pipeline_state(name=pipeline_name)[
             "stageStates"
@@ -264,7 +264,7 @@ def get_pipeline_active_executions(
 
 
 def get_model_stacks():
-    cf = boto3.client("cloudformation")
+    cf = boto3.client("cloudformation", region_name=get_current_region())
     stacks = cf.list_stacks(
         StackStatusFilter=[
             "CREATE_COMPLETE",
@@ -322,13 +322,13 @@ def get_model_stacks():
 
 
 def get_model_stack_info(model_stack_name: str):
-    cf = boto3.client("cloudformation")
+    cf = boto3.client("cloudformation", region_name=get_current_region())
     stack_info = cf.describe_stacks(StackName=model_stack_name)["Stacks"][0]
     return stack_info
 
 
 def s3_bucket_version(bucket, s3_key):
-    s3_client = boto3.client("s3")
+    s3_client = boto3.client("s3", region_name=get_current_region())
     version_id: str = s3_client.head_object(Bucket=bucket, Key=s3_key)[
         "VersionId"
     ]
@@ -336,7 +336,7 @@ def s3_bucket_version(bucket, s3_key):
 
 
 def check_stack_exist_and_complete(stack_name: str):
-    client = boto3.client("cloudformation")
+    client = boto3.client("cloudformation", region_name=get_current_region())
     try:
         response = client.describe_stacks(StackName=stack_name)
         stack_status = response["Stacks"][0]["StackStatus"]
@@ -357,7 +357,7 @@ def monitor_stack(stack_name):
     response = get_stack_info(stack_name=stack_name)
     stack_id = response["StackId"]
     seen_events = set()
-    cloudformation = boto3.client("cloudformation")
+    cloudformation = boto3.client("cloudformation", region_name=get_current_region())
     # Determine if this is a create or update operation
     while True:
         events = cloudformation.describe_stack_events(StackName=stack_id)[
@@ -398,7 +398,7 @@ def monitor_stack(stack_name):
 
 
 def monitor_pipeline(pipeline_name, pipeline_execution_id):
-    client = boto3.client("codepipeline")
+    client = boto3.client("codepipeline", region_name=get_current_region())
     while True:
         response = client.get_pipeline_state(name=pipeline_name)
         for stage in response["stageStates"]:
@@ -435,7 +435,7 @@ def get_sagemaker_instance_quota(instance_type: str) -> float:
         ValueError: If the instance type doesn't have a corresponding quota code
         ClientError: If there's an error calling AWS Service Quotas
     """
-    service_quota_client = boto3.client("service-quotas")
+    service_quota_client = boto3.client("service-quotas", region_name=get_current_region())
 
     quota_code = ServiceQuotaCode.get_service_quota_code(instance_type)
     response = service_quota_client.get_service_quota(
@@ -459,7 +459,7 @@ def get_sagemaker_instance_count_by_type(instance_type: str):
         list: List of endpoint names using this instance type
     """
     # Initialize SageMaker client
-    sagemaker_client = boto3.client("sagemaker")
+    sagemaker_client = boto3.client("sagemaker", region_name=get_current_region())
 
     sagemaker_instance_type = InstanceType.convert_instance_type_to_sagemaker(
         instance_type
@@ -566,7 +566,7 @@ def get_current_region():
 
 
 def get_aws_account_id():
-    sts = boto3.client("sts")
+    sts = boto3.client("sts", region_name=get_current_region())
     response = sts.get_caller_identity()
     account_id = response["Account"]
     return account_id

@@ -9,9 +9,9 @@
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellowgreen.svg" alt="MIT License"></a>
-  <a href="https://github.com/aws-samples/easy-model-deployer/releases"><img src="https://img.shields.io/github/v/release/aws-samples/easy-model-deployer?include_prereleases"></a>
+  <a href="https://pypi.org/project/easy_model_deployer"><img src="https://img.shields.io/pypi/v/easy_model_deployer.svg?logo=pypi&label=PyPI&logoColor=gold"></a>
+  <a href="https://pypi.org/project/easy_model_deployer"><img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dw/easy-model-deployer"></a>
   <a href="https://github.com/aws-samples/easy-model-deployer/actions/workflows/release-package.yml"><img src="https://github.com/aws-samples/easy-model-deployer/actions/workflows/release-package.yml/badge.svg" alt="Build Status"></a>
-  <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/aws-samples/easy-model-deployer">
 </p>
 
 ## 🔥 Latest News
@@ -34,10 +34,11 @@ Easy Model Deployer is a lightweight tool designed to simplify the deployment of
 
 ## 🚀 Quick Install
 
-Install EMD with `pip`, currently support for Python 3.9 and above:
+Install Easy Model Deployer with `pip`, currently support for Python 3.9 and above:
 
 ```bash
-pip install https://github.com/aws-samples/easy-model-deployer/releases/download/emd-0.7.1/emd-0.7.1-py3-none-any.whl
+pip install easy_model_deployer  # or pip3 install easy_model_deployer
+emd
 ```
 
 Visit our [documentation](https://aws-samples.github.io/easy-model-deployer/en/installation/) to learn more.
