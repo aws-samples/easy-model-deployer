@@ -127,10 +127,16 @@ class ECSClient(ClientBase):
             def _ret_iterator_helper():
                 interator = LineIterator(response)
                 for line in interator:
-                    chunk_dict = json.loads(line)
-                    if not chunk_dict:
-                        continue
-                    yield chunk_dict
+                    try:
+                        decoded_line = line.decode('utf-8').strip()
+                        if decoded_line.startswith('data: '):
+                            json_data = decoded_line[len('data: '):]
+                            chunk_dict = json.loads(json_data)
+                            if not chunk_dict:
+                                continue
+                            yield chunk_dict
+                    except Exception as e:
+                        print(e)
 
             return _ret_iterator_helper()
         else:
