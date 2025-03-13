@@ -30,7 +30,7 @@ class ConversationInvoker(InvokerBase):
                 content = ai_message['content']
                 reasoning_content = ai_message.get('reasoning_content','')
                 if reasoning_content:
-                        content = f"<think>\n{reasoning_content}\n</think>\n{content}"
+                        content = f"<Reasoning>\n{reasoning_content}\n</Reasoning>\n{content}"
                 return content
             except Exception as e:
                 return ret
