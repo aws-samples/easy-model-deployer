@@ -107,3 +107,16 @@ class TgiBackend(OpenAICompitableProxyBackendBase):
             return self._transform_streaming_response(response)
         else:
             return self._transform_response(response)
+
+    async def ainvoke(self, request):
+        # Transform input to tgi format
+        request = self._transform_request(request)
+        request['model'] = 'tgi'
+        # Invoke tgi
+        logger.info(f"Chat request:{request}")
+        response = await self.async_client.chat.completions.create(**request)
+        logger.info(f"response:{response}")
+        if request.get('stream',False):
+            return await self._atransform_streaming_response(response)
+        else:
+            return await self._atransform_response(response)

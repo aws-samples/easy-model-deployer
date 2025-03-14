@@ -225,6 +225,37 @@ Model.register(
     )
 )
 
+Model.register(
+    dict(
+        model_id = "DeepSeek-R1-Distill-Qwen-32B-GGUF",
+        supported_engines=[llama_cpp_deepseek_r1_distill_engineb9ab0a4],
+        supported_instances=[
+            g5d12xlarge_instance,
+            g5d24xlarge_instance,
+            local_instance
+        ],
+        supported_services=[
+            sagemaker_service,
+            sagemaker_async_service,
+            ecs_service,
+            local_service
+        ],
+        supported_frameworks=[
+            fastapi_framework
+        ],
+        huggingface_model_id = "unsloth/DeepSeek-R1-Distill-Qwen-32B-GGUF",
+        huggingface_model_download_kwargs = {
+            "allow_patterns":["DeepSeek-R1-Distill-Qwen-32B-Q8_0.gguf"],
+        },
+        allow_china_region=True,
+        require_huggingface_token=False,
+        application_scenario="Agent, tool use, translation, summary",
+        description="The latest series of DeepSeek LLMs for reasoning",
+        model_type=ModelType.LLM,
+        model_series=DEEPSEEK_REASONING_MODEL
+    )
+)
+
 
 Model.register(
     dict(

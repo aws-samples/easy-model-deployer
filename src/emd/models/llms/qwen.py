@@ -40,6 +40,7 @@ Model.register(
         model_id = "Qwen2.5-7B-Instruct",
         supported_engines=[
             vllm_qwen2d5_engine064,
+            tgi_qwen2d5_72b_engine064,
             tgi_qwen2d5_on_inf2
         ],
         supported_instances=[

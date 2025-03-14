@@ -11,6 +11,7 @@ import traceback
 import json
 import socket
 import threading
+from fastapi.concurrency import run_in_threadpool
 
 
 # import httpx
@@ -38,6 +39,9 @@ class BackendBase(ABC):
     def invoke(self, request):
         ...
 
+    async def ainvoke(self, request):
+        return await run_in_threadpool(self.invoke, request)
+
 
 class OpenAICompitableProxyBackendBase(BackendBase):
     server_port = "8000"
@@ -52,8 +56,12 @@ class OpenAICompitableProxyBackendBase(BackendBase):
               *args,
               **kwargs
         )
-        from openai import OpenAI
+        from openai import OpenAI, AsyncOpenAI
         self.client = OpenAI(
+            base_url=self.base_url,
+            api_key="NOT SET"
+        )
+        self.async_client = AsyncOpenAI(
             base_url=self.base_url,
             api_key="NOT SET"
         )
@@ -190,14 +198,23 @@ class OpenAICompitableProxyBackendBase(BackendBase):
         # Transform response to sagemaker format
         return self._get_response(response)
 
+    async def _atransform_response(self, response):
+        # Transform response to sagemaker format
+        return self._aget_response(response)
+
     def _transform_streaming_response(self, response):
         # Transform response to sagemaker format
         return self._get_streaming_response(response)
+
+    async def _atransform_streaming_response(self, response):
+        # Transform response to sagemaker format
+        return self._aget_streaming_response(response)
 
     def _format_streaming_response(self, response:bytes):
         if self.service_type == ServiceType.SAGEMAKER:
             return response +  "\n"
         else:
+            logger.info(f"data: {response}")
             return f"data: {response}\n\n"
 
     def _get_streaming_response(self, response) -> Iterable[List[str]]:
@@ -209,6 +226,14 @@ class OpenAICompitableProxyBackendBase(BackendBase):
             logger.error(traceback.format_exc())
             yield self._format_streaming_response(json.dumps({"error": str(e)}))
 
+    async def _aget_streaming_response(self, response) -> Iterable[List[str]]:
+        try:
+            async for chunk in response:
+                logger.info(f"chunk: {chunk}")
+                yield self._format_streaming_response(chunk.model_dump_json())
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            yield self._format_streaming_response(json.dumps({"error": str(e)}))
 
-    def _get_response(self, response) -> List[str]:
+    async def _aget_response(self, response) -> List[str]:
         return response
