@@ -57,12 +57,20 @@ vllm_engine064 = VllmEngine(**{
 )
 
 vllm_qwen2d5_engine064 = VllmEngine(**{
-             **vllm_engine064.model_dump(),
+            **vllm_engine064.model_dump(),
             "default_cli_args": " --chat-template emd/models/chat_templates/qwen_2d5_add_prefill_chat_template.jinja --max_model_len 16000 --disable-log-stats --enable-auto-tool-choice --tool-call-parser hermes"
 })
 
 
-
+vllm_gemma3_engine = VllmEngine(
+    **{
+    **vllm_engine064.model_dump(),
+    "engine_dockerfile_config": {"VERSION":"v7.4.0_gemma3"},
+    "dockerfile_name":"Dockerfile_gemma3",
+    "default_cli_args": " --max_num_seq 5 --max_model_len 20000",
+    "environment_variables": "export VLLM_ATTENTION_BACKEND=FLASH_ATTN && export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
+    }
+)
 
 vllm_deepseek_r1_distill_qwen_engine071 = VllmEngine(**{
             **vllm_engine064.model_dump(),

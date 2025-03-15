@@ -1,4 +1,6 @@
 import httpx
+import sys
+import os
 from emd.models.utils.constants import ModelType
 
 from backend.backend import OpenAICompitableProxyBackendBase
@@ -9,6 +11,7 @@ logger = get_logger(__name__)
 class VLLMBackend(OpenAICompitableProxyBackendBase):
 
     def create_proxy_server_start_command(self,model_path):
+        os.system(f"{sys.executable} -m pip list")
         serve_command = f'vllm serve {model_path} --port {self.server_port} --trust-remote-code --served-model-name={self.model_id} --tensor_parallel_size={self.gpu_num} {self.default_cli_args} {self.cli_args}'
         if self.environment_variables:
             serve_command = f'{self.environment_variables} && {serve_command}'

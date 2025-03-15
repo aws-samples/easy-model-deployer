@@ -69,7 +69,7 @@ def download_modelscope_model(model:Model,model_dir=None):
     service_type = model.executable_config.current_service.service_type
     model_id = model.model_id
     model_dir = model_dir or EMD_MODELS_LOCAL_DIR_TEMPLATE.format(model_id=model_id)
-    logger.info(f"Downloading {modelscope_model_id} model")
+    logger.info(f"Downloading {str(modelscope_model_id)} model")
 
     ms_snapshot_download(
         model_id=modelscope_model_id,
