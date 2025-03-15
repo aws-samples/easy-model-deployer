@@ -78,6 +78,12 @@ Our mission is to empower individuals and industry through this opportunity whil
     reference_link="https://github.com/meta-llama/llama-models"
 )
 
+Gemma3_SERIES = ModelSeries(
+    model_series_name=ModelSeriesType.GEMMA3,
+    description="Gemma 3 is Google’s latest open-source multimodal AI model, supporting text, image, and video processing with up to 128K tokens of context. It comes in 1B, 4B, 12B, and 27B parameter sizes, offering high efficiency, with the largest model running on a single H100 GPU. Ranking among top AI models, Gemma 3 excels in multilingual tasks, function calling, and long-document understanding, making it ideal for diverse AI applications.",
+    reference_link="https://blog.google/technology/developers/gemma-3/"
+)
+
 DEEPSEEK_REASONING_MODEL = ModelSeries(
     model_series_name=ModelSeriesType.DEEPSEEK_REASONING_MODEL,
     description="DeepSeek-R1-Zero and DeepSeek-R1 are innovative reasoning models, with the former showcasing strong performance through reinforcement learning alone, while the latter enhances reasoning capabilities by incorporating cold-start data, achieving results comparable to OpenAI-o1 and setting new benchmarks with its distilled versions.",

@@ -1,9 +1,14 @@
-
 # Best Deployment Practices
 
 This document provides examples of best practices for deploying models using EMD for various use cases.
 
 ## Famous Models
+
+### Gemma 3 Series
+
+```
+emd deploy --model-id gemma-3-27b-it --instance-type g5.12xlarge --engine-type vllm --service-type sagemaker
+```
 
 ### Qwen Series
 
@@ -13,14 +18,9 @@ This document provides examples of best practices for deploying models using EMD
 emd deploy --model-id QwQ-32B --instance-type g5.12xlarge --engine-type vllm --service-type sagemaker
 ```
 
-
-
-
 ## Deploying to Specific GPU Types
 
-
 Choosing the right GPU type is critical for optimal performance and cost-efficiency. Use the `--instance-type` parameter to specify the GPU instance.
-
 
 ### Example: Deploying Qwen2.5-7B on g5.2xlarge
 
@@ -28,12 +28,9 @@ Choosing the right GPU type is critical for optimal performance and cost-efficie
 emd deploy --model-id Qwen2.5-7B-Instruct --instance-type g5.2xlarge --engine-type vllm --service-type sagemaker
 ```
 
-
 ## Achieving Longer Context Windows
 
-
 To enable longer context windows, use the `--extra-params` option with engine-specific parameters.
-
 
 ### Example: Deploying model with 16k context window
 
@@ -55,8 +52,6 @@ emd deploy --model-id Qwen2.5-14B-Instruct-AWQ --instance-type g4dn.2xlarge --en
   }
 }'
 ```
-
-
 
 ## Common Troubleshooting
 
