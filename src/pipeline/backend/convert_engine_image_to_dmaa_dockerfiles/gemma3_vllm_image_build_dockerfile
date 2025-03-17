@@ -1,0 +1,13 @@
+From vllm/vllm-openai:v0.7.3
+
+RUN pip install boto3 hf_transfer modelscope
+
+RUN mkdir -p  /opt/ml/code
+
+RUN export VLLM_COMMIT=776dcec8fe51860d7580001de86216406629df0f && pip install https://wheels.vllm.ai/${VLLM_COMMIT}/vllm-1.0.0.dev-cp38-abi3-manylinux1_x86_64.whl
+RUN pip install git+https://github.com/huggingface/transformers@v4.49.0-Gemma-3
+
+EXPOSE 8080
+
+# Set the serve script as the entrypoint
+ENTRYPOINT ["/usr/bin/serve"]

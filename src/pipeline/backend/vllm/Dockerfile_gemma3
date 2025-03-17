@@ -1,0 +1,16 @@
+FROM public.ecr.aws/aws-gcr-solutions/dmaa-vllm/vllm-openai:{{VERSION}} AS vllm-base
+
+FROM vllm-base AS sagemaker-serving
+
+RUN pip install boto3 hf_transfer modelscope
+
+WORKDIR /opt/ml/code
+
+# RUN git clone  https://github.com/vllm-project/vllm.git && cd vllm && VLLM_USE_PRECOMPILED=1 pip install --editable .
+# Expose port 8080
+EXPOSE 8080
+
+
+
+# Set the serve script as the entrypoint
+ENTRYPOINT ["/usr/bin/serve"]
