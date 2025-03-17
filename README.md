@@ -16,6 +16,7 @@
 
 ## 🔥 Latest News
 
+- 2025-03-17: Deploy Gemma 3 series models with [one command line](https://github.com/aws-samples/easy-model-deployer/blob/main/docs/en/best_deployment_practices.md##famous-models###gemma-3-series).
 - 2025-03-06: Deploy QwQ-32B with [one command line](docs/en/best_deployment_practices.md##famous-models###qwen-series###qwq-32b).
 
 ## Introduction
@@ -25,12 +26,12 @@ Easy Model Deployer is a lightweight tool designed to simplify the deployment of
 ![cli](docs/images/cli-all.gif)
 
 **Key Features**
+
 - One-click deployment of models to the cloud (Amazon SageMaker, Amazon ECS, Amazon EC2)
 - Diverse model types (LLMs, VLMs, Embeddings, Vision, etc.)
 - Rich inference engine (vLLM, TGI, Lmdeploy, etc.)
 - Different instance types (CPU/GPU/AWS Inferentia)
 - Convenient integration (OpenAI Compatible API, LangChain client, etc.)
-
 
 ## 🚀 Quick Install
 
@@ -47,10 +48,9 @@ Visit our [documentation](https://aws-samples.github.io/easy-model-deployer/en/i
 
 ### (Optional) Configure AWS Profile
 
->If you have already configured your AWS credentials using the AWS CLI, you can skip this step.
+> If you have already configured your AWS credentials using the AWS CLI, you can skip this step.
 
 You can configure the AWS profile by EMD. If you don't set any AWS profile, the EMD will use the default credentials in your terminal, you can also configure your credentials by [`aws configure`](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html#cli-configure-files-methods).
-
 
 ```bash
 emd config set-default-profile-name
@@ -68,7 +68,6 @@ emd bootstrap
 
 > **💡 Tip** Once you upgrade the EMD by `pip`, you need to run this command again.
 
-
 ### Deploy Model
 
 Deploy models with an interactive CLI or one command.
@@ -79,9 +78,9 @@ emd deploy
 
 ![deploy](docs/images/cli-deploy.gif)
 
-
 > **💡 Tip** To view all available parameters, run `emd deploy --help`.
 > When you see the message "Waiting for model: ...", it means the deployment task has started and you can stop the terminal output by pressing `Ctrl+C`.
+>
 > - For more information on deployment parameters, please refer to the [Deployment parameters](docs/en/installation.md).
 > - For best practice examples of using command line parameters, please refer to the [Best Deployment Practices](docs/en/best_deployment_practices.md).
 
@@ -139,7 +138,6 @@ emd destroy DeepSeek-R1-Distill-Qwen-1.5B
 ## 📖 Documentation
 
 For advanced configurations and detailed guides, visit our [documentation site](https://aws-samples.github.io/easy-model-deployer/).
-
 
 ## 🤝 Contributing
 
