@@ -86,3 +86,15 @@ class LlamaCppBackend(OpenAICompitableProxyBackendBase):
             return self._transform_streaming_response(response)
         else:
             return self._transform_response(response)
+
+    async def ainvoke(self, request):
+        # Transform input to lmdeploy format
+        request = self._transform_request(request)
+        # Invoke lmdeploy
+        logger.info(f"Chat request:{request}")
+        response = await self.async_client.chat.completions.create(**request)
+        logger.info(f"response:{response}")
+        if request.get('stream',False):
+            return await self._atransform_streaming_response(response)
+        else:
+            return await self._atransform_response(response)

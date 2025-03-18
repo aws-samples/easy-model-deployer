@@ -2,7 +2,6 @@ import typer
 from rich.console import Console
 from typing import Optional
 from typing_extensions import Annotated
-
 from rich.prompt import Prompt
 
 from emd.constants import MODEL_DEFAULT_TAG
@@ -15,8 +14,7 @@ app = typer.Typer(pretty_exceptions_enable=False)
 console = Console()
 layout = make_layout()
 
-
-def conversation_invoke(model_id:str,model_tag):
+def conversation_invoke(model_id:str,model_tag:str,stream:bool=False):
     model = Model.get_model(model_id)
     from emd.sdk.invoke.conversation_invoker import ConversationInvoker
     invoker = ConversationInvoker(model_id,model_tag)
@@ -30,13 +28,37 @@ def conversation_invoke(model_id:str,model_tag):
         if not user_message:
             continue
         invoker.add_user_message(user_message)
-        ai_message:str = invoker.invoke()
-        # content = ai_message['content']
-        # reasoning_content = ai_message.get('reasoning_content','')
-        # if reasoning_content:
-        #     content = f"<think>\n{reasoning_content}\n</think>\n{content}"
-        console.print(f"[bold green]Assistant:{ai_message}[/bold green]")
-        invoker.add_assistant_message(ai_message)
+        ret = invoker.invoke(stream=stream)
+        if stream:
+            content = ''
+            reasoning_content = ''
+            reasoning_started = False
+            console.print(f"[bold green]Assistant: [/bold green]")
+            for chunk in ret:
+                chunk_reasoning_content = chunk['choices'][0]['delta'].get('reasoning_content', '')
+                chunk_content = chunk['choices'][0]['delta'].get('content', '')
+
+                if chunk_reasoning_content and not reasoning_started:
+                    print("<Reasoning>", end='', flush=True)
+                    reasoning_started = True
+
+                if chunk_reasoning_content:
+                    print(chunk_reasoning_content, end='', flush=True)
+                    reasoning_content += chunk_reasoning_content
+
+                if chunk_content:
+                    if reasoning_started:
+                        print("</Reasoning>", end='', flush=True)
+                        reasoning_started = False
+                    print(chunk_content, end='', flush=True)
+                    content += chunk_content
+            if reasoning_content:
+                content += f"<Reasoning>\n{reasoning_content}\n</Reasoning>\n{content}"
+            print('', flush=True)
+        else:
+            content:str = ret
+            console.print(f"{content}")
+        invoker.add_assistant_message(content)
 
 def whisper_invoke(model_id,model_tag):
     model = Model.get_model(model_id)
@@ -103,13 +125,16 @@ def vlm_invoke(model_id,model_tag):
 @load_aws_profile
 def invoke(
     model_id: Annotated[str, typer.Argument(help="Model ID")],
-    model_tag: Annotated[str, typer.Argument(help="Model rag")] = MODEL_DEFAULT_TAG
-    ):
+    model_tag: Annotated[str, typer.Argument(help="Model rag")] = MODEL_DEFAULT_TAG,
+    stream: Annotated[
+        bool, typer.Option("-s", "--stream", help="Stream the response, it only works with language models")
+    ] = True
+):
     console.print(f"Invoking model {model_id} with tag {model_tag}")
     model:Model = Model.get_model(model_id)
     model_type = model.model_type
     if model_type == ModelType.LLM:
-        return conversation_invoke(model_id,model_tag)
+        return conversation_invoke(model_id,model_tag,stream)
     elif model_type == ModelType.WHISPER:
         return whisper_invoke(model_id, model_tag)
     elif model_type == ModelType.EMBEDDING:
