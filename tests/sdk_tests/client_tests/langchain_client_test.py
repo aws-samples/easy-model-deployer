@@ -6,12 +6,15 @@ from langchain_core.utils.function_calling import (
     convert_to_openai_function,
     convert_to_openai_tool
 )
+import time
 
 chat_model = SageMakerVllmChatModel(
-    model_id="Qwen2.5-7B-Instruct",
+    # model_id="Qwen2.5-7B-Instruct",
+    model_id="deepseek-r1-671b-1.58bit_gguf",
     model_kwargs={
-        "temperature":0.5,
-    }
+        "temperature":0.6,
+    },
+    max_tokens=100
     # model_tag='Admin',
     # endpoint_name="EMD-Model-Qwen2-5-72B-Instruct-AWQ-sv1dqz-endpoint"
 )
@@ -23,8 +26,10 @@ messages = [
         HumanMessage(content="9.11和9.9两个数字哪个更大？"),
         # AIMessage(content="<thinking>"),
     ]
-print(chain.invoke(messages))
 
+t0 = time.time()
+print(chat_model.invoke(messages))
+print('total time: ',time.time()-t0)
 # print(sfgsfd)
 print("="*50)
 
@@ -33,7 +38,6 @@ print("="*50)
 print('stream test')
 for i in chain.stream(messages):
     print(i,end="",flush=True)
-
 
 print("="*50)
 

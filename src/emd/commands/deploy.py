@@ -523,19 +523,19 @@ def deploy(
             raise typer.Exit(0)
 
     # log the deployment parameters
-    # engine_info = model.find_current_engine(engine_type)
-    # framework_info = model.find_current_framework(framework_type)
+    engine_info = model.find_current_engine(engine_type)
+    framework_info = model.find_current_framework(framework_type)
 
-    # engine_info_str = json.dumps(engine_info,indent=2,ensure_ascii=False)
-    # framework_info_str = json.dumps(framework_info, indent=2, ensure_ascii=False)
-    # extra_params_info = json.dumps(extra_params, indent=2, ensure_ascii=False)
-    # console.print(f"[bold blue]Deployment parameters:[/bold blue]")
-    # console.print(f"[bold blue]model_id: {model_id},model_tag: {model_tag}[/bold blue]")
-    # console.print(f"[bold blue]instance_type: {instance_type}[/bold blue]")
-    # console.print(f"[bold blue]service_type: {service_type}[/bold blue]")
-    # console.print(f"[bold blue]engine info:\n {engine_info_str}[/bold blue]")
-    # console.print(f"[bold blue]framework info:\n {framework_info_str}[/bold blue]")
-    # console.print(f"[bold blue]extra_params:\n {extra_params_info}[/bold blue]")
+    engine_info_str = json.dumps(engine_info,indent=2,ensure_ascii=False)
+    framework_info_str = json.dumps(framework_info, indent=2, ensure_ascii=False)
+    extra_params_info = json.dumps(extra_params, indent=2, ensure_ascii=False)
+    console.print(f"[bold blue]Deployment parameters:[/bold blue]")
+    console.print(f"[bold blue]model_id: {model_id},model_tag: {model_tag}[/bold blue]")
+    console.print(f"[bold blue]instance_type: {instance_type}[/bold blue]")
+    console.print(f"[bold blue]service_type: {service_type}[/bold blue]")
+    console.print(f"[bold blue]engine info:\n {engine_info_str}[/bold blue]")
+    console.print(f"[bold blue]framework info:\n {framework_info_str}[/bold blue]")
+    console.print(f"[bold blue]extra_params:\n {extra_params_info}[/bold blue]")
     # Start pipeline execution
     if service_type != ServiceType.LOCAL:
         response = sdk_deploy(

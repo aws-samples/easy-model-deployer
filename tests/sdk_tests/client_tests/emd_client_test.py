@@ -1,12 +1,14 @@
 from emd.sdk.clients.sagemaker_client import SageMakerClient
-
+import time
 
 client = SageMakerClient(
     # model_id="Qwen2.5-72B-Instruct-AWQ"
     # model_id="internlm2_5-20b-chat-4bit-awq"
-    model_id="deepseek-r1-distill-llama-70b-awq"
+    # model_id="deepseek-r1-distill-llama-70b-awq"
+    model_id="deepseek-r1-671b-1.58bit_gguf"
 )
 
+t0 = time.time()
 ret = client.invoke_async(
     {
         "messages": [
@@ -21,6 +23,7 @@ ret = client.invoke_async(
         "stream":False
     }
 )
+print('total time: ',time.time()-t0)
 # for i in ret:
 #     print(i['choices'][0]['delta']['content'],end="")
 print(ret)

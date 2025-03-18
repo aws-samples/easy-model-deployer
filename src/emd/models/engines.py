@@ -194,7 +194,7 @@ llama_cpp_deepseek_r1_1d58_bit_engine_b9ab0a4 = LlamaCppEngine(
         "base_image_host":"public.ecr.aws",
         "use_public_ecr":True,
         "docker_login_region":"us-east-1",
-        "default_cli_args":" -c 6500  -np 5 --temp 0.6 -ngl 10000 --cache-type-k q4_0 --cont-batching --threads-http 5 --jinja --chat-template-file emd/models/chat_templates/deepseek_r1.jinja"
+        "default_cli_args":"--tensor-split 8,7,8,8,8,8,7,8  -ctk q4_0 --ctx-size 10240 --parallel 2 --batch-size 32 --threads 96 --prio 2 --temp 0.6 --top-p 0.95 --jinja --chat-template-file emd/models/chat_templates/deepseek_r1.jinja"
     }
 )
 

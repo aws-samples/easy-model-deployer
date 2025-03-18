@@ -29,6 +29,7 @@ from emd.utils.aws_service_utils import get_current_region
 
 from .bootstrap import create_env_stack, get_bucket_name
 from .status import get_pipeline_execution_status
+from emd.models.utils.constants import ServiceType
 
 logger = get_logger(__name__)
 
@@ -114,6 +115,12 @@ def deploy(
     waiting_until_deploy_complete=True,
 ) -> dict:
     # Check if AWS environment is properly configured
+    if service_type == ServiceType.SAGEMAKER_OLDER:
+        service_type = ServiceType.SAGEMAKER
+        logger.warning(
+            f"Service type {ServiceType.SAGEMAKER_OLDER} is deprecated, please use {ServiceType.SAGEMAKER}"
+        )
+
     logger.info("checking if model is exists...")
     assert (
         model_stack_name is None

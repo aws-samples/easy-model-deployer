@@ -111,7 +111,8 @@ class InstanceType(ConstantBase):
             raise NotImplementedError(service)
 
 class ServiceType(ConstantBase):
-    SAGEMAKER = "sagemaker"
+    SAGEMAKER_OLDER = "sagemaker"
+    SAGEMAKER = "sagemaker_realtime"
     SAGEMAKER_ASYNC = "sagemaker_async"
     EC2 = "ec2"
     ECS = "ecs"
