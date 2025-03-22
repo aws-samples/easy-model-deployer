@@ -47,7 +47,7 @@ pip install -r custom_nodes/ComfyUI-Manager/requirements.txt
 pip install -r custom_nodes/ComfyUI-VideoHelperSuite/requirements.txt
 #pip install -r custom_nodes/ComfyUI-LTXVideo/requirements.txt
 pip install av>=10.0.0
-pip install ltx-video@git+https://github.com/Lightricks/LTX-Video
+pip install ltx-video@git+https://github.com/Lightricks/LTX-Video@ltx-video-0.9.1
 
 pip install https://github.com/openai/CLIP/archive/d50d76daa670286dd6cacf3bcd80b5e4823fc8e1.zip
 pip install https://github.com/mlfoundations/open_clip/archive/bb6e834e9c70d9c27d0dc3ecedeebeaeb1ffad6b.zip
