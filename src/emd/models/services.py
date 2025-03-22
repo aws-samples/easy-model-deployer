@@ -24,6 +24,25 @@ sagemaker_service = Service(
     support_cn_region = True
 )
 
+sagemaker_old_service = Service(
+    cfn_parameters={
+        "ECRImageURI":"ecr_repo_uri",
+        "InstanceType":"instance_type",
+        "ModelId": "model_id",
+        "ModelTag":"model_tag",
+        "FrameWorkType":"framework_type",
+        "ServiceType":"service_type",
+        "EngineType":"engine_type",
+        "Region":"region",
+        "MaxCapacity": ValueWithDefault(name="max_capacity",default=1),
+        "AutoScalingTargetValue": ValueWithDefault(name="auto_scaling_target_value",default=10)
+    },
+    name = "Amazon SageMaker AI Real-time inference",
+    service_type=ServiceType.SAGEMAKER_OLDER,
+    description="Amazon SageMaker Real-time inference provides low-latency, interactive inference through fully managed endpoints that support autoscaling. \n(https://docs.aws.amazon.com/sagemaker/latest/dg/realtime-endpoints.html)",
+    support_cn_region = True
+)
+
 sagemaker_async_service = Service(
     cfn_parameters={
         "ECRImageURI":"ecr_repo_uri",

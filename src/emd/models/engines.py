@@ -75,7 +75,7 @@ vllm_gemma3_engine = VllmEngine(
 vllm_deepseek_r1_distill_qwen_engine071 = VllmEngine(**{
             **vllm_engine064.model_dump(),
             "engine_dockerfile_config": {"VERSION":"v0.7.1"},
-            "default_cli_args": "--max_num_seq 256 --max_model_len 16000"
+            "default_cli_args": "--max_num_seq 256 --max_model_len 16000 --chat-template emd/models/chat_templates/deepseek_r1_distill.jinja"
 })
 
 vllm_deepseek_r1_distill_llama_engine071 = vllm_deepseek_r1_distill_qwen_engine071
