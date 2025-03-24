@@ -1,15 +1,18 @@
 import json
 import os
+import io
 import time
 from typing import Optional
 
 import boto3
+import zipfile
 import sys
 
 from emd.constants import (
     CODEPIPELINE_NAME,
     ENV_STACK_NAME,
     MODEL_DEFAULT_TAG,
+    MODEL_STACK_NAME_PREFIX,
     VERSION,
     LOCAL_REGION
 )
@@ -57,11 +60,15 @@ def prepare_deploy(
     service_type=None,
     instance_type=None,
     region=None,
+    dockerfile_local_path=None
 ):
-    model: Model = Model.get_model(model_id)
-    model_stack_name = model.get_model_stack_name_prefix(
-        model_id, model_tag=model_tag
-    )
+    if dockerfile_local_path:
+        model_stack_name = f"{MODEL_STACK_NAME_PREFIX}-{model_id}-{model_tag}"
+    else:
+        model: Model = Model.get_model(model_id)
+        model_stack_name = model.get_model_stack_name_prefix(
+            model_id, model_tag=model_tag
+        )
     # check if model_id is inprogress in pipeline execution
     if check_stack_exists(model_stack_name):
         raise RuntimeError(
@@ -113,6 +120,7 @@ def deploy(
     env_stack_on_failure="ROLLBACK",
     force_env_stack_update=False,
     waiting_until_deploy_complete=True,
+    dockerfile_local_path=None,
 ) -> dict:
     # Check if AWS environment is properly configured
     if service_type == ServiceType.SAGEMAKER_OLDER:
@@ -132,6 +140,7 @@ def deploy(
         service_type=service_type,
         instance_type=instance_type,
         region=region,
+        dockerfile_local_path=dockerfile_local_path
     )
     # logger.info("Checking AWS environment...")
     extra_params = extra_params or {}
@@ -168,23 +177,39 @@ def deploy(
     pipeline_name = pipeline_resources[0]["PhysicalResourceId"]
     logger.info("AWS environment is properly configured.")
 
-    model = Model.get_model(model_id)
+    if dockerfile_local_path:
+        if not os.path.exists(dockerfile_local_path):
+            raise FileNotFoundError(f"Dockerfile path {dockerfile_local_path} does not exist.")
+        
+        # Create a zip file of the dockerfile directory
+        zip_buffer = zipped_dockerfile(dockerfile_local_path)
 
-    # check instance,service,engine
-    supported_instances = model.supported_instance_types
-    assert (
-        instance_type in supported_instances
-    ), f"Instance type {instance_type} is not supported for model {model_id}"
+        # Upload the zip file to S3
+        s3 = boto3.client('s3', region_name=region)
+        s3_key = f"emd_models/{model_id}.zip"
+        s3.upload_fileobj(zip_buffer, bucket_name, s3_key)
+        extra_params["model_params"] = extra_params.get("model_params", {})
+        extra_params["model_params"]["custom_dockerfile_path"] = f"s3://{bucket_name}/{s3_key}"
+        logger.info(extra_params)
+        return
+    else:
+        model = Model.get_model(model_id)
 
-    supported_engines = model.supported_engine_types
-    assert (
-        engine_type in supported_engines
-    ), f"Engine type {engine_type} is not supported for model {model_id}"
+        # check instance,service,engine
+        supported_instances = model.supported_instance_types
+        assert (
+            instance_type in supported_instances
+        ), f"Instance type {instance_type} is not supported for model {model_id}"
 
-    supported_services = model.supported_service_types
-    assert (
-        service_type in supported_services
-    ), f"Service type {service_type} is not supported for model {model_id}"
+        supported_engines = model.supported_engine_types
+        assert (
+            engine_type in supported_engines
+        ), f"Engine type {engine_type} is not supported for model {model_id}"
+
+        supported_services = model.supported_service_types
+        assert (
+            service_type in supported_services
+        ), f"Service type {service_type} is not supported for model {model_id}"
 
     # Start pipeline execution
     codepipeline = boto3.client("codepipeline", region_name=region)
@@ -329,3 +354,15 @@ def deploy_local(
     assert (
         os.system(pipeline_cmd) == 0
     ), f"run pipeline cmd failed: {pipeline_cmd}"
+
+def zipped_dockerfile(dockerfile_local_path):
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'a', zipfile.ZIP_DEFLATED) as zipf:
+        dockerfile_dir = os.path.dirname(dockerfile_local_path)
+        for root, dirs, files in os.walk(dockerfile_dir):
+            for file in files:
+                file_path = os.path.join(root, file)
+                arcname = os.path.relpath(file_path, dockerfile_dir)
+                zipf.write(file_path, arcname)
+    zip_buffer.seek(0)
+    return zip_buffer

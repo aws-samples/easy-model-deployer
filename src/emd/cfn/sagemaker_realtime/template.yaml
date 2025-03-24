@@ -34,6 +34,13 @@ Parameters:
     Type: Number
     Description: The target value for the autoscaling
     Default: 10
+  SageMakerEndpointName:
+    Type: String
+    Description: The name of the SageMaker Endpoint
+    Default: "none"
+
+Conditions:
+  UseDefaultEndpointName: !Equals [!Ref SageMakerEndpointName, "none"]
 
 Resources:
   ExecutionRole:
@@ -90,7 +97,10 @@ Resources:
   SageMakerEndpoint:
     Type: AWS::SageMaker::Endpoint
     Properties:
-      EndpointName: !Sub '${AWS::StackName}-endpoint'
+      EndpointName: !If 
+        - UseDefaultEndpointName
+        - !Sub '${AWS::StackName}-endpoint'
+        - !Ref SageMakerEndpointName
       EndpointConfigName: !GetAtt SageMakerEndpointConfig.EndpointConfigName
 
 

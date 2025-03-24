@@ -234,13 +234,33 @@ def deploy(
     ] = False,
     only_allow_local_deploy: Annotated[
         Optional[bool], typer.Option("--only-allow-local-deploy", help="only allow local instance")
-    ] = False
+    ] = False,
+    dockerfile_local_path: Annotated[
+        str, typer.Option("--dockerfile-local-path", help="Your custom Dockerfile path for building the model image, all files must be in the same directory")
+    ] = None,
 ):
     if only_allow_local_deploy:
         allow_local_deploy = True
         region = LOCAL_REGION
     else:
         region = get_current_region()
+
+    if dockerfile_local_path:
+        response = sdk_deploy(
+            model_id=model_id,
+            instance_type=instance_type,
+            engine_type=engine_type,
+            service_type=service_type,
+            region=region,
+            extra_params = extra_params,
+            model_tag=model_tag,
+            env_stack_on_failure = "ROLLBACK",
+            force_env_stack_update = force_update_env_stack,
+            waiting_until_deploy_complete=True,
+            dockerfile_local_path=dockerfile_local_path,
+        )
+        return response
+
     vpc_id = None
     # ask model id
     model_id = ask_model_id(region,model_id=model_id)
