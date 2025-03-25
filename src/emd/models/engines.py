@@ -15,6 +15,9 @@ class VllmEngine(OpenAICompitableEngine):
     pass
 
 
+# class MultiModelVllmEngine:
+
+
 class LMdeployEngine(OpenAICompitableEngine):
     pass
 

@@ -12,6 +12,12 @@ emd deploy --model-id gemma-3-27b-it --instance-type g5.12xlarge --engine-type v
 
 ### Qwen Series
 
+#### Qwen2.5-VL-32B-Instruct
+
+```bash
+emd deploy --model-id Qwen2.5-VL-32B-Instruct --instance-type g5.12xlarge --engine-type vllm --service-type sagemaker_realtime
+```
+
 #### QwQ-32B
 
 ```bash
