@@ -381,6 +381,9 @@ Model.register(
             g5d4xlarge_instance,
             g5d8xlarge_instance,
             g5d16xlarge_instance,
+            g4dn2xlarge_instance,
+            # g5d24xlarge_instance,
+            # g5d48xlarge_instance,
             local_instance
         ],
         supported_services=[
