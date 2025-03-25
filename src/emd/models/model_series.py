@@ -34,6 +34,13 @@ BGE_SERIES = ModelSeries(
     reference_link="https://github.com/FlagOpen/FlagEmbedding"
 )
 
+BCE_SERIES = ModelSeries(
+    model_series_name=ModelSeriesType.BCE,
+    description="BCEmbedding: Bilingual and Crosslingual Embedding for RAG.",
+    reference_link="https://huggingface.co/maidalun1020/bce-embedding-base_v1"
+)
+
+
 QWEN2VL_SERIES = ModelSeries(
     model_series_name=ModelSeriesType.QWEN2VL,
     description="""Qwen2-VL is the latest version of the vision language models in the Qwen model families.
