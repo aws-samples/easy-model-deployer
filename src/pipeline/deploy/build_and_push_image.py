@@ -330,3 +330,178 @@ def run(
 
     parameters = {"ecr_repo_uri": ecr_repo_uri}
     return parameters
+
+def run_custom(
+    region,
+    model_id,
+    model_tag,
+    backend_type,
+    service_type,
+    framework_type,
+    image_name,
+    image_tag,
+    model_s3_bucket,
+    instance_type,
+    extra_params,
+    dockerfile_local_path
+):
+    model = Model.get_model(model_id)
+
+    execute_model = model.convert_to_execute_model(
+        region=region,
+        instance_type=instance_type,
+        engine_type=backend_type,
+        service_type=service_type,
+        framework_type=framework_type,
+        model_s3_bucket=model_s3_bucket,
+        extra_params=extra_params,
+        model_tag=model_tag
+    )
+
+    # engine = execute_model.get_engine()
+    logger.info(f"Building and deploying {model_id} on {backend_type} backend")
+    execute_dir = os.path.dirname(dockerfile_local_path)
+    logger.info(f"docker build dir: {execute_dir}")
+
+    # Build and push image
+    logger.info(f"Building and pushing {image_name} image")
+
+    # docker build image
+    # get current aws account_id
+    push_image_account_id = execute_model.get_image_push_account_id()
+    build_image_account_id = (
+        execute_model.executable_config.current_engine.base_image_account_id
+    )
+    build_image_host = execute_model.executable_config.current_engine.base_image_host
+
+    # get ecr repo uri
+    ecr_repo_uri = execute_model.get_image_uri(
+        account_id=push_image_account_id,
+        region=region,
+        image_name=image_name,
+        image_tag=image_tag,
+    )
+
+    print("build_image_account_id", build_image_account_id, push_image_account_id)
+
+    if not build_image_host and build_image_account_id:
+        build_image_host = execute_model.get_image_host(
+            execute_model.get_image_uri(
+                account_id=build_image_account_id,
+                region=region,
+                image_name=image_name,
+                image_tag=image_tag,
+            )
+        )
+
+    push_image_host = execute_model.get_image_host(ecr_repo_uri)
+
+    # build image
+    use_public_ecr = execute_model.executable_config.current_engine.use_public_ecr
+    if use_public_ecr:
+        ecr_name = "ecr-public"
+    else:
+        ecr_name = "ecr"
+
+    docker_login_region = (
+        execute_model.executable_config.current_engine.docker_login_region
+    )
+
+    docker_login_region = docker_login_region or region
+    dockerfile_name = dockerfile_local_path.split("/")[-1]
+
+    if build_image_host:
+        build_image_script_cn = (
+                f"cd {execute_dir}"
+                f' && docker build --platform linux/amd64 -f {dockerfile_name} -t "{ecr_repo_uri}" .'
+            )
+        build_image_script_global = (
+                f"cd {execute_dir}"
+                f" && aws {ecr_name} get-login-password --region {docker_login_region} | docker login --username AWS --password-stdin {build_image_host}"
+                f' && docker build --platform linux/amd64 -f {dockerfile_name} -t "{ecr_repo_uri}" .'
+            )
+        if check_cn_region(region):
+            build_image_scripts = [build_image_script_cn]
+        else:
+            build_image_scripts = [build_image_script_global,build_image_script_cn]
+
+        is_build_success = False
+        for build_image_script in build_image_scripts:
+            logger.info(f"building image: {build_image_script}")
+            try:
+                assert os.system(build_image_script) == 0
+                is_build_success = True
+                break
+            except Exception as e:
+                logger.error(f"docker build errorr: {e}")
+
+        if not is_build_success:
+            raise RuntimeError("docker build errorr")
+
+
+        # build_image_script = (
+        #     f"cd {execute_dir}"
+        #     f" && aws {ecr_name} get-login-password --region {docker_login_region} | docker login --username AWS --password-stdin {build_image_host}"
+        #     f' && docker build --platform linux/amd64 -f {dockerfile_name} -t "{ecr_repo_uri}" .'
+        # )
+    else:
+        build_image_script = (
+            f"cd {execute_dir}"
+            f' && docker build --platform linux/amd64 -f {dockerfile_name} -t "{ecr_repo_uri}" .'
+        )
+
+        logger.info(f"building image: {build_image_script}")
+        assert os.system(build_image_script) == 0
+
+    # push image
+    # It should not push the image to ecr when service_type is `local`
+    if service_type != ServiceType.LOCAL:
+        ecr_client = boto3.client("ecr", region_name=region)
+        try:
+            response = ecr_client.create_repository(
+                repositoryName=image_name,
+            )
+            logger.info(f"ecr repo: {image_name} created.")
+        except ecr_client.exceptions.RepositoryAlreadyExistsException:
+            logger.info(f"ecr repo: {image_name} exist.")
+
+        ##  give erc repo policy
+        ecr_repository_policy = {
+            "Version": "2008-10-17",
+            "Statement": [
+                {
+                    "Sid": "new statement",
+                    "Effect": "Allow",
+                    "Principal": "*",
+                    "Action": [
+                        "ecr: CompleteLayerUpload",
+                        "ecr: InitiateLayerUpload",
+                        "ecr: ListImages",
+                        "ecr:BatchCheckLayerAvailability",
+                        "ecr:BatchGetImage",
+                        "ecr:DescribeImages",
+                        "ecr:DescribeRepositories",
+                        "ecr:GetDownloadUrlForLayer",
+                    ],
+                }
+            ],
+        }
+        response = ecr_client.set_repository_policy(
+            repositoryName=image_name, policyText=json.dumps(ecr_repository_policy)
+        )
+
+        ## push image
+        push_image_script = (
+            f"cd {execute_dir}"
+            f" && aws ecr get-login-password --region {region} | docker login --username AWS --password-stdin {push_image_host}"
+            f' && docker push "{ecr_repo_uri}"'
+        )
+
+        logger.info(f"pushing image: {push_image_script}")
+        assert os.system(push_image_script) == 0
+
+    image_uri = ecr_repo_uri
+    logger.info(f"Image URI: {ecr_repo_uri}")
+
+    parameters = {"ecr_repo_uri": ecr_repo_uri}
+    return parameters

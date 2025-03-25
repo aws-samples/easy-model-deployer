@@ -379,5 +379,9 @@ comfyui_engine = ComfyuiEngine(**{
             "base_image_host":"public.ecr.aws",
             "use_public_ecr":True,
             "docker_login_region":"us-east-1",
-}
-)
+})
+
+custom_engine = Engine(**{
+            "engine_type":EngineType.CUSTOM,
+})
+

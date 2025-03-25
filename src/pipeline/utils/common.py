@@ -41,6 +41,17 @@ def download_dir_from_s3_by_s5cmd(local_dir,bucket_name=None, s3_key=None,model_
     logger.info(f"Downloading model files from {model_files_s3_path}")
     assert os.system(f"./s5cmd cp {model_files_s3_path}/* {local_dir}") == 0
 
+def download_file_from_s3_by_s5cmd(s3_file_path, local_file_path):
+    """
+    Download a file from S3 using s5cmd.
+    
+    Args:
+        s3_file_path (str): The S3 file path (e.g., s3://bucket/key).
+        local_file_path (str): The local file path to save the downloaded file.
+    """
+    logger.info(f"Downloading {s3_file_path} to {local_file_path}")
+    os.system(f"./s5cmd cp {s3_file_path} {local_file_path}")
+
 def upload_dir_to_s3(bucket_name, local_dir_name):
     logger.info(f"Uploading {local_dir_name} to {bucket_name} bucket")
     s3 = boto3.client('s3')

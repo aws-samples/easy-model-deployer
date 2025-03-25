@@ -7,11 +7,12 @@ import json
 import logging
 from concurrent.futures import as_completed,ProcessPoolExecutor
 
+from utils.common import download_file_from_s3_by_s5cmd
+
 from emd.models import Model
 from emd.constants import MODEL_DEFAULT_TAG,LOCAL_REGION
 from emd.models.utils.constants import FrameworkType,ServiceType,InstanceType
 
-from utils.common import str2bool
 from emd.utils.aws_service_utils import check_cn_region
 from emd.models import Model, ExecutableConfig
 from emd.models.utils.serialize_utils import load_extra_params,dump_extra_params
@@ -46,6 +47,7 @@ def parse_args():
     parser.add_argument("--skip_image_build", action='store_true')
     parser.add_argument("--skip_deploy", action='store_true')
     parser.add_argument("--disable_parallel_prepare_and_build_image", action='store_true')
+    parser.add_argument("--dockerfile_local_path", type=str, default=None)
     parser.add_argument(
             "--extra_params",
             type=load_extra_params,
@@ -82,19 +84,50 @@ def run_build_image(args):
     if not args.image_uri and not args.skip_image_build:
         logger.info("build image...")
         from deploy import build_and_push_image
-        build_and_push_output_params = build_and_push_image.run(
-            region=args.region,
-            model_id=args.model_id,
-            model_tag=args.model_tag,
-            backend_type=args.backend_type,
-            service_type=args.service_type,
-            framework_type=args.framework_type,
-            image_name=args.image_name,
-            image_tag="latest" if args.model_tag == MODEL_DEFAULT_TAG else args.model_tag,
-            model_s3_bucket=args.model_s3_bucket,
-            instance_type=args.instance_type,
-            extra_params=args.extra_params
-        )
+        if args.extra_params.get("model_params", {}).get("custom_dockerfile_path", None):
+            dockerfile_s3_path = args.extra_params["model_params"]["custom_dockerfile_path"]
+            image_build_dir = os.path.join(os.getcwd(), "docker_build")
+            os.makedirs(image_build_dir, exist_ok=True)
+            local_zip_path = os.path.join(image_build_dir, "docker_build.zip")
+            # download dockerfile from s3
+            download_file_from_s3_by_s5cmd(
+                dockerfile_s3_path,
+                local_zip_path
+            )
+            os.system(f"unzip {local_zip_path} -dq {image_build_dir}")
+            # build image with custom dockerfile
+            logger.info(f"custom_dockerfile_path: {dockerfile_s3_path}")
+            logger.info(f"image_build_dir: {image_build_dir}")
+            dockerfile_local_path = os.path.join(image_build_dir, "Dockerfile")
+            logger.info(f"dockerfile_local_path: {dockerfile_local_path}")
+            build_and_push_output_params = build_and_push_image.run_custom(
+                region=args.region,
+                model_id=args.model_id,
+                model_tag=args.model_tag,
+                backend_type=args.backend_type,
+                service_type=args.service_type,
+                framework_type=args.framework_type,
+                image_name=args.image_name,
+                image_tag="latest" if args.model_tag == MODEL_DEFAULT_TAG else args.model_tag,
+                model_s3_bucket=args.model_s3_bucket,
+                instance_type=args.instance_type,
+                extra_params=args.extra_params,
+                dockerfile_local_path=dockerfile_local_path
+            )
+        else:
+            build_and_push_output_params = build_and_push_image.run(
+                region=args.region,
+                model_id=args.model_id,
+                model_tag=args.model_tag,
+                backend_type=args.backend_type,
+                service_type=args.service_type,
+                framework_type=args.framework_type,
+                image_name=args.image_name,
+                image_tag="latest" if args.model_tag == MODEL_DEFAULT_TAG else args.model_tag,
+                model_s3_bucket=args.model_s3_bucket,
+                instance_type=args.instance_type,
+                extra_params=args.extra_params
+            )
     else:
         print("skip build image...")
     print(f"image build elapsed time: ", time.time() - t2)

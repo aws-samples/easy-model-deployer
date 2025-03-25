@@ -74,7 +74,7 @@ class Instance(ModelBase):
 class Engine(ModelBase):
     engine_type: EngineType
     engine_dockerfile_config: Union[dict,None] = Field(default_factory=dict)
-    engine_cls: str
+    engine_cls: Union[str,None] = None
     dockerfile_name: str = "Dockerfile"
     base_image_account_id: Union[str,None] = None
     base_image_host: Union[str,None] = None
@@ -176,7 +176,7 @@ class Model(ModelBase,Generic[T]):
     require_huggingface_token: bool = False
     modelscope_model_id: str = ""
     require_modelscope_token: bool = False
-    application_scenario: str
+    application_scenario: str = ""
     description: str =  ""
     model_type: ModelType = ModelType.LLM
     need_prepare_model: bool = True
@@ -184,7 +184,7 @@ class Model(ModelBase,Generic[T]):
     model_files_s3_path: Union[str,None] = None
     model_files_local_path: Union[str,None] = None
     model_files_download_source: ModelFilesDownloadSource = ModelFilesDownloadSource.AUTO
-    model_series: ModelSeries
+    model_series: ModelSeries = None
     executable_config: Union[ExecutableConfig,None] = None
 
     @classmethod

@@ -18,6 +18,7 @@ from . import (
     asr,
     embeddings,
     reranks,
+    custom_models,
 )
 # text-2-image,text-2-video
 
@@ -26,3 +27,4 @@ from . import instances
 from . import services
 from . import model_series
 from . import frameworks
+

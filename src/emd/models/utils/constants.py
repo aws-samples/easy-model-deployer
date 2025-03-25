@@ -32,6 +32,7 @@ class EngineType(ConstantBase):
     LLAMA_CPP = "llama.cpp"
     TGI = "tgi"
     LMDEPLOY = 'lmdeploy'
+    CUSTOM = "custom"
 
     # @classmethod
     # def get_engine_description(cls,engine_type:str):
