@@ -32,6 +32,7 @@ class EngineType(ConstantBase):
     LLAMA_CPP = "llama.cpp"
     TGI = "tgi"
     LMDEPLOY = 'lmdeploy'
+    KTRANFORMERS = 'ktransformers'
 
     # @classmethod
     # def get_engine_description(cls,engine_type:str):
@@ -60,6 +61,15 @@ class InstanceType(ConstantBase):
     G5dXLARGE = "g5.xlarge"
     G5d4XLARGE = "g5.4xlarge"
     G5d8XLARGE = "g5.8xlarge"
+
+    G6d48XLARGE = "g6.48xlarge"
+    G6d24XLARGE = "g6.24xlarge"
+    G6d12XLARGE = "g6.12xlarge"
+    G6d16XLARGE = "g6.16xlarge"
+    G6d2XLARGE = "g6.2xlarge"
+    G6dXLARGE = "g6.xlarge"
+    G6d4XLARGE = "g6.4xlarge"
+    G6d8XLARGE = "g6.8xlarge"
 
     G6eXLARGE = "g6e.xlarge"
     G6e2XLARGE = "g6e.2xlarge"
@@ -171,6 +181,13 @@ class ServiceQuotaCode(ConstantBase):
             InstanceType.G5d16XLARGE: cls.G5d16XLARGE_ENDPOINT,
             InstanceType.G5d24XLARGE: cls.G5d24XLARGE_ENDPOINT,
             InstanceType.G5d48XLARGE: cls.G5d48XLARGE_ENDPOINT,
+
+            InstanceType.G6d8XLARGE: "L-B0F91871",
+            InstanceType.G6d12XLARGE: "L-0A29AACF",
+            InstanceType.G6d16XLARGE: "L-913947FA",
+            InstanceType.G6d24XLARGE: "L-6A3E5D65",
+            InstanceType.G6d48XLARGE: "L-28FEB563",
+
             InstanceType.G6eXLARGE: "G6e2XLARGE",
             InstanceType.G6e2XLARGE: cls.G6e2XLARGE_ENDPOINT,
             InstanceType.G6e4XLARGE: "L-93531071",

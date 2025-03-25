@@ -5,7 +5,8 @@ from ..engines import (
     ollama_deepseek_r1_qwen2d5_1d5b_engine057,
     llama_cpp_deepseek_r1_1d58_bit_engine_b9ab0a4,
     llama_cpp_deepseek_r1_distill_engineb9ab0a4,
-    tgi_deepseek_r1_llama_70b_engine301
+    tgi_deepseek_r1_llama_70b_engine301,
+    ktransformers_engine,
 )
 from ..services import (
     sagemaker_service,
@@ -22,7 +23,20 @@ from ..instances import (
     g5d16xlarge_instance,
     g5d24xlarge_instance,
     g5d48xlarge_instance,
+    g6d2xlarge_instance,
+    g6d4xlarge_instance,
+    g6d8xlarge_instance,
+    g6d12xlarge_instance,
+    g6d16xlarge_instance,
+    g6d24xlarge_instance,
+    g6d48xlarge_instance,
     g6e2xlarge_instance,
+    g6e4xlarge_instance,
+    g6e8xlarge_instance,
+    g6e12xlarge_instance,
+    g6e16xlarge_instance,
+    g6e24xlarge_instance,
+    g6e48xlarge_instance,
     inf2d8xlarge_instance,
     local_instance
 )
@@ -352,9 +366,24 @@ Model.register(
 Model.register(
     dict(
         model_id = "deepseek-r1-671b-1.58bit_gguf",
-        supported_engines=[llama_cpp_deepseek_r1_1d58_bit_engine_b9ab0a4],
+        supported_engines=[llama_cpp_deepseek_r1_1d58_bit_engine_b9ab0a4, ktransformers_engine],
         supported_instances=[
+            g5d8xlarge_instance,
+            g5d12xlarge_instance,
+            g5d16xlarge_instance,
+            g5d24xlarge_instance,
             g5d48xlarge_instance,
+            g6d8xlarge_instance,
+            g6d12xlarge_instance,
+            g6d16xlarge_instance,
+            g6d24xlarge_instance,
+            g6d48xlarge_instance,
+            g6e4xlarge_instance,
+            g6e8xlarge_instance,
+            g6e12xlarge_instance,
+            g6e16xlarge_instance,
+            g6e24xlarge_instance,
+            g6e48xlarge_instance,
             local_instance
         ],
         supported_services=[
@@ -370,7 +399,7 @@ Model.register(
         need_prepare_model=False,
         huggingface_model_id="unsloth/DeepSeek-R1-GGUF",
         huggingface_model_download_kwargs = dict(allow_patterns = ["*UD-IQ1_S*"]),
-        # modelscope_model_id="Qwen/Qwen2.5-14B-Instruct",
+        modelscope_model_id="unsloth/DeepSeek-R1-GGUF",
         require_huggingface_token=False,
         application_scenario="Agent, tool use, translation, summary",
         description="The latest series of DeepSeek LLMs for reasoning",
@@ -379,6 +408,83 @@ Model.register(
     )
 )
 
+Model.register(
+    dict(
+        model_id = "deepseek-r1-671b-2.51bit_gguf",
+        supported_engines=[ktransformers_engine],
+        supported_instances=[
+            g5d12xlarge_instance,
+            g5d16xlarge_instance,
+            g5d24xlarge_instance,
+            g5d48xlarge_instance,
+            g6d12xlarge_instance,
+            g6d16xlarge_instance,
+            g6d24xlarge_instance,
+            g6d48xlarge_instance,
+            g6e8xlarge_instance,
+            g6e12xlarge_instance,
+            g6e16xlarge_instance,
+            g6e24xlarge_instance,
+            g6e48xlarge_instance,
+            local_instance
+        ],
+        supported_services=[
+            sagemaker_service,
+            sagemaker_async_service,
+            ecs_service,
+            local_service
+        ],
+        supported_frameworks=[
+            fastapi_framework
+        ],
+        allow_china_region=True,
+        need_prepare_model=False,
+        huggingface_model_id="unsloth/DeepSeek-R1-GGUF",
+        huggingface_model_download_kwargs = dict(allow_patterns = ["*UD-Q2_K_XL*"]),
+        modelscope_model_id="unsloth/DeepSeek-R1-GGUF",
+        require_huggingface_token=False,
+        application_scenario="Agent, tool use, translation, summary",
+        description="The latest series of DeepSeek LLMs for reasoning",
+        model_type=ModelType.LLM,
+        model_series=DEEPSEEK_REASONING_MODEL
+    )
+)
+
+Model.register(
+    dict(
+        model_id = "deepseek-r1-671b-4bit_gguf",
+        supported_engines=[ktransformers_engine],
+        supported_instances=[
+            g5d24xlarge_instance,
+            g5d48xlarge_instance,
+            g6d24xlarge_instance,
+            g6d48xlarge_instance,
+            g6e16xlarge_instance,
+            g6e24xlarge_instance,
+            g6e48xlarge_instance,
+            local_instance
+        ],
+        supported_services=[
+            sagemaker_service,
+            sagemaker_async_service,
+            ecs_service,
+            local_service
+        ],
+        supported_frameworks=[
+            fastapi_framework
+        ],
+        allow_china_region=True,
+        need_prepare_model=False,
+        huggingface_model_id="unsloth/DeepSeek-R1-GGUF",
+        huggingface_model_download_kwargs = dict(allow_patterns = ["*Q4_K_M*"]),
+        modelscope_model_id="unsloth/DeepSeek-R1-GGUF",
+        require_huggingface_token=False,
+        application_scenario="Agent, tool use, translation, summary",
+        description="The latest series of DeepSeek LLMs for reasoning",
+        model_type=ModelType.LLM,
+        model_series=DEEPSEEK_REASONING_MODEL
+    )
+)
 
 Model.register(
     dict(

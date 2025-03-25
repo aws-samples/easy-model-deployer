@@ -15,6 +15,8 @@ def get_gpu_num(shell_script="nvidia-smi --list-gpus | wc -l"):
     except ValueError:
         raise ValueError(f"Failed to parse gpu nums: {stdout}")
 
+def get_cpu_num():
+    return os.cpu_count()
 
 def get_neuron_core_num(shell_script="neuron-ls -j"):
     ret = execute_command(shell_script)
