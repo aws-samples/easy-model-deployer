@@ -136,7 +136,8 @@ def ask_model_id(region,model_id=None):
 
     # step 1: select model series name
     support_models:list[Model] = sorted(
-        [Model.get_model(m) for m in Model.get_supported_models()],
+        [Model.get_model(m) for m in Model.get_supported_models() 
+         if hasattr(Model.get_model(m), 'model_series') and hasattr(Model.get_model(m).model_series, 'model_series_name')],
         key=lambda x:x.model_series.model_series_name
     )
     # filter models
