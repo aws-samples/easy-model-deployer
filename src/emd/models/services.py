@@ -17,7 +17,7 @@ sagemaker_service = Service(
         "Region":"region",
         "MaxCapacity": ValueWithDefault(name="max_capacity",default=1),
         "AutoScalingTargetValue": ValueWithDefault(name="auto_scaling_target_value",default=10),
-        "SageMakerEndpointName": "sagemaker_endpoint_name"
+        "SageMakerEndpointName": ValueWithDefault(name="sagemaker_endpoint_name",default="noname")
     },
     name = "Amazon SageMaker AI Real-time inference",
     service_type=ServiceType.SAGEMAKER,
