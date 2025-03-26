@@ -40,6 +40,12 @@ BCE_SERIES = ModelSeries(
     reference_link="https://huggingface.co/maidalun1020/bce-embedding-base_v1"
 )
 
+JINA_SERIES = ModelSeries(
+    model_series_name=ModelSeriesType.JINA,
+    description="Search foundation models: embeddings, rerankers, small LMs for better search",
+    reference_link="https://huggingface.co/jinaai"
+)
+
 
 QWEN2VL_SERIES = ModelSeries(
     model_series_name=ModelSeriesType.QWEN2VL,

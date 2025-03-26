@@ -20,7 +20,6 @@ from ..model_series import BGE_SERIES,BCE_SERIES
 
 
 
-
 Model.register(
     dict(
         model_id = "bce-embedding-base_v1",

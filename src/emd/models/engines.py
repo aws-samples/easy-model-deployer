@@ -377,6 +377,27 @@ huggingface_baichuan_engine_4d41d2 = HuggingFaceLLMEngine(**{
             "pretrained_tokenizer_init_kwargs":{"trust_remote_code":True}
 })
 
+huggingface_embedding_engine449 = HuggingFaceLLMEngine(**{
+            "engine_type":EngineType.HUGGINGFACE,
+            "engine_cls":"huggingface.embedding.transformers_embedding_backend.TransformerEmbeddingBackend",
+            "python_name":"python3",
+            "base_image_host":"public.ecr.aws",
+            "use_public_ecr":True,
+            "docker_login_region":"us-east-1",
+            "engine_dockerfile_config": {"VERSION":"4.49.0"},
+            "pretrained_model_init_kwargs":{"trust_remote_code":True,"torch_dtype":"float16"},
+})
+
+huggingface_rerank_engine449 = HuggingFaceLLMEngine(**{
+            "engine_type":EngineType.HUGGINGFACE,
+            "engine_cls":"huggingface.rerank.transformers_rerank_backend.TransformerRerankBackend",
+            "python_name":"python3",
+            "base_image_host":"public.ecr.aws",
+            "use_public_ecr":True,
+            "docker_login_region":"us-east-1",
+            "engine_dockerfile_config": {"VERSION":"4.49.0"},
+            "pretrained_model_init_kwargs":{"trust_remote_code":True,"torch_dtype":"float16"},
+})
 
 comfyui_engine = ComfyuiEngine(**{
             "engine_type":EngineType.COMFYUI,

@@ -75,7 +75,8 @@ def health():
 @app.post("/invocations")
 @app.post("/v1/chat/completions")
 @app.post("/v1/embeddings")
-@app.post("/score")
+@app.post("/v1/rerank")
+# @app.post("/score")
 # @measure_time
 async def invocations(request: Request, authorization: str = Depends(get_authorization)):
     # logger.info('invocations ......')

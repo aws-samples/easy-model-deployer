@@ -1,1 +1,2 @@
-from .bert_embedding import *
+from . import bert_embedding
+from . import jina

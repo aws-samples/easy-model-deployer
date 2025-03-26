@@ -217,6 +217,7 @@ class ModelSeriesType(ConstantBase):
     INTERLM2d5 = "internlm2.5"
     WHISPER = "whisper"
     BGE = "bge"
+    JINA = 'jina'
     BCE = "bce"
     COMFYUI = "comfyui"
     QWEN2VL = "qwen2vl"

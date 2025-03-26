@@ -4,5 +4,6 @@ from . import (
     qwen,
     llama,
     deepseek,
-    baichuan
+    baichuan,
+    jina
 )

@@ -38,7 +38,7 @@ class VLLMBackend(OpenAICompitableProxyBackendBase):
                 "Accept-Type": "application/json",
             }
             response = httpx.post(
-                f'{self.base_url}/score',
+                f'{self.base_url}/rerank',
                 json=request,
                 headers=headers
             ).json()
@@ -66,7 +66,7 @@ class VLLMBackend(OpenAICompitableProxyBackendBase):
                 "Accept-Type": "application/json",
             }
             response = httpx.post(
-                f'{self.base_url}/score',
+                f'{self.base_url}/rerank',
                 json=request,
                 headers=headers
             ).json()

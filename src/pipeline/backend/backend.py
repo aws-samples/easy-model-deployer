@@ -136,6 +136,7 @@ class OpenAICompitableProxyBackendBase(BackendBase):
         t.start()
         t2 = threading.Thread(target=self.check_model_serve_ready,args=(t, "127.0.0.1", self.server_port),daemon=True)
         t2.start()
+        t2.join()
         return
 
 

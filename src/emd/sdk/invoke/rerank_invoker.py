@@ -16,8 +16,8 @@ class RerankInvoker(InvokerBase):
     def invoke(self):
         pyload = {
             "encoding_format": "float",
-            "text_1": self.text_a,
-            "text_2": self.text_b
+            "query": self.text_a,
+            "documents": [self.text_b]
         }
         ret = self._invoke(pyload)
         return ret
