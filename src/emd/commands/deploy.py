@@ -247,7 +247,7 @@ def deploy(
 
     if dockerfile_local_path:
         response = sdk_deploy(
-            model_id='Model-In-Docker',
+            model_id='custom-docker',
             model_tag=f"{model_id}-{model_tag}",
             instance_type=instance_type,
             engine_type='custom',

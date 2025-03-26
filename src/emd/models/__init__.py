@@ -18,7 +18,7 @@ from . import (
     asr,
     embeddings,
     reranks,
-    custom_models,
+    custom,
 )
 # text-2-image,text-2-video
 
