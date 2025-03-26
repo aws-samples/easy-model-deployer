@@ -35,23 +35,24 @@ def conversation_invoke(model_id:str,model_tag:str,stream:bool=False):
             reasoning_started = False
             console.print(f"[bold green]Assistant: [/bold green]")
             for chunk in ret:
-                chunk_reasoning_content = chunk['choices'][0]['delta'].get('reasoning_content', '')
-                chunk_content = chunk['choices'][0]['delta'].get('content', '')
+                if len(chunk['choices']) > 0:
+                    chunk_reasoning_content = chunk['choices'][0]['delta'].get('reasoning_content', '')
+                    chunk_content = chunk['choices'][0]['delta'].get('content', '')
 
-                if chunk_reasoning_content and not reasoning_started:
-                    print("<Reasoning>", end='', flush=True)
-                    reasoning_started = True
+                    if chunk_reasoning_content and not reasoning_started:
+                        print("<Reasoning>", end='', flush=True)
+                        reasoning_started = True
 
-                if chunk_reasoning_content:
-                    print(chunk_reasoning_content, end='', flush=True)
-                    reasoning_content += chunk_reasoning_content
+                    if chunk_reasoning_content:
+                        print(chunk_reasoning_content, end='', flush=True)
+                        reasoning_content += chunk_reasoning_content
 
-                if chunk_content:
-                    if reasoning_started:
-                        print("</Reasoning>", end='', flush=True)
-                        reasoning_started = False
-                    print(chunk_content, end='', flush=True)
-                    content += chunk_content
+                    if chunk_content:
+                        if reasoning_started:
+                            print("</Reasoning>", end='', flush=True)
+                            reasoning_started = False
+                        print(chunk_content, end='', flush=True)
+                        content += chunk_content
             if reasoning_content:
                 content += f"<Reasoning>\n{reasoning_content}\n</Reasoning>\n{content}"
             print('', flush=True)

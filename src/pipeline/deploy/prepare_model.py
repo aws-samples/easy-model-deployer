@@ -48,6 +48,8 @@ def download_huggingface_model(model:Model,model_dir=None):
             if not check_website_urllib(huggingface_endpoint):
                 logger.error(f"Endpoint {huggingface_endpoint} is not reachable")
                 continue
+            logger.info(f"model_dir: {model_dir}")
+            logger.info(f"model_download_kwarg: {model.huggingface_model_download_kwargs}")
             hf_snapshot_download(
                 huggingface_model_id,
                 local_dir=model_dir,

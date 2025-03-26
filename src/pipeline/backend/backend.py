@@ -17,7 +17,7 @@ from fastapi.concurrency import run_in_threadpool
 # import httpx
 from emd.models.utils.constants import ModelType,ServiceType
 from emd.models import Engine
-from emd.utils.accelerator_utils import get_gpu_num,get_neuron_core_num
+from emd.utils.accelerator_utils import get_gpu_num,get_neuron_core_num,get_cpu_num
 
 
 from utils.common import download_dir_from_s3_by_s5cmd
@@ -89,6 +89,10 @@ class OpenAICompitableProxyBackendBase(BackendBase):
         return get_gpu_num()
 
     @property
+    def cpu_num(self):
+        return get_cpu_num()
+
+    @property
     def neuron_core_num(self):
         if self.custom_neuron_core_num is not None:
             return self.custom_neuron_core_num
@@ -130,11 +134,8 @@ class OpenAICompitableProxyBackendBase(BackendBase):
         logger.info(f"Starting {self.engine_type} server with command: {server_start_command}")
         t = threading.Thread(target=os.system,args=(server_start_command,),daemon=True)
         t.start()
-        self.check_model_serve_ready(
-            t,
-            "127.0.0.1",
-            self.server_port
-        )
+        t2 = threading.Thread(target=self.check_model_serve_ready,args=(t, "127.0.0.1", self.server_port),daemon=True)
+        t2.start()
         return
 
 

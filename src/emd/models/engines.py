@@ -15,6 +15,9 @@ class VllmEngine(OpenAICompitableEngine):
     pass
 
 
+# class MultiModelVllmEngine:
+
+
 class LMdeployEngine(OpenAICompitableEngine):
     pass
 
@@ -43,6 +46,8 @@ class HuggingFaceLLMEngine(Engine):
 class ComfyuiEngine(Engine):
     pass
 
+class KtransformersEngine(OpenAICompitableEngine):
+    pass
 
 vllm_engine064 = VllmEngine(**{
             "engine_type":EngineType.VLLM,
@@ -381,7 +386,10 @@ comfyui_engine = ComfyuiEngine(**{
             "docker_login_region":"us-east-1",
 })
 
-custom_engine = Engine(**{
-            "engine_type":EngineType.CUSTOM,
+ktransformers_engine = KtransformersEngine(**{
+            "engine_type":EngineType.KTRANFORMERS,
+            "engine_cls":"ktransformers.ktransformers_backend.KTransformersBackend",
+            "base_image_host":"nvcr.io",
+            "use_public_ecr":False,
+            "default_cli_args": " --max_new_tokens 2048",
 })
-

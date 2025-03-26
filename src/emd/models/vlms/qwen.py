@@ -85,6 +85,35 @@ Model.register(
 
 Model.register(
     dict(
+        model_id = "Qwen2.5-VL-32B-Instruct",
+        supported_engines=[vllm_qwen25vl72b_engine073],
+        supported_instances=[
+            g5d12xlarge_instance,
+            g5d24xlarge_instance,
+            g5d48xlarge_instance,
+            local_instance
+        ],
+        supported_services=[
+            sagemaker_service,
+            sagemaker_async_service,
+            local_service
+        ],
+        supported_frameworks=[
+            fastapi_framework
+        ],
+        allow_china_region=True,
+        huggingface_model_id="Qwen/Qwen2.5-VL-32B-Instruct",
+        modelscope_model_id="Qwen/Qwen2.5-VL-32B-Instruct",
+        require_huggingface_token=False,
+        application_scenario="vision llms for image understanding",
+        description="The latest series of Qwen2.5 VL",
+        model_type=ModelType.VLM,
+        model_series=QWEN2VL_SERIES
+    )
+)
+
+Model.register(
+    dict(
         model_id = "QVQ-72B-Preview-AWQ",
         supported_engines=[vllm_qwen2vl72b_engine064],
         supported_instances=[

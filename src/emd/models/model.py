@@ -2,7 +2,7 @@ import os
 import re
 import importlib
 from pydantic import BaseModel,Field,ConfigDict,SerializeAsAny
-from typing import List,ClassVar,Union,TypeVar, Generic,Any
+from typing import List,ClassVar,Union,TypeVar, Generic,Any,Dict
 from .utils.constants import (
     EngineType,
     InstanceType,
@@ -94,6 +94,11 @@ class Engine(ModelBase):
         *module_path,hook_name = hook_path.split(".")
         module = importlib.import_module(".".join(module_path))
         return getattr(module,hook_name)
+
+
+class MultiModelEngine(ModelBase):
+    engines: Dict[str,Engine]
+
 
 class Service(ModelBase):
     cfn_parameters:dict = Field(default_factory=dict)
