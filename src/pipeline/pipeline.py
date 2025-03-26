@@ -94,7 +94,7 @@ def run_build_image(args):
                 dockerfile_s3_path,
                 local_zip_path
             )
-            os.system(f"unzip {local_zip_path} -dq {image_build_dir}")
+            os.system(f"unzip -o {local_zip_path} -d {image_build_dir}")
             # build image with custom dockerfile
             logger.info(f"custom_dockerfile_path: {dockerfile_s3_path}")
             logger.info(f"image_build_dir: {image_build_dir}")
