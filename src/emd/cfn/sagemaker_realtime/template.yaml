@@ -37,10 +37,10 @@ Parameters:
   SageMakerEndpointName:
     Type: String
     Description: The name of the SageMaker Endpoint
-    Default: "none"
+    Default: "noname"
 
 Conditions:
-  UseDefaultEndpointName: !Equals [!Ref SageMakerEndpointName, "none"]
+  UseDefaultEndpointName: !Equals [!Ref SageMakerEndpointName, "noname"]
 
 Resources:
   ExecutionRole:
