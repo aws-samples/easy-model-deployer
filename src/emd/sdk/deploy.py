@@ -183,7 +183,7 @@ def deploy(
     if dockerfile_local_path:
         if not os.path.exists(dockerfile_local_path):
             raise FileNotFoundError(f"Dockerfile path {dockerfile_local_path} does not exist.")
-        
+
         # Create a zip file of the dockerfile directory
         zip_buffer = zipped_dockerfile(dockerfile_local_path)
 

@@ -97,7 +97,7 @@ Resources:
   SageMakerEndpoint:
     Type: AWS::SageMaker::Endpoint
     Properties:
-      EndpointName: !If 
+      EndpointName: !If
         - UseDefaultEndpointName
         - !Sub '${AWS::StackName}-endpoint'
         - !Ref SageMakerEndpointName

@@ -44,7 +44,7 @@ def download_dir_from_s3_by_s5cmd(local_dir,bucket_name=None, s3_key=None,model_
 def download_file_from_s3_by_s5cmd(s3_file_path, local_file_path):
     """
     Download a file from S3 using s5cmd.
-    
+
     Args:
         s3_file_path (str): The S3 file path (e.g., s3://bucket/key).
         local_file_path (str): The local file path to save the downloaded file.

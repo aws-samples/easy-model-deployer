@@ -393,3 +393,7 @@ ktransformers_engine = KtransformersEngine(**{
             "use_public_ecr":False,
             "default_cli_args": " --max_new_tokens 2048",
 })
+
+custom_engine = Engine(**{
+            "engine_type":EngineType.CUSTOM,
+})
