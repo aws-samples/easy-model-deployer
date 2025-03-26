@@ -189,7 +189,7 @@ def deploy(
 
         # Upload the zip file to S3
         s3 = boto3.client('s3', region_name=region)
-        s3_key = f"emd_models/{model_id}.zip"
+        s3_key = f"emd_models/{model_id}-{model_tag}.zip"
         s3.upload_fileobj(zip_buffer, bucket_name, s3_key)
         extra_params["model_params"] = extra_params.get("model_params", {})
         extra_params["model_params"]["custom_dockerfile_path"] = f"s3://{bucket_name}/{s3_key}"

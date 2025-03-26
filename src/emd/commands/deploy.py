@@ -247,13 +247,14 @@ def deploy(
 
     if dockerfile_local_path:
         response = sdk_deploy(
-            model_id=model_id,
+            model_id='Model-In-Docker',
+            model_tag=f"{model_id}-{model_tag}",
             instance_type=instance_type,
-            engine_type=engine_type,
-            service_type=service_type,
+            engine_type='custom',
+            framework_type='custom',
+            service_type='sagemaker_realtime',
             region=region,
             extra_params = extra_params,
-            model_tag=model_tag,
             env_stack_on_failure = "ROLLBACK",
             force_env_stack_update = force_update_env_stack,
             waiting_until_deploy_complete=True,
