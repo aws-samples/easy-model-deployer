@@ -6,6 +6,7 @@ from .logger_utils import get_logger
 import json
 import hashlib
 import boto3
+from emd.utils.aws_service_utils import get_current_region
 logger = get_logger(__name__)
 
 
@@ -22,7 +23,7 @@ def check_aws_environment():
     """
     try:
         # Try to create a boto3 client and make a simple API call
-        sts = boto3.client('sts')
+        sts = boto3.client("sts", region_name=get_current_region())
         response = sts.get_caller_identity()
         logger.info("AWS environment is properly configured.")
         account_id = response['Account']

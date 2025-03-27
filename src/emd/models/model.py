@@ -15,6 +15,7 @@ from .utils.constants import (
 )
 import boto3
 from .utils.text_utilities import normalize
+from emd.utils.aws_service_utils import get_current_region
 from emd.constants import (
     MODEL_STACK_NAME_PREFIX,
     MODEL_DEFAULT_TAG
@@ -374,7 +375,7 @@ class Model(ModelBase,Generic[T]):
             raise ValueError(f"stack_name:{stack_name} is not a valid model stack name")
 
     def get_image_build_account_id(self):
-        current_account_id = boto3.client("sts").get_caller_identity()["Account"]
+        current_account_id = boto3.client("sts", region_name=get_current_region()).get_caller_identity()["Account"]
         build_image_account_id = (
             self.executable_config.current_engine.base_image_account_id or \
             current_account_id
@@ -382,7 +383,7 @@ class Model(ModelBase,Generic[T]):
         return build_image_account_id
 
     def get_image_push_account_id(self):
-        current_account_id = boto3.client("sts").get_caller_identity()["Account"]
+        current_account_id = boto3.client("sts", region_name=get_current_region()).get_caller_identity()["Account"]
         return current_account_id
 
     def get_image_uri(

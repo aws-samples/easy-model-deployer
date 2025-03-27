@@ -2,6 +2,7 @@ import os
 import logging
 import argparse
 import boto3
+from emd.utils.aws_service_utils import get_current_region
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -54,7 +55,7 @@ def download_file_from_s3_by_s5cmd(s3_file_path, local_file_path):
 
 def upload_dir_to_s3(bucket_name, local_dir_name):
     logger.info(f"Uploading {local_dir_name} to {bucket_name} bucket")
-    s3 = boto3.client('s3')
+    s3 = boto3.client('s3', region_name=get_current_region())
     for root, dirs, files in os.walk(local_dir_name):
         for file in files:
             local_path = os.path.join(root, file)

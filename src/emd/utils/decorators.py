@@ -97,7 +97,7 @@ def check_emd_env_exist(fn):
 @catch_aws_credential_errors
 def print_aws_profile():
     console = Console()
-    sts = boto3.client("sts")
+    sts = boto3.client("sts", region_name=get_current_region())
     response = sts.get_caller_identity()
     profile_name = os.environ.get("AWS_PROFILE","default")
     account_id = response["Account"]
