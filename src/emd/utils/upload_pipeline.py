@@ -59,6 +59,6 @@ def upload_pipeline_source_to_s3(
         region
     )
     zip_buffer = ziped_pipeline()
-    s3 = boto3.client('s3')
+    s3 = boto3.client('s3', region_name=region)
     s3.upload_fileobj(zip_buffer, bucket, s3_key)
     return f"s3://{bucket}/{s3_key}"
