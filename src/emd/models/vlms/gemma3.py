@@ -35,7 +35,10 @@ Model.register(
             local_instance
         ],
         supported_services=[
-            sagemaker_service, sagemaker_async_service,local_service
+            sagemaker_service,
+            sagemaker_async_service,
+            ecs_service,
+            local_service
         ],
         supported_frameworks=[
             fastapi_framework
@@ -63,7 +66,10 @@ Model.register(
             local_instance
         ],
         supported_services=[
-            sagemaker_service, sagemaker_async_service,local_service
+            sagemaker_service,
+            sagemaker_async_service,
+            ecs_service,
+            local_service
         ],
         supported_frameworks=[
             fastapi_framework
@@ -92,7 +98,10 @@ Model.register(
         ],
         disable_hf_transfer=True,
         supported_services=[
-            sagemaker_service, sagemaker_async_service,local_service
+            sagemaker_service,
+            sagemaker_async_service,
+            ecs_service,
+            local_service
         ],
         supported_frameworks=[
             fastapi_framework

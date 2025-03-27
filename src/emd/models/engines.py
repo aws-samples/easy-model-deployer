@@ -77,6 +77,17 @@ vllm_gemma3_engine = VllmEngine(
     }
 )
 
+
+vllm_mistral_small_engine082 = VllmEngine(
+    **{
+    **vllm_engine064.model_dump(),
+    "engine_dockerfile_config": {"VERSION":"v0.8.2"},
+    "dockerfile_name":"Dockerfile",
+    "default_cli_args": " --tokenizer-mode mistral --config-format mistral --load-format mistral  --limit-mm-per-prompt 'image=4' --max-model-len 16384",
+    "environment_variables": ""
+    }
+)
+
 vllm_deepseek_r1_distill_qwen_engine071 = VllmEngine(**{
             **vllm_engine064.model_dump(),
             "engine_dockerfile_config": {"VERSION":"v0.7.1"},

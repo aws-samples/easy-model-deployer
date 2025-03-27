@@ -13,10 +13,11 @@ from ..instances import (
     local_instance
 )
 from ..engines import custom_engine
+from ..utils.constants import CUSTOM_DOCKER_MODEL_ID
 
 Model.register(
     dict(
-        model_id = "custom-docker",
+        model_id = CUSTOM_DOCKER_MODEL_ID,
         supported_engines=[custom_engine],
         supported_instances=[
             g5dxlarge_instance,

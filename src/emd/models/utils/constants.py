@@ -2,6 +2,8 @@ from enum import Enum, EnumMeta
 from typing import ClassVar
 
 
+CUSTOM_DOCKER_MODEL_ID = "custom-docker"
+
 class EnumDirectValueMeta(EnumMeta):
     def __getattribute__(cls, name):
         value = super().__getattribute__(name)
@@ -212,6 +214,7 @@ class ServiceQuotaCode(ConstantBase):
 
 class ModelSeriesType(ConstantBase):
     GEMMA3 = "gemma3"
+    MISTRAL = "mistral"
     QWEN2D5 = "qwen2.5"
     GLM4 = "glm4"
     INTERLM2d5 = "internlm2.5"
