@@ -228,16 +228,6 @@ def run_deploy(execute_model, service_deploy_parameters, region, role_name):
 
 def get_executable_model(args):
     model = Model.get_model(args.model_id)
-    # executable_config = ExecutableConfig(
-    #     region=args.region,
-    #     current_engine=model.find_current_engine(args.backend_type),
-    #     current_instance=model.find_current_instance(args.instance_type),
-    #     current_service=model.find_current_service(args.service_type),
-    #     current_framework=model.find_current_framework(args.framework_type),
-    #     model_s3_bucket=args.model_s3_bucket,
-    #     extra_params=args.extra_params,
-    #     model_tag=args.model_tag
-    # )
     execute_model = model.convert_to_execute_model(
         engine_type=args.backend_type,
         instance_type=args.instance_type,

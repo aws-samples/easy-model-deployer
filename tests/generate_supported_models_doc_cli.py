@@ -1,11 +1,14 @@
 import argparse
 import pandas
 from emd.models import Model
+from emd.models.utils.constants import CUSTOM_DOCKER_MODEL_ID
 
 
 def generate_model_table():
     model_infos = []
     for _, model in Model.model_map.items():
+        if model.model_id == CUSTOM_DOCKER_MODEL_ID:
+            continue
         supported_instances = [i.instance_type for i in model.supported_instances]
         if "local" in supported_instances:
             supported_instances.remove("local")

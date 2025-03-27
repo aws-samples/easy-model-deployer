@@ -59,10 +59,12 @@ emd deploy --model-id Qwen2.5-14B-Instruct-AWQ --instance-type g4dn.2xlarge --en
 }'
 ```
 
+## Environmental variables
+- `LOCAL_DEPLOY_PORT: ` Local deployment port, default: `8080`
+
 ## Common Troubleshooting
 
-If your deployment fails due to out-of-memory issues, try:
-
-- Using a larger instance type
-- Reducing max_model_len and max_num_seqs in the engine parameters
-- Setting a lower gpu_memory_utilization value (e.g., 0.8 instead of the default)
+- If your deployment fails due to out-of-memory issues, try:
+  - Using a larger instance type
+  - Reducing max_model_len and max_num_seqs in the engine parameters
+  - Setting a lower gpu_memory_utilization value (e.g., 0.8 instead of the default)
