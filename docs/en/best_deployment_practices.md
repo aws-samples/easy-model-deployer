@@ -4,6 +4,11 @@ This document provides examples of best practices for deploying models using EMD
 
 ## Famous Models
 
+### Mistral Small Series
+```
+emd deploy --model-id Mistral-Small-3.1-24B-Instruct-2503 --instance-type g5.12xlarge --engine-type vllm --service-type sagemaker_realtime
+```
+
 ### Gemma 3 Series
 
 ```

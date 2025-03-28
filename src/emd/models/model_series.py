@@ -97,6 +97,12 @@ Gemma3_SERIES = ModelSeries(
     reference_link="https://blog.google/technology/developers/gemma-3/"
 )
 
+MISTRAL_SERIES = ModelSeries(
+    model_series_name=ModelSeriesType.MISTRAL,
+    description="LLMs and VLMs provided by MISTRAL AI.",
+    reference_link="https://huggingface.co/mistralai"
+)
+
 DEEPSEEK_REASONING_MODEL = ModelSeries(
     model_series_name=ModelSeriesType.DEEPSEEK_REASONING_MODEL,
     description="DeepSeek-R1-Zero and DeepSeek-R1 are innovative reasoning models, with the former showcasing strong performance through reinforcement learning alone, while the latter enhances reasoning capabilities by incorporating cold-start data, achieving results comparable to OpenAI-o1 and setting new benchmarks with its distilled versions.",
