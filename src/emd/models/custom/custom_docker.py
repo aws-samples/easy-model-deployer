@@ -5,6 +5,12 @@ from ..services import (
 )
 from ..frameworks import custom_framework
 from ..instances import (
+    g4dnxlarge_instance,
+    g4dn2xlarge_instance,
+    g4dn4xlarge_instance,
+    g4dn8xlarge_instance,
+    g4dn12xlarge_instance,
+    g4dn16xlarge_instance,
     g5dxlarge_instance,
     g5d2xlarge_instance,
     g5d4xlarge_instance,
