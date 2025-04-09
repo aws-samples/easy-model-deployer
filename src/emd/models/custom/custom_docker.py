@@ -26,6 +26,12 @@ Model.register(
         model_id = CUSTOM_DOCKER_MODEL_ID,
         supported_engines=[custom_engine],
         supported_instances=[
+            g4dnxlarge_instance,
+            g4dn2xlarge_instance,
+            g4dn4xlarge_instance,
+            g4dn8xlarge_instance,
+            g4dn12xlarge_instance,
+            g4dn16xlarge_instance,
             g5dxlarge_instance,
             g5d2xlarge_instance,
             g5d4xlarge_instance,
