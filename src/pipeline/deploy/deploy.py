@@ -108,9 +108,7 @@ def run(
             + "-"
             + time.strftime("%Y-%m-%d-%H-%M-%S")
         )
-
         role_arn = get_or_create_role(role_name, region)
-
         create_sagemaker_endpoint(
             region=region,
             instance_type=instance_type,

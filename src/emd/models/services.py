@@ -92,6 +92,9 @@ ecs_service = Service(
         "EngineType":"engine_type",
         "Region": "region",
         "DesiredCapacity": ValueWithDefault(name="desired_capacity",default=1),
+        "MaxSize": ValueWithDefault(name="max_size",default=1),
+        "VPCID": ValueWithDefault(name="vpc_id",default=""),
+        "Subnets": ValueWithDefault(name="subnet_ids",default=""),
         "ContainerCpu": "container_cpu",
         "ContainerMemory": "container_memory",
         "ContainerGpu":"instance_gpu_num"
