@@ -63,6 +63,7 @@ Resources:
                   - lambda:*
                   - logs:*
                   - elasticloadbalancing:*
+                  - application-autoscaling:*
                 Resource:
                   - "*"
       ManagedPolicyArns:
@@ -236,6 +237,7 @@ Resources:
                   cd ..
                   cp cfn/$ServiceType/template.yaml template.yaml
                   cp pipeline/parameters.json parameters.json
+                  python cfn/shared/filter_parameters.py template.yaml parameters.json
                   cat parameters.json
                   echo post build completed on `date`
 

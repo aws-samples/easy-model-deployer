@@ -7,6 +7,20 @@ Parameters:
   Subnets:
     Type: List<AWS::EC2::Subnet::Id>
     Description: The public subnets to be used for the ECS cluster
+  APIRouterImageURI:
+    Type: String
+    Description: The URI of OpenAI compatbile API router image. If provided, the router will be deployed.
+    Default: ""
+  UseSpot:
+    Type: String
+    Description: Use Fargate Spot capacity?
+    Default: "no"
+    AllowedValues: ["yes", "no"]
+
+Conditions:
+  DeployAPIRouterCondition: !Not [!Equals [!Ref APIRouterImageURI, ""]]
+  UseSpotCondition: !Equals [!Ref UseSpot, "yes"]
+
 Resources:
   ECSCluster:
     Type: AWS::ECS::Cluster
@@ -223,6 +237,202 @@ Resources:
           LISTENER_ARN: !Ref PublicLoadBalancerListener
   LogGroup:
     Type: 'AWS::Logs::LogGroup'
+    Properties:
+      LogGroupName: /ecs/emd-cluster
+      RetentionInDays: 7
+
+  # OpenAI API Compatbile Router Resources (Conditional)
+  APIRouterTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Condition: DeployAPIRouterCondition
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [ecs-tasks.amazonaws.com]
+            Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+        - PolicyName: ecs-task-execution
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'ecr:GetAuthorizationToken'
+                  - 'ecr:BatchCheckLayerAvailability'
+                  - 'ecr:GetDownloadUrlForLayer'
+                  - 'ecr:BatchGetImage'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: '*'
+
+  APIRouterTaskRole:
+    Type: AWS::IAM::Role
+    Condition: DeployAPIRouterCondition
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [ecs-tasks.amazonaws.com]
+            Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+        - PolicyName: ecs-task-role
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'cloudformation:ListStacks'
+                  - 'cloudformation:DescribeStacks'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'sagemaker:InvokeEndpoint'
+                  - 'sagemaker:InvokeEndpointWithResponseStream'
+                Resource: '*'
+
+  APIRouterTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Condition: DeployAPIRouterCondition
+    Properties:
+      Family: EMD-API-Router
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      Cpu: 256
+      Memory: 512
+      ExecutionRoleArn: !GetAtt APIRouterTaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt APIRouterTaskRole.Arn
+      ContainerDefinitions:
+        - Name: api-router
+          Image: !Ref APIRouterImageURI
+          Essential: true
+          PortMappings:
+            - ContainerPort: 8080
+              Protocol: tcp
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref LogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: api-router
+
+  APIRouterService:
+    Type: AWS::ECS::Service
+    Condition: DeployAPIRouterCondition
+    Properties:
+      ServiceName: api-router-service
+      Cluster: !Ref ECSCluster
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker:
+          Enable: true
+          Rollback: true
+        MaximumPercent: 200
+        MinimumHealthyPercent: 50
+      DesiredCount: 1
+      EnableECSManagedTags: true
+      EnableExecuteCommand: true
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets: !Ref Subnets
+          SecurityGroups:
+            - !GetAtt APIRouterSecurityGroup.GroupId
+      TaskDefinition: !Ref APIRouterTaskDefinition
+      LoadBalancers:
+        - ContainerName: api-router
+          ContainerPort: 8080
+          TargetGroupArn: !Ref APIRouterTargetGroup
+      CapacityProviderStrategy:
+        - !If
+          - UseSpotCondition
+          - CapacityProvider: FARGATE_SPOT
+            Weight: 1
+          - CapacityProvider: FARGATE
+            Weight: 1
+
+  APIRouterSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Condition: DeployAPIRouterCondition
+    Properties:
+      GroupDescription: Security group for OpenAI compatbile API router
+      VpcId: !Ref VPCID
+
+  APIRouterScalingPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Condition: DeployAPIRouterCondition
+    Properties:
+      PolicyName: cpu-scaling-policy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref APIRouterScalingTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ECSServiceAverageCPUUtilization
+
+  APIRouterScalingTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Condition: DeployAPIRouterCondition
+    Properties:
+      MaxCapacity: 10
+      MinCapacity: 1
+      ResourceId: !Join ["/", [service, !Ref ECSCluster, !GetAtt APIRouterService.Name]]
+      RoleARN: !GetAtt APIRouterTaskExecutionRole.Arn
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+
+  APIRouterTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: PublicLoadBalancer
+    Condition: DeployAPIRouterCondition
+    Properties:
+      Name: !Sub ${AWS::StackName}-router-tg
+      Port: 8080
+      Protocol: HTTP
+      TargetType: ip
+      VpcId: !Ref VPCID
+      HealthCheckPath: /health
+      HealthCheckIntervalSeconds: 300
+      HealthCheckTimeoutSeconds: 30
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 2
+      Matcher:
+        HttpCode: "200"
+
+  APIRouterListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Condition: DeployAPIRouterCondition
+    DependsOn: [PublicLoadBalancerListener, APIRouterTargetGroup]
+    Properties:
+      ListenerArn: !Ref PublicLoadBalancerListener
+      Priority: 10
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref APIRouterTargetGroup
+      Conditions:
+        - Field: path-pattern
+          Values: ["/health", "/ping", "/v1/*"]
+
+  ServiceIngressfromLoadBalancer:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Ingress from the public ALB
+      GroupId: !GetAtt APIRouterSecurityGroup.GroupId
+      IpProtocol: -1
+      SourceSecurityGroupId: !Ref PublicLoadBalancerSecurityGroup
 
 Outputs:
   ECSCluster:
@@ -243,3 +453,12 @@ Outputs:
   LambdaDeploymentHelperArn:
     Description: The Lambda function for capacity provider association
     Value: !GetAtt LambdaDeploymentHelper.Arn
+  APIRouterServiceName:
+    Description: The name of the OpenAI compatbile API router ECS Service
+    Value: !If [DeployAPIRouterCondition, !Ref APIRouterService, ""]
+  APIRouterTaskDefinition:
+    Description: The ARN of the OpenAI compatbile API router Task Definition
+    Value: !If [DeployAPIRouterCondition, !Ref APIRouterTaskDefinition, ""]
+  APIRouterTargetGroupArn:
+    Description: The ARN of the OpenAI compatbile API outer Target Group
+    Value: !If [DeployAPIRouterCondition, !Ref APIRouterTargetGroup, ""]

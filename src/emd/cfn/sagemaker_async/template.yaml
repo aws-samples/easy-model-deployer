@@ -93,9 +93,9 @@ Resources:
       EndpointConfigName: !GetAtt SageMakerEndpointConfig.EndpointConfigName
 
 Outputs:
-  ModelId:
-    Description: The emd model ID to be used for the SageMaker Endpoint
-    Value: !Ref ModelId
+  Model:
+    Description: Model ID used to generate the response
+    Value: !Join ['', [!Ref ModelId, '/', !Ref ModelTag]]
   SageMakerEndpointName:
     Description: The name of the SageMaker Endpoint
     Value: !GetAtt SageMakerEndpoint.EndpointName
