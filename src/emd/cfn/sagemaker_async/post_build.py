@@ -41,7 +41,7 @@ def post_build():
         use_spot = True
     else:
         use_spot = False
-        
+
     deploy_ecs_cluster(args.region, vpc_id, subnets, use_spot)
 
 

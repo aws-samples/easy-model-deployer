@@ -11,7 +11,7 @@ WAIT_SECONDS = 10
 
 def run_command(cmd):
     try:
-        result = subprocess.run(cmd, shell=True, check=True, 
+        result = subprocess.run(cmd, shell=True, check=True,
                               stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                               text=True)
         return result.stdout.strip()
@@ -23,7 +23,7 @@ def run_command(cmd):
 def build_router_image(region):
     repo_name = "emd-openai-api-router"
     image_tag = f"{repo_name}:latest"
-    
+
     # Check if repo exists
     try:
         run_command(f"aws ecr describe-repositories --repository-names {repo_name} --region {region}")
@@ -31,7 +31,7 @@ def build_router_image(region):
     except:
         print(f"Creating ECR repository: {repo_name}")
         run_command(f"aws ecr create-repository --repository-name {repo_name} --region {region}")
-    
+
     # Get ECR login
     account_id = json.loads(run_command(f"aws sts get-caller-identity --region {region}"))['Account']
     domain = f"dkr.ecr.{region}.amazonaws.com.cn" if region.startswith("cn-") else f"dkr.ecr.{region}.amazonaws.com"
@@ -45,16 +45,16 @@ def build_router_image(region):
         f"-t {image_tag} ."
     )
     run_command(build_cmd)
-    
+
     # Tag and push image
     full_image_tag = f"{registry}/{image_tag}"
-    
+
     print(f"Tagging image as: {full_image_tag}")
     run_command(f"docker tag {image_tag} {full_image_tag}")
-    
+
     print(f"Pushing image to ECR: {full_image_tag}")
     run_command(f"docker push {full_image_tag}")
-    
+
     return full_image_tag
 
 def wait_for_stack_completion(client, stack_name):
@@ -207,23 +207,23 @@ def deploy_ecs_cluster_template(region, vpc_id, subnets, api_router_uri, use_spo
 
 def deploy_ecs_cluster(region, vpc_id=None, subnets=None, use_spot=False):
     """Deploy ECS cluster with specified VPC and subnets.
-    
+
     Args:
         region (str): AWS region to deploy to
         vpc_id (str, optional): VPC ID to use for deployment. If None, deploys new VPC.
         subnets (str, optional): Comma-separated list of subnet IDs. If None, deploys new VPC.
     """
-    
+
     # Deploy new VPC if no vpc_id/subnets provided
     if not vpc_id or not subnets:
         vpc_id, subnets = deploy_vpc_template(region)
-    
+
     # Update parameters with networking info
     update_parameters_file("parameters.json", {"VPCID": vpc_id, "Subnets": subnets})
-    
+
     # Build and push Fargate image to ECR as the OpenAI compatible API router
     api_router_uri = build_router_image(region)
-    
+
     # Deploy the ECS cluster
     deploy_ecs_cluster_template(region, vpc_id, subnets, api_router_uri, use_spot)
 

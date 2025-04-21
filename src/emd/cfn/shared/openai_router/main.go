@@ -336,7 +336,7 @@ func isPartialJSON(s string) bool {
 	if strings.HasPrefix(s, "[") && !strings.HasSuffix(s, "]") {
 		return true
 	}
-	
+
 	// Count open vs close braces
 	openBraces := strings.Count(s, "{") + strings.Count(s, "[")
 	closeBraces := strings.Count(s, "}") + strings.Count(s, "]")
@@ -384,7 +384,7 @@ func requestHandler(c *gin.Context) {
 	var payload struct {
 		Model string `json:"model"`
 	}
-	
+
 	// Try to parse model from payload
 	if err := json.Unmarshal(inputBytes, &payload); err == nil && payload.Model != "" {
 		// Use model from payload if present
@@ -411,13 +411,13 @@ func requestHandler(c *gin.Context) {
 		c.JSON(400, gin.H{"error": "Invalid JSON payload"})
 		return
 	}
-	
+
 	// Extract modelID from model field (remove modelTag if present)
 	if modelVal, ok := payloadData["model"].(string); ok {
 		modelParts := strings.Split(modelVal, "/")
 		payloadData["model"] = modelParts[0] // Keep only modelID
 	}
-	
+
 	modifiedBytes, err := json.Marshal(payloadData)
 	if err != nil {
 		c.JSON(500, gin.H{"error": "Failed to modify payload"})
@@ -450,7 +450,7 @@ func requestHandler(c *gin.Context) {
 			// Start streaming in a goroutine
 			go func() {
 				defer closeOnce.Do(func() { close(stream) })
-				
+
 				ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Minute)
 				defer cancel()
 
@@ -470,8 +470,8 @@ func requestHandler(c *gin.Context) {
 
 				eventStream := resp.GetStream()
 				defer eventStream.Close()
-				
-				
+
+
 				for event := range eventStream.Events() {
 					switch e := event.(type) {
 					case *sagemakerruntime.PayloadPart:
@@ -482,15 +482,15 @@ func requestHandler(c *gin.Context) {
 
 						chunk := string(e.Bytes)
 						log.Printf("[DEBUG] Received chunk: %s", chunk)
-						
+
 						// Check for finish_reason=stop to end stream
-						if strings.Contains(chunk, `"finish_reason":"stop"`) || 
+						if strings.Contains(chunk, `"finish_reason":"stop"`) ||
 						   strings.Contains(chunk, `"finish_reason": "stop"`) {
 							log.Printf("[DEBUG] Detected finish_reason=stop, ending stream")
 							// stream <- []byte("data: " + chunk + "\n\n")
 							break
 						}
-						
+
 						// Forward chunk as-is in SSE format
 						stream <- []byte(chunk + "\n\n")
 					case *sagemakerruntime.InternalStreamFailure:
