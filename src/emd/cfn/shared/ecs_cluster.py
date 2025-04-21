@@ -161,10 +161,11 @@ def deploy_vpc_template(region):
     vpc_id = None
     subnets = None
     for output in outputs:
-        if output["OutputKey"] == "VPCID":
+        if output["OutputKey"] == "VPCID" and output["OutputValue"]:
             vpc_id = output["OutputValue"]
-        elif output["OutputKey"] == "Subnets":
+        elif output["OutputKey"] == "Subnets" and output["OutputValue"]:
             subnets = output["OutputValue"]
+
     update_parameters_file("parameters.json", {"VPCID": vpc_id, "Subnets": subnets})
     return vpc_id, subnets
 
