@@ -20,6 +20,9 @@ Parameters:
 Conditions:
   DeployAPIRouterCondition: !Not [!Equals [!Ref APIRouterImageURI, ""]]
   UseSpotCondition: !Equals [!Ref UseSpot, "yes"]
+  IsChinaRegionCondition: !Or
+    - !Equals [!Ref "AWS::Region", "cn-north-1"]
+    - !Equals [!Ref "AWS::Region", "cn-northwest-1"]
 
 Resources:
   ECSCluster:
@@ -251,7 +254,10 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Service: [ecs-tasks.amazonaws.com]
+              Service:
+                - ecs-tasks.amazonaws.com
+                - application-autoscaling.amazonaws.com
+                - !If [IsChinaRegionCondition, "application-autoscaling.amazonaws.com.cn", !Ref "AWS::NoValue"]
             Action: ['sts:AssumeRole']
       Path: /
       Policies:
@@ -267,6 +273,10 @@ Resources:
                   - 'ecr:BatchGetImage'
                   - 'logs:CreateLogStream'
                   - 'logs:PutLogEvents'
+                  - 'ecs:UpdateService'
+                  - 'ecs:DescribeServices'
+                  - 'cloudwatch:DescribeAlarms'
+                  - 'cloudwatch:PutMetricAlarm'
                 Resource: '*'
 
   APIRouterTaskRole:
