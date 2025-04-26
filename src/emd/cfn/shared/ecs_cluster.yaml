@@ -220,23 +220,23 @@ Resources:
 
               # Send response back to CloudFormation
               cfnresponse.send(event, context, response_status, response_data)
-              
+
           def convert_dns_name(event, context):
               """
               Converts a DNS name to comply with AWS Service Connect naming rules.
               DNS names can only contain lowercase letters and numbers.
               """
               import re
-              
+
               # Get the input DNS name from the event
               dns_name = event['ResourceProperties'].get('ModelName', '')
-              
+
               # Step 1: Convert to lowercase
               dns_name = dns_name.lower()
-              
+
               # Step 2: Replace any character that is not a lowercase letter or number with a hyphen
               dns_name = re.sub(r'[^a-z0-9]', '-', dns_name)
-              
+
               response_data = {'DnsName': dns_name}
               cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data)
 

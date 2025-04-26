@@ -264,7 +264,7 @@ func httpProxyHandler(c *gin.Context, endpointURL string, inputBytes []byte) {
 	path := c.Request.URL.Path
 	fullURL := baseURL + path
 	log.Printf("[DEBUG] Proxying request to URL %s", fullURL)
-	
+
 	req, err := http.NewRequest(c.Request.Method, fullURL, bytes.NewReader(inputBytes))
 	if err != nil {
 		c.JSON(500, gin.H{"error": fmt.Sprintf("Failed to create HTTP request: %v", err)})

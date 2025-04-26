@@ -22,7 +22,7 @@ python = "^3.9"
 typer = {extras = ["all"], version = "^0.13.0"}
 rich = "^13.9.4"
 boto3 = "^1.35.0"
-questionary = "^2.0.1"
+questionary = "^2.1.0"
 requests = "^2.26"
 pydantic = "^2.9.2"
 sagemaker = "^2.237.0"
