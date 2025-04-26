@@ -10,7 +10,7 @@ Parameters:
   APIRouterImageURI:
     Type: String
     Description: The URI of OpenAI compatbile API router image. If provided, the router will be deployed.
-    Default: ""
+    Default: "public.ecr.aws/aws-gcr-solutions/dmaa/api-router:latest"
   UseSpot:
     Type: String
     Description: Use Fargate Spot capacity?
@@ -28,9 +28,11 @@ Resources:
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
+      ServiceConnectDefaults:
+        Namespace: emd-service-connect-namespace
       ClusterSettings:
         - Name: containerInsights
-          Value: enabled
+          Value: disabled
   PublicLoadBalancerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -218,6 +220,25 @@ Resources:
 
               # Send response back to CloudFormation
               cfnresponse.send(event, context, response_status, response_data)
+              
+          def convert_dns_name(event, context):
+              """
+              Converts a DNS name to comply with AWS Service Connect naming rules.
+              DNS names can only contain lowercase letters and numbers.
+              """
+              import re
+              
+              # Get the input DNS name from the event
+              dns_name = event['ResourceProperties'].get('ModelName', '')
+              
+              # Step 1: Convert to lowercase
+              dns_name = dns_name.lower()
+              
+              # Step 2: Replace any character that is not a lowercase letter or number with a hyphen
+              dns_name = re.sub(r'[^a-z0-9]', '-', dns_name)
+              
+              response_data = {'DnsName': dns_name}
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data)
 
           def handler(event, context):
               print(event)
@@ -371,6 +392,9 @@ Resources:
             Weight: 1
           - CapacityProvider: FARGATE
             Weight: 1
+      ServiceConnectConfiguration:
+        Enabled: true
+        Namespace: emd-service-connect-namespace
 
   APIRouterSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -472,3 +496,6 @@ Outputs:
   APIRouterTargetGroupArn:
     Description: The ARN of the OpenAI compatbile API outer Target Group
     Value: !If [DeployAPIRouterCondition, !Ref APIRouterTargetGroup, ""]
+  APIRouterSecurityGroup:
+    Description: The security group for the OpenAI compatbile API router
+    Value: !GetAtt APIRouterSecurityGroup.GroupId

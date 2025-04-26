@@ -18,8 +18,10 @@ Parameters:
     Description: The listener to be used for the ECS Endpoint
   PublicLoadBalancerSecurityGroup:
     Type: String
-    Default: "sg-0d059e1ba522921fe"
     Description: The security group to be used for the ECS Endpoint
+  APIRouterSecurityGroup:
+    Type: String
+    Description: The security group to be used for the API Router
   LambdaDeploymentHelperArn:
     Type: String
     Description: The ARN of the Lambda function for capacity provider association
@@ -35,7 +37,6 @@ Parameters:
     Description: The instance type to be used for the ECS Endpoint
   ModelId:
     Type: String
-    Default: "qwen2-5-7b"
     Description: The emd model ID to be used for the ECS Endpoint
   ModelTag:
     Type: String
@@ -43,15 +44,12 @@ Parameters:
     Description: The model tag to be used for the ECS Endpoint
   FrameWorkType:
     Type: String
-    Default: "awq"
     Description: The framework type to be used for the ECS Endpoint
   ServiceType:
     Type: String
-    Default: "instruct"
     Description: The service type to be used for the ECS Endpoint
   EngineType:
     Type: String
-    Default: "qwen2-5-72b"
     Description: The engine type to be used for the ECS Endpoint
   DesiredCapacity:
     Type: Number
@@ -171,6 +169,12 @@ Resources:
     Type: Custom::GetPriorityNumber
     Properties:
       ServiceToken: !Ref LambdaDeploymentHelperArn
+  ConvertDnsName:
+    Type: Custom::ConvertDnsName
+    Properties:
+      ServiceToken: !Ref LambdaDeploymentHelperArn
+      ModelName: !Join ['', [!Ref ModelId, '/', !Ref ModelTag]]
+
   ContainerHostSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -249,6 +253,8 @@ Resources:
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               HostPort: !Ref ContainerPort
+              Name: model-port
+              AppProtocol: http
             - ContainerPort: 80
               HostPort: 80
           # Command: [--gpus, all]
@@ -265,7 +271,7 @@ Resources:
             interval: 120
             retries: 10
             timeout: 60
-            startPeriod: 120
+            startPeriod: 300
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -310,11 +316,31 @@ Resources:
         - ContainerName: !Sub '${AWS::StackName}'
           ContainerPort: !Ref ContainerPort
           TargetGroupArn: !Ref ServiceTargetGroup
+      ServiceConnectConfiguration:
+        Enabled: true
+        Namespace: emd-service-connect-namespace
+        Services:
+          - PortName: model-port
+            DiscoveryName: model-service
+            ClientAliases:
+              - Port: !Ref ContainerPort
+                DnsName: !GetAtt ConvertDnsName.DnsName
   ServiceSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
       GroupDescription: Security group for service
       VpcId: !Ref VPCID
+
+  ServiceSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt ServiceSecurityGroup.GroupId
+      IpProtocol: tcp
+      FromPort: !Ref ContainerPort
+      ToPort: !Ref ContainerPort
+      SourceSecurityGroupId: !Ref APIRouterSecurityGroup
+      Description: Allow traffic from API router service to model service
+
   ServiceTargetGroup:
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
     Properties:
@@ -362,8 +388,11 @@ Resources:
 
 Outputs:
   Model:
-    Description: Model ID used to generate the response
+    Description: Model ID used to generate the response.
     Value: !Join ['', [!Ref ModelId, '/', !Ref ModelTag]]
-  PublicLoadBalancerDNSName:
-    Description: The DNS name of the public load balancer. To use HTTPS, create an SSL certificate in AWS Certificate Manager and attach it to the load balancer.
-    Value: !Join ['', ['http://', !Ref DNSName, '/', !Ref ModelId, '/', !Ref ModelTag]]
+  BaseURL:
+    Description: Please use this URL for the OpenAI-compatible model API, like /v1/chat/completions. To use HTTPS, create an SSL certificate in AWS Certificate Manager and attach it to the load balancer.
+    Value: !Join ['', ['http://', !Ref DNSName]]
+  ECSServiceConnect:
+    Description: Service Connect allows for service-to-service communications with automatic discovery using short names and standard ports.
+    Value: !Join ['', ['http://', !GetAtt ConvertDnsName.DnsName, ':', !Ref ContainerPort]]

@@ -170,7 +170,7 @@ def deploy_vpc_template(region):
     return vpc_id, subnets
 
 
-def deploy_ecs_cluster_template(region, vpc_id, subnets, api_router_uri, use_spot):
+def deploy_ecs_cluster_template(region, vpc_id, subnets, use_spot):
     client = boto3.client("cloudformation", region_name=region)
     stack_name = "EMD-ECS-Cluster"
     template_path = f"{CFN_ROOT_PATH}/shared/ecs_cluster.yaml"
@@ -186,10 +186,6 @@ def deploy_ecs_cluster_template(region, vpc_id, subnets, api_router_uri, use_spo
             {
                 "ParameterKey": "Subnets",
                 "ParameterValue": subnets,
-            },
-            {
-                "ParameterKey": "APIRouterImageURI",
-                "ParameterValue": api_router_uri,
             },
             {
                 "ParameterKey": "UseSpot",
@@ -222,10 +218,10 @@ def deploy_ecs_cluster(region, vpc_id=None, subnets=None, use_spot=False):
     update_parameters_file("parameters.json", {"VPCID": vpc_id, "Subnets": subnets})
 
     # Build and push Fargate image to ECR as the OpenAI compatible API router
-    api_router_uri = build_router_image(region)
+    # api_router_uri = build_router_image(region)
 
     # Deploy the ECS cluster
-    deploy_ecs_cluster_template(region, vpc_id, subnets, api_router_uri, use_spot)
+    deploy_ecs_cluster_template(region, vpc_id, subnets, use_spot)
 
 if __name__ == "__main__":
     deploy_ecs_cluster("us-east-1")

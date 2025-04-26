@@ -38,6 +38,9 @@ Parameters:
     Type: String
     Description: The name of the SageMaker Endpoint
     Default: "Auto-generate"
+  DNSName:
+    Type: String
+    Description: The DNS name of the public load balancer. To use HTTPS, create an SSL certificate in AWS Certificate Manager and attach it to the load balancer.
 
 Conditions:
   UseDefaultEndpointName: !Equals [!Ref SageMakerEndpointName, "Auto-generate"]
@@ -149,8 +152,11 @@ Resources:
 
 Outputs:
   Model:
-    Description: Model ID used to generate the response
+    Description: Model ID used to generate the response.
     Value: !Join ['', [!Ref ModelId, '/', !Ref ModelTag]]
+  BaseURL:
+    Description: Please use this URL for the OpenAI-compatible model API, like /v1/chat/completions. To use HTTPS, create an SSL certificate in AWS Certificate Manager and attach it to the load balancer.
+    Value: !Join ['', ['http://', !Ref DNSName]]
   SageMakerEndpointName:
-    Description: The name of the SageMaker Endpoint
+    Description: You can use invoke the endpoint by using the SageMaker runtime API.
     Value: !GetAtt SageMakerEndpoint.EndpointName
