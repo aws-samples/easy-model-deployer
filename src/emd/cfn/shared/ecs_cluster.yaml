@@ -363,7 +363,7 @@ Resources:
     Type: AWS::ECS::Service
     Condition: DeployAPIRouterCondition
     Properties:
-      ServiceName: api-router-service
+      ServiceName: EMD-API-Router
       Cluster: !Ref ECSCluster
       DeploymentConfiguration:
         DeploymentCircuitBreaker:

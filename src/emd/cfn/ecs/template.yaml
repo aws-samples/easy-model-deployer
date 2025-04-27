@@ -321,7 +321,7 @@ Resources:
         Namespace: emd-service-connect-namespace
         Services:
           - PortName: model-port
-            DiscoveryName: model-service
+            DiscoveryName: !GetAtt ConvertDnsName.DnsName
             ClientAliases:
               - Port: !Ref ContainerPort
                 DnsName: !GetAtt ConvertDnsName.DnsName
