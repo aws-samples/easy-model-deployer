@@ -43,7 +43,7 @@ func main() {
 	// Load configuration from environment
 	port := getEnv("PORT", "8080")
 	host := getEnv("HOST", "0.0.0.0")
-	logLevel := getEnv("LOG_LEVEL", "DEBUG")
+	logLevel := getEnv("LOG_LEVEL", "INFO")
 
 	// Configure logging
 	if logLevel == "DEBUG" {
@@ -263,7 +263,7 @@ func httpProxyHandler(c *gin.Context, endpointURL string, inputBytes []byte) {
 	baseURL := strings.TrimRight(endpointURL, "/")
 	path := c.Request.URL.Path
 	fullURL := baseURL + path
-	log.Printf("[DEBUG] Proxying request to URL %s", fullURL)
+	// log.Printf("[DEBUG] Proxying request to URL %s", fullURL)
 
 	req, err := http.NewRequest(c.Request.Method, fullURL, bytes.NewReader(inputBytes))
 	if err != nil {
@@ -473,7 +473,7 @@ func requestHandler(c *gin.Context) {
 					stream <- []byte(`data: {"error": "` + err.Error() + `"}` + "\n\n")
 					return
 				}
-				log.Println("[DEBUG] Successfully established streaming connection")
+				// log.Println("[DEBUG] Successfully established streaming connection")
 
 				eventStream := resp.GetStream()
 				defer eventStream.Close()
@@ -482,22 +482,26 @@ func requestHandler(c *gin.Context) {
 					switch e := event.(type) {
 					case *sagemakerruntime.PayloadPart:
 						if len(e.Bytes) == 0 {
-							log.Printf("[WARNING] Received empty payload chunk")
+							// log.Printf("[WARNING] Received empty payload chunk")
 							continue
 						}
 
-						chunk := string(e.Bytes)
-						log.Printf("[DEBUG] Received chunk: %s", chunk)
+                chunk := string(e.Bytes)
+                // log.Printf("[DEBUG] Received chunk: %s", chunk)
 
-						// Check for finish_reason=stop to end stream
-						if strings.Contains(chunk, `"finish_reason":"stop"`) ||
-						   strings.Contains(chunk, `"finish_reason": "stop"`) {
-							log.Printf("[DEBUG] Detected finish_reason=stop, ending stream")
-							break
-						}
+                // Format as proper SSE event
+                formattedChunk := "data: " + chunk
+                
+                // Check for finish_reason=stop to end stream
+                if strings.Contains(chunk, `"finish_reason":"stop"`) ||
+                   strings.Contains(chunk, `"finish_reason": "stop"`) {
+                    // log.Printf("[DEBUG] Detected finish_reason=stop, ending stream")
+                    stream <- []byte(formattedChunk + "\n\n")
+                    return // Exit the goroutine completely
+                }
 
-						// Forward chunk as-is in SSE format
-						stream <- []byte(chunk + "\n\n")
+                // Forward as properly formatted SSE event
+                stream <- []byte(formattedChunk + "\n\n")
 					case *sagemakerruntime.InternalStreamFailure:
 						stream <- []byte(`data: {"error": "` + e.Error() + `"}` + "\n\n")
 						return
@@ -506,7 +510,6 @@ func requestHandler(c *gin.Context) {
 				// Send final done message
 				stream <- []byte("data: [DONE]\n\n")
 			}()
-
 			// Stream responses to client
 			c.Stream(func(w io.Writer) bool {
 				if msg, ok := <-stream; ok {
@@ -518,6 +521,7 @@ func requestHandler(c *gin.Context) {
 				}
 				return false
 			})
+
 		} else {
 			// Non-streaming request
 			output, err := sagemakerClient.InvokeEndpoint(&sagemakerruntime.InvokeEndpointInput{
@@ -538,14 +542,14 @@ func requestHandler(c *gin.Context) {
 				return
 			}
 
-			log.Printf("[DEBUG] SageMaker response: %s", string(output.Body))
+			// log.Printf("[DEBUG] SageMaker response: %s", string(output.Body))
 			// Forward raw SageMaker response
 			c.Data(200, "application/json", output.Body)
 		}
 	} else if endpointType == "ecs" {
 		// Handle ECS endpoint
 		baseURL := endpointAddress
-		log.Printf("[DEBUG] Proxying request to ECS endpoint %s", baseURL)
+		// log.Printf("[DEBUG] Proxying request to ECS endpoint %s", baseURL)
 		httpProxyHandler(c, baseURL, modifiedBytes)
 	}
 }
