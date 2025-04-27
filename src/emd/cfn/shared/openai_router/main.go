@@ -491,7 +491,7 @@ func requestHandler(c *gin.Context) {
 
                 // Format as proper SSE event
                 formattedChunk := "data: " + chunk
-                
+
                 // Check for finish_reason=stop to end stream
                 if strings.Contains(chunk, `"finish_reason":"stop"`) ||
                    strings.Contains(chunk, `"finish_reason": "stop"`) {
