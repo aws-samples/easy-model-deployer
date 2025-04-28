@@ -164,40 +164,70 @@ Resources:
               ecs_client = boto3.client('ecs')
               cluster_name = os.environ['ECS_CLUSTER_NAME']
               capacity_provider_name = event['ResourceProperties']['CapacityProvider']
+
+              def try_update_with_retry():
+                  # Simple retry mechanism - try twice with a delay
+                  try:
+                      return _do_update()
+                  except Exception as e:
+                      if 'UpdateInProgressException' in str(e):
+                          print("Cluster busy, waiting 30 seconds before retry...")
+                          import time
+                          time.sleep(30)
+                          return _do_update()  # Try once more
+                      else:
+                          raise  # Re-raise if it's not the specific error we're handling
+
+              def _do_update():
+                  cluster_info = ecs_client.describe_clusters(clusters=[cluster_name])['clusters'][0]
+                  current_capacity_providers = cluster_info.get('capacityProviders', [])
+
+                  if capacity_provider_name not in current_capacity_providers:
+                      current_capacity_providers.append(capacity_provider_name)
+
+                  return ecs_client.put_cluster_capacity_providers(
+                      cluster=cluster_name,
+                      capacityProviders=current_capacity_providers,
+                      defaultCapacityProviderStrategy=[
+                          {
+                              'capacityProvider': capacity_provider_name,
+                              'weight': 1,
+                              'base': 0
+                          }
+                      ]
+                  )
+
               try:
                   if event['RequestType'] in ['Create', 'Update']:
-                      cluster_info = ecs_client.describe_clusters(clusters=[cluster_name])['clusters'][0]
-                      current_capacity_providers = cluster_info.get('capacityProviders', [])
-
-                      if capacity_provider_name not in current_capacity_providers:
-                          current_capacity_providers.append(capacity_provider_name)
-
-                      ecs_client.put_cluster_capacity_providers(
-                          cluster=cluster_name,
-                          capacityProviders=current_capacity_providers,
-                          defaultCapacityProviderStrategy=[
-                              {
-                                  'capacityProvider': capacity_provider_name,
-                                  'weight': 1,
-                                  'base': 0
-                              }
-                          ]
-                      )
+                      try_update_with_retry()
                   elif event['RequestType'] == 'Delete':
-                    # Retrieve current capacity providers
-                    cluster_info = ecs_client.describe_clusters(clusters=[cluster_name])['clusters'][0]
-                    current_capacity_providers = cluster_info.get('capacityProviders', [])
+                      def _do_delete():
+                          # Retrieve current capacity providers
+                          cluster_info = ecs_client.describe_clusters(clusters=[cluster_name])['clusters'][0]
+                          current_capacity_providers = cluster_info.get('capacityProviders', [])
 
-                    # Remove only the specific capacity provider
-                    updated_capacity_providers = [
-                        cp for cp in current_capacity_providers if cp != capacity_provider_name
-                    ]
+                          # Remove only the specific capacity provider
+                          updated_capacity_providers = [
+                              cp for cp in current_capacity_providers if cp != capacity_provider_name
+                          ]
 
-                    ecs_client.put_cluster_capacity_providers(
-                        cluster=cluster_name,
-                        capacityProviders=updated_capacity_providers,
-                        defaultCapacityProviderStrategy=[]
-                    )
+                          return ecs_client.put_cluster_capacity_providers(
+                              cluster=cluster_name,
+                              capacityProviders=updated_capacity_providers,
+                              defaultCapacityProviderStrategy=[]
+                          )
+
+                      # Simple retry for delete operation too
+                      try:
+                          _do_delete()
+                      except Exception as e:
+                          if 'UpdateInProgressException' in str(e):
+                              print("Cluster busy during delete, waiting 30 seconds before retry...")
+                              import time
+                              time.sleep(30)
+                              _do_delete()  # Try once more
+                          else:
+                              raise
                   cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
               except Exception as e:
                   cfnresponse.send(event, context, cfnresponse.FAILED, {'Error': str(e)})
