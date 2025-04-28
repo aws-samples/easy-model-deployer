@@ -289,16 +289,16 @@ Resources:
                   )
 
                   if not response['services'] or response['services'][0]['status'] != 'ACTIVE':
-                      raise Exception(f"Service {service_name} not found or not active in cluster {cluster_name}")
+                      response_data = {'Message': f"Service {service_name} not found or not active in cluster {cluster_name}"}
+                  else:
+                    # Force a new deployment
+                    ecs_client.update_service(
+                        cluster=cluster_name,
+                        service=service_name,
+                        forceNewDeployment=True
+                        response_data = {'Message': f"Forced new deployment for {service_name}"}
+                    )
 
-                  # Force a new deployment
-                  ecs_client.update_service(
-                      cluster=cluster_name,
-                      service=service_name,
-                      forceNewDeployment=True
-                  )
-
-                  response_data = {'Message': f"Forced new deployment for {service_name}"}
                   cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data)
               except Exception as e:
                   print(f"Error forcing deployment: {str(e)}")
