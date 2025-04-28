@@ -356,7 +356,6 @@ Resources:
                 TemplateConfiguration: BuildOutput::parameters.json
                 Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM
                 RoleArn: !GetAtt CloudFormationServiceRole.Arn
-                TimeoutInMinutes: 45
               InputArtifacts:
                 - Name: BuildOutput
               RunOrder: 1
