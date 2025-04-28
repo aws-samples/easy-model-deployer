@@ -241,7 +241,7 @@ Resources:
 
               response_data = {'DnsName': dns_name}
               cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data)
-              
+
           def force_api_router_deployment(event, context):
               """
               Forces a new deployment for the APIRouterService.
@@ -250,24 +250,24 @@ Resources:
               ecs_client = boto3.client('ecs')
               cluster_name = os.environ['ECS_CLUSTER_NAME']
               service_name = "EMD-API-Router"
-              
+
               try:
                   # Check if the service exists
                   response = ecs_client.describe_services(
                       cluster=cluster_name,
                       services=[service_name]
                   )
-                  
+
                   if not response['services'] or response['services'][0]['status'] != 'ACTIVE':
                       raise Exception(f"Service {service_name} not found or not active in cluster {cluster_name}")
-                  
+
                   # Force a new deployment
                   ecs_client.update_service(
                       cluster=cluster_name,
                       service=service_name,
                       forceNewDeployment=True
                   )
-                  
+
                   response_data = {'Message': f"Forced new deployment for {service_name}"}
                   cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data)
               except Exception as e:
