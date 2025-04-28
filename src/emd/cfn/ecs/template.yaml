@@ -386,6 +386,14 @@ Resources:
         - Type: forward
           TargetGroupArn: !Ref ServiceTargetGroup
 
+  ForceAPIRouterDeployment:
+    Type: Custom::ForceAPIRouterDeployment
+    DependsOn: Service
+    Properties:
+      ServiceToken: !Ref LambdaDeploymentHelperArn
+      # Adding a timestamp parameter to ensure this resource is updated when needed
+      Timestamp: !Ref "AWS::StackName"
+
 Outputs:
   Model:
     Description: Model ID used to generate the response.
