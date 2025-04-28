@@ -6,7 +6,7 @@ toolchain go1.24.2
 
 require (
 	github.com/aws/aws-sdk-go v1.54.0
-	github.com/gin-gonic/gin v1.8.1
+	github.com/gin-gonic/gin v1.9.1
 )
 
 require (
