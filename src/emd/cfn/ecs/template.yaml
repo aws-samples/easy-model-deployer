@@ -387,7 +387,7 @@ Resources:
           TargetGroupArn: !Ref ServiceTargetGroup
 
   ForceAPIRouterDeployment:
-    Type: Custom::ForceAPIRouterDeployment
+    Type: Custom::ForceApiRouterDeployment
     DependsOn: Service
     Properties:
       ServiceToken: !Ref LambdaDeploymentHelperArn
