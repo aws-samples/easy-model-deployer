@@ -296,8 +296,8 @@ Resources:
                         cluster=cluster_name,
                         service=service_name,
                         forceNewDeployment=True,
-                        response_data = {'Message': f"Forced new deployment for {service_name}"}
                     )
+                    response_data = {'Message': f"Forced new deployment for {service_name}"}
 
                   cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data)
               except Exception as e:
