@@ -295,7 +295,7 @@ Resources:
                     ecs_client.update_service(
                         cluster=cluster_name,
                         service=service_name,
-                        forceNewDeployment=True
+                        forceNewDeployment=True,
                         response_data = {'Message': f"Forced new deployment for {service_name}"}
                     )
 
