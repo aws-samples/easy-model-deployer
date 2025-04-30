@@ -65,8 +65,6 @@ Deploy models with an interactive CLI or one command line.
 emd deploy
 ```
 
-![deploy](docs/images/cli-deploy.gif)
-
 > **💡 Tip** To view all available parameters, run `emd deploy --help`.
 > When you see the message "Waiting for model: ...", it means the deployment task has started and you can stop the terminal output by pressing `Ctrl+C`.
 >
