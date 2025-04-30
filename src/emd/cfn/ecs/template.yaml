@@ -325,6 +325,9 @@ Resources:
             ClientAliases:
               - Port: !Ref ContainerPort
                 DnsName: !GetAtt ConvertDnsName.DnsName
+            Timeout:
+              IdleTimeoutSeconds: 3600
+              PerRequestTimeoutSeconds: 3600
   ServiceSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
