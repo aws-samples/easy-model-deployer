@@ -45,9 +45,18 @@ Parameters:
   DNSName:
     Type: String
     Description: The DNS name of the public load balancer. To use HTTPS, create an SSL certificate in AWS Certificate Manager and attach it to the load balancer.
+  LambdaDeploymentHelperArn:
+    Type: String
+    Description: The ARN of the Lambda function for capacity provider association
+  APIKey:
+    Type: String
+    Default: ""
+    NoEcho: true
+    Description: API key to be used for invoking the model
 
 Conditions:
   UseDefaultEndpointName: !Equals [!Ref SageMakerEndpointName, "Auto-generate"]
+  HasAPIKey: !Not [!Equals [!Ref APIKey, ""]]
 
 Resources:
   ExecutionRole:
@@ -154,6 +163,14 @@ Resources:
         ScaleInCooldown: 600
         ScaleOutCooldown: 600
 
+  SetApiKey:
+    Type: Custom::SetApiKey
+    Condition: HasAPIKey
+    Properties:
+      ServiceToken: !Ref LambdaDeploymentHelperArn
+      ModelName: !Join ['', [!Ref ModelId, '/', !Ref ModelTag]]
+      APIKey: !Ref APIKey
+
 Outputs:
   Model:
     Description: Model ID used to generate the response.
@@ -164,3 +181,7 @@ Outputs:
   SageMakerEndpointName:
     Description: You can use invoke the endpoint by using the SageMaker runtime API.
     Value: !GetAtt SageMakerEndpoint.EndpointName
+  ModelAPIKey:
+    Condition: HasAPIKey
+    Description: API key has been stored in AWS Secrets Manager. Check the secret 'EMD-APIKey-Secrets' for the key associated with model ID.
+    Value: "****"

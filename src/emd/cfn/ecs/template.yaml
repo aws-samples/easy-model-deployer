@@ -92,6 +92,9 @@ Parameters:
     NoEcho: true
     Description: API key to be used for invoking the model
 
+Conditions:
+  HasAPIKey: !Not [!Equals [!Ref APIKey, ""]]
+
 Resources:
   ECSAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -182,6 +185,7 @@ Resources:
       ModelName: !Join ['', [!Ref ModelId, '/', !Ref ModelTag]]
   SetApiKey:
     Type: Custom::SetApiKey
+    Condition: HasAPIKey
     Properties:
       ServiceToken: !Ref LambdaDeploymentHelperArn
       ModelName: !Join ['', [!Ref ModelId, '/', !Ref ModelTag]]
@@ -417,3 +421,7 @@ Outputs:
   ECSServiceConnect:
     Description: Service Connect allows for service-to-service communications with automatic discovery using short names and standard ports.
     Value: !Join ['', ['http://', !GetAtt ConvertDnsName.DnsName, ':', !Ref ContainerPort]]
+  ModelAPIKey:
+    Condition: HasAPIKey
+    Description: API key has been stored in AWS Secrets Manager. Check the secret 'EMD-APIKey-Secrets' for the key associated with model ID.
+    Value: "****"

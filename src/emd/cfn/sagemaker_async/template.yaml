@@ -29,6 +29,18 @@ Parameters:
   Region:
     Type: String
     Description: The region to be used for the SageMaker Endpoint
+  LambdaDeploymentHelperArn:
+    Type: String
+    Description: The ARN of the Lambda function for capacity provider association
+  APIKey:
+    Type: String
+    Default: ""
+    NoEcho: true
+    Description: API key to be used for invoking the model
+
+Conditions:
+  HasAPIKey: !Not [!Equals [!Ref APIKey, ""]]
+
 Resources:
   ExecutionRole:
     Type: AWS::IAM::Role
@@ -92,6 +104,14 @@ Resources:
       EndpointName: !Sub '${AWS::StackName}-endpoint'
       EndpointConfigName: !GetAtt SageMakerEndpointConfig.EndpointConfigName
 
+  SetApiKey:
+    Type: Custom::SetApiKey
+    Condition: HasAPIKey
+    Properties:
+      ServiceToken: !Ref LambdaDeploymentHelperArn
+      ModelName: !Join ['', [!Ref ModelId, '/', !Ref ModelTag]]
+      APIKey: !Ref APIKey
+
 Outputs:
   Model:
     Description: Model ID used to generate the response
@@ -99,3 +119,7 @@ Outputs:
   SageMakerEndpointName:
     Description: The name of the SageMaker Endpoint
     Value: !GetAtt SageMakerEndpoint.EndpointName
+  ModelAPIKey:
+    Condition: HasAPIKey
+    Description: API key has been stored in AWS Secrets Manager. Check the secret 'EMD-APIKey-Secrets' for the key associated with model ID.
+    Value: "****"
