@@ -136,22 +136,51 @@ Resources:
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
+              # ECS permissions for cluster management
               - Effect: Allow
                 Action:
                   - ecs:PutClusterCapacityProviders
                   - ecs:DescribeClusters
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:cluster/${ECSCluster}'
+              # ECS permissions for service management
+              - Effect: Allow
+                Action:
                   - ecs:UpdateService
                   - ecs:DescribeServices
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:service/${ECSCluster}/EMD-API-Router'
+              # CloudWatch Logs permissions
+              - Effect: Allow
+                Action:
                   - logs:CreateLogGroup
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:*'
+              - Effect: Allow
+                Action:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*:*'
+              # ELB permissions for listener rules
+              - Effect: Allow
+                Action:
                   - elasticloadbalancing:DescribeRules
+                Resource: '*'
+              # Secrets Manager permissions for API key management
+              - Effect: Allow
+                Action:
                   - secretsmanager:GetSecretValue
                   - secretsmanager:PutSecretValue
-                  - secretsmanager:CreateSecret
                   - secretsmanager:UpdateSecret
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:EMD-APIKey-Secrets*'
+              - Effect: Allow
+                Action:
+                  - secretsmanager:CreateSecret
                   - secretsmanager:DeleteSecret
-                Resource: '*'
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:EMD-APIKey-Secrets*'
 
   LambdaDeploymentHelper:
     Type: AWS::Lambda::Function
@@ -308,6 +337,8 @@ Resources:
                 except Exception as e:
                     print(f"Error forcing deployment: {str(e)}")
                     cfnresponse.send(event, context, cfnresponse.FAILED, {'Error': str(e)})
+              else:
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
 
           def set_api_key(event, context):
               # Get properties from the event
@@ -470,17 +501,30 @@ Resources:
                   - 'logs:CreateLogGroup'
                   - 'logs:CreateLogStream'
                   - 'logs:PutLogEvents'
-                Resource: '*'
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/ecs/emd-cluster:*'
+                  - !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/ecs/emd-cluster:log-stream:*'
               - Effect: Allow
                 Action:
                   - 'cloudformation:ListStacks'
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/*'
+              - Effect: Allow
+                Action:
                   - 'cloudformation:DescribeStacks'
-                Resource: '*'
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/EMD-Model-*'
               - Effect: Allow
                 Action:
                   - 'sagemaker:InvokeEndpoint'
                   - 'sagemaker:InvokeEndpointWithResponseStream'
-                Resource: '*'
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:sagemaker:${AWS::Region}:${AWS::AccountId}:endpoint/*'
+              - Effect: Allow
+                Action:
+                  - 'secretsmanager:GetSecretValue'
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:EMD-APIKey-Secrets*'
 
   APIRouterTaskDefinition:
     Type: AWS::ECS::TaskDefinition

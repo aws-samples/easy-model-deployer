@@ -74,6 +74,9 @@ func main() {
 	if err := discoverModelEndpoints(); err != nil {
 		log.Fatalf("Failed to discover model endpoints: %v", err)
 	}
+	
+	// Start background refresh of maps every hour
+	go startPeriodicRefresh(1 * time.Hour)
 
 	// Create router with ALB support
 	router := gin.Default()
@@ -387,6 +390,33 @@ func getEndpointForModel(modelKey string) (string, error) {
 		return "", fmt.Errorf("model %s not found in any endpoint", modelKey)
 	}
 	return endpoint, nil
+}
+
+// startPeriodicRefresh runs a background goroutine that refreshes the model maps at the specified interval
+func startPeriodicRefresh(interval time.Duration) {
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			log.Println("Refreshing model maps...")
+			
+			// Refresh API keys
+			if err := loadApiKeysFromSecrets(); err != nil {
+				log.Printf("Warning: Failed to refresh API keys: %v", err)
+			} else {
+				log.Printf("Successfully refreshed API keys, loaded %d keys", len(modelApiKeyMap))
+			}
+			
+			// Refresh endpoints
+			if err := discoverModelEndpoints(); err != nil {
+				log.Printf("Warning: Failed to refresh model endpoints: %v", err)
+			} else {
+				log.Printf("Successfully refreshed model endpoints, loaded %d endpoints", len(modelEndpointMap))
+			}
+		}
+	}
 }
 
 func requestHandler(c *gin.Context) {
