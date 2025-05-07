@@ -64,6 +64,10 @@ Resources:
                   - logs:*
                   - elasticloadbalancing:*
                   - application-autoscaling:*
+                  - secretsmanager:GetSecretValue
+                  - secretsmanager:PutSecretValue
+                  - secretsmanager:CreateSecret
+                  - secretsmanager:UpdateSecret
                 Resource:
                   - "*"
       ManagedPolicyArns:
@@ -245,6 +249,12 @@ Resources:
             files:
               - parameters.json
               - template.yaml
+
+  EMDAPIKeySecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: EMD-APIKey-Secrets
+      Description: Easy Model Deployer model API keys secrets
 
   Pipeline:
     Type: AWS::CodePipeline::Pipeline

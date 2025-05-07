@@ -18,7 +18,8 @@ sagemaker_service = Service(
         "MaxCapacity": ValueWithDefault(name="max_capacity",default=1),
         "MinCapacity": ValueWithDefault(name="min_capacity",default=1),
         "AutoScalingTargetValue": ValueWithDefault(name="auto_scaling_target_value",default=10),
-        "SageMakerEndpointName": ValueWithDefault(name="sagemaker_endpoint_name",default="Auto-generate")
+        "SageMakerEndpointName": ValueWithDefault(name="sagemaker_endpoint_name",default="Auto-generate"),
+        "APIKey": ValueWithDefault(name="api_key",default="")
     },
     name = "Amazon SageMaker AI Real-time inference with OpenAI Compatible API",
     service_type=ServiceType.SAGEMAKER,
@@ -61,6 +62,7 @@ sagemaker_async_service = Service(
         "MaxCapacity": ValueWithDefault(name="max_capacity",default=1),
         "MinCapacity": ValueWithDefault(name="min_capacity",default=1),
         "AutoScalingTargetValue": ValueWithDefault(name="auto_scaling_target_value",default=10),
+        "APIKey": ValueWithDefault(name="api_key",default="")
     },
     name = "Amazon SageMaker AI Asynchronous inference with OpenAI Compatible API",
     service_type=ServiceType.SAGEMAKER_ASYNC,
@@ -102,7 +104,8 @@ ecs_service = Service(
         "Subnets": ValueWithDefault(name="subnet_ids",default=""),
         "ContainerCpu": "container_cpu",
         "ContainerMemory": "container_memory",
-        "ContainerGpu":"instance_gpu_num"
+        "ContainerGpu":"instance_gpu_num",
+        "APIKey": ValueWithDefault(name="api_key",default="")
     },
     name = "Amazon ECS with OpenAI Compatible API",
     service_type=ServiceType.ECS,

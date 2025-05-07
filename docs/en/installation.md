@@ -49,7 +49,7 @@ Extra parameters passed to the model deployment. extra-params should be a Json o
   }
 }
 ```
-To learn some practice examples, please refer to the [Best Deployment Practices](docs/en/best_deployment_practices.md).
+To learn some practice examples, please refer to the [Best Deployment Practices](https://aws-samples.github.io/easy-model-deployer/en/best_deployment_practices/).
 
 
 

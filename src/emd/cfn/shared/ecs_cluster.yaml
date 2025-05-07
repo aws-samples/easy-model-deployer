@@ -146,6 +146,11 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                   - elasticloadbalancing:DescribeRules
+                  - secretsmanager:GetSecretValue
+                  - secretsmanager:PutSecretValue
+                  - secretsmanager:CreateSecret
+                  - secretsmanager:UpdateSecret
+                  - secretsmanager:DeleteSecret
                 Resource: '*'
 
   LambdaDeploymentHelper:
@@ -275,34 +280,113 @@ Resources:
           def force_api_router_deployment(event, context):
               """
               Forces a new deployment for the APIRouterService.
-              This will restart the service with the latest task definition.
               """
-              ecs_client = boto3.client('ecs')
-              cluster_name = os.environ['ECS_CLUSTER_NAME']
-              service_name = "EMD-API-Router"
+              if event['RequestType'] in ['Create', 'Update']:
+                ecs_client = boto3.client('ecs')
+                cluster_name = os.environ['ECS_CLUSTER_NAME']
+                service_name = "EMD-API-Router"
+
+                try:
+                    # Check if the service exists
+                    response = ecs_client.describe_services(
+                        cluster=cluster_name,
+                        services=[service_name]
+                    )
+
+                    if not response['services'] or response['services'][0]['status'] != 'ACTIVE':
+                        response_data = {'Message': f"Service {service_name} not found or not active in cluster {cluster_name}"}
+                    else:
+                      # Force a new deployment
+                      ecs_client.update_service(
+                          cluster=cluster_name,
+                          service=service_name,
+                          forceNewDeployment=True,
+                      )
+                      response_data = {'Message': f"Forced new deployment for {service_name}"}
+
+                    cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data)
+                except Exception as e:
+                    print(f"Error forcing deployment: {str(e)}")
+                    cfnresponse.send(event, context, cfnresponse.FAILED, {'Error': str(e)})
+
+          def set_api_key(event, context):
+              # Get properties from the event
+              properties = event['ResourceProperties']
+              model_name = properties.get('ModelName', '')
+              api_key = properties.get('APIKey', '')
+              secret_id = 'EMD-APIKey-Secrets'
+
+              # Create a Secrets Manager client
+              client = boto3.client('secretsmanager')
+              response_data = {}
 
               try:
-                  # Check if the service exists
-                  response = ecs_client.describe_services(
-                      cluster=cluster_name,
-                      services=[service_name]
-                  )
+                  if event['RequestType'] in ['Create', 'Update'] and api_key:
+                      # Get the current secret value if it exists
+                      try:
+                          response = client.get_secret_value(SecretId=secret_id)
+                          if 'SecretString' in response:
+                              secret_data = json.loads(response['SecretString'])
+                          else:
+                              secret_data = {}
+                      except client.exceptions.ResourceNotFoundException:
+                          # Secret doesn't exist yet or is empty
+                          secret_data = {}
+                          # Create the secret if it doesn't exist
+                          try:
+                              client.create_secret(
+                                  Name=secret_id,
+                                  Description='Easy Model Deployer model API keys secrets',
+                                  SecretString='{}'
+                              )
+                          except client.exceptions.ResourceExistsException:
+                              # Secret already exists, which is fine
+                              pass
 
-                  if not response['services'] or response['services'][0]['status'] != 'ACTIVE':
-                      response_data = {'Message': f"Service {service_name} not found or not active in cluster {cluster_name}"}
-                  else:
-                    # Force a new deployment
-                    ecs_client.update_service(
-                        cluster=cluster_name,
-                        service=service_name,
-                        forceNewDeployment=True,
-                    )
-                    response_data = {'Message': f"Forced new deployment for {service_name}"}
+                      # Add or update the key-value pair with format model_id/model_tag
+                      secret_data[model_name] = api_key
+
+                      # Update the secret
+                      client.put_secret_value(
+                          SecretId=secret_id,
+                          SecretString=json.dumps(secret_data)
+                      )
+                      print(f"Successfully stored API key for {model_name} in {secret_id}")
+                      response_data['Status'] = 'SUCCESS'
+                      response_data['Message'] = f"API key stored for {model_name}"
+
+                  elif event['RequestType'] == 'Delete' and model_name:
+                      # Get the current secret value
+                      try:
+                          response = client.get_secret_value(SecretId=secret_id)
+                          if 'SecretString' in response:
+                              secret_data = json.loads(response['SecretString'])
+
+                              # Remove the key for this model
+                              if model_name in secret_data:
+                                  del secret_data[model_name]
+
+                                  # Update the secret with the key removed
+                                  client.put_secret_value(
+                                      SecretId=secret_id,
+                                      SecretString=json.dumps(secret_data)
+                                  )
+                                  print(f"Successfully removed API key for {model_name} from {secret_id}")
+
+                          response_data['Status'] = 'SUCCESS'
+                          response_data['Message'] = 'API key removed'
+                      except client.exceptions.ResourceNotFoundException:
+                          # Secret doesn't exist, nothing to delete
+                          print(f"Secret {secret_id} not found, nothing to delete")
+                          response_data['Status'] = 'SUCCESS'
+                          response_data['Message'] = 'Secret not found, nothing to delete'
 
                   cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data)
               except Exception as e:
-                  print(f"Error forcing deployment: {str(e)}")
-                  cfnresponse.send(event, context, cfnresponse.FAILED, {'Error': str(e)})
+                  print(f"Error managing API key secret: {str(e)}")
+                  response_data['Status'] = 'FAILED'
+                  response_data['Message'] = str(e)
+                  cfnresponse.send(event, context, cfnresponse.FAILED, response_data)
 
           def handler(event, context):
               print(event)
@@ -317,7 +401,7 @@ Resources:
               function_name = function_name.lstrip('_')
               globals()[function_name](event, context)
 
-      Runtime: python3.10
+      Runtime: python3.13
       Timeout: 300
       Environment:
         Variables:

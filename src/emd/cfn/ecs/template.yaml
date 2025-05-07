@@ -86,6 +86,12 @@ Parameters:
   Region:
     Type: String
     Description: Not used currently
+  APIKey:
+    Type: String
+    Default: ""
+    NoEcho: true
+    Description: API key to be used for invoking the model
+
 Resources:
   ECSAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -174,6 +180,12 @@ Resources:
     Properties:
       ServiceToken: !Ref LambdaDeploymentHelperArn
       ModelName: !Join ['', [!Ref ModelId, '/', !Ref ModelTag]]
+  SetApiKey:
+    Type: Custom::SetApiKey
+    Properties:
+      ServiceToken: !Ref LambdaDeploymentHelperArn
+      ModelName: !Join ['', [!Ref ModelId, '/', !Ref ModelTag]]
+      APIKey: !Ref APIKey
 
   ContainerHostSecurityGroup:
     Type: AWS::EC2::SecurityGroup

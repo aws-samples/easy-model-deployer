@@ -502,6 +502,7 @@ def deploy(
         while True:
             extra_params = questionary.text(
                 "(Optional) Additional deployment parameters (JSON string or local file path), you can skip by pressing Enter:",
+                instruction="Parameters format: https://aws-samples.github.io/easy-model-deployer/en/installation/#-extra-params.",
                 default="{}"
             ).ask()
 
