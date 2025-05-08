@@ -117,18 +117,15 @@ Resources:
 
 Outputs:
   Model:
-    Description: Model ID used to generate the response
+    Description: The unique model ID that determines which model will process your request in the OpenAI-compatible API.
     Value: !Join ['', [!Ref ModelId, '/', !Ref ModelTag]]
   SageMakerEndpointName:
     Description: The name of the SageMaker Endpoint
     Value: !GetAtt SageMakerEndpoint.EndpointName
   ModelAPIKey:
     Condition: HasAPIKey
-    Description: !Sub
-      - |
-        API key stored in Secrets Manager. View, modify, or rotate the key via the console: ${SecretManagerConsoleLink}
-      - SecretManagerConsoleLink: !If
-        - IsChinaRegion
-        - !Sub "https://console.amazonaws.cn/secretsmanager/secret?name=EMD-APIKey-Secrets&region=${AWS::Region}"
-        - !Sub "https://console.aws.amazon.com/secretsmanager/secret?name=EMD-APIKey-Secrets&region=${AWS::Region}"
-    Value: "****"
+    Description: "API key for accessing model is securely stored in AWS Secrets Manager and can be managed through the provided link."
+    Value: !If
+      - IsChinaRegion
+      - !Sub "https://console.amazonaws.cn/secretsmanager/secret?name=EMD-APIKey-Secrets&region=${AWS::Region}"
+      - !Sub "https://console.aws.amazon.com/secretsmanager/secret?name=EMD-APIKey-Secrets&region=${AWS::Region}"
