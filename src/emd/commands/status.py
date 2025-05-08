@@ -63,30 +63,30 @@ def status(
         })
 
     account_id = get_account_id()
-    
+
     # Display each model in its own table box
     for model_data in data:
         # Create a table for the model with a thinner border
         model_table = Table(show_header=False, expand=True)
-        
+
         # Add a single column for the model name header
         model_table.add_column(justify="center")
-        
+
         # Add the model name as the first row with bold styling
         model_name = f"{model_data['model_id']}/{model_data['model_tag']}"
         model_table.add_row(model_name, style="bold")
-        
+
         # Create a nested table for model details
         details_table = Table(show_header=False, box=None, expand=True)
         details_table.add_column(justify="left", style="cyan", width=20)
         details_table.add_column(justify="left", overflow="fold")
-        
+
         # Add model details as name/value pairs
         details_table.add_row("Status", model_data['status'])
         details_table.add_row("Service Type", model_data['service_type'])
         details_table.add_row("Instance Type", model_data['instance_type'])
         details_table.add_row("Create Time", model_data['create_time'])
-        
+
         # Parse and add outputs as separate rows
         try:
             # Check if outputs is a string that looks like a dictionary
@@ -97,12 +97,12 @@ def status(
                 if isinstance(outputs_dict, dict):
                     # Define the order of priority keys
                     priority_keys = ["BaseURL", "Model", "ModelAPIKey"]
-                    
+
                     # First add priority keys if they exist
                     for key in priority_keys:
                         if key in outputs_dict:
                             details_table.add_row(key, str(outputs_dict[key]))
-                    
+
                     # Then add any remaining keys
                     for key, value in outputs_dict.items():
                         if key not in priority_keys:
@@ -114,10 +114,10 @@ def status(
         except (SyntaxError, ValueError):
             # If parsing fails, just show the raw outputs
             details_table.add_row("Outputs", model_data['outputs'])
-        
+
         # Add the details table as a row in the main table
         model_table.add_row(details_table)
-        
+
         console.print(model_table)
         console.print()  # Add a blank line between models
 
