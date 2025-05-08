@@ -74,7 +74,7 @@ func main() {
 	if err := discoverModelEndpoints(); err != nil {
 		log.Fatalf("Failed to discover model endpoints: %v", err)
 	}
-	
+
 	// Start background refresh of maps every hour
 	go startPeriodicRefresh(1 * time.Hour)
 
@@ -401,14 +401,14 @@ func startPeriodicRefresh(interval time.Duration) {
 		select {
 		case <-ticker.C:
 			log.Println("Refreshing model maps...")
-			
+
 			// Refresh API keys
 			if err := loadApiKeysFromSecrets(); err != nil {
 				log.Printf("Warning: Failed to refresh API keys: %v", err)
 			} else {
 				log.Printf("Successfully refreshed API keys, loaded %d keys", len(modelApiKeyMap))
 			}
-			
+
 			// Refresh endpoints
 			if err := discoverModelEndpoints(); err != nil {
 				log.Printf("Warning: Failed to refresh model endpoints: %v", err)

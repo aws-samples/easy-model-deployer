@@ -94,6 +94,9 @@ Parameters:
 
 Conditions:
   HasAPIKey: !Not [!Equals [!Ref APIKey, ""]]
+  IsChinaRegion: !Or
+    - !Equals [!Ref "AWS::Region", "cn-north-1"]
+    - !Equals [!Ref "AWS::Region", "cn-northwest-1"]
 
 Resources:
   ECSAutoScalingGroup:
@@ -423,5 +426,11 @@ Outputs:
     Value: !Join ['', ['http://', !GetAtt ConvertDnsName.DnsName, ':', !Ref ContainerPort]]
   ModelAPIKey:
     Condition: HasAPIKey
-    Description: API key has been stored in AWS Secrets Manager. Check the secret 'EMD-APIKey-Secrets' for the key associated with model ID.
+    Description: !Sub
+      - |
+        API key stored in Secrets Manager. View, modify, or rotate the key via the console: ${SecretManagerConsoleLink}
+      - SecretManagerConsoleLink: !If
+        - IsChinaRegion
+        - !Sub "https://console.amazonaws.cn/secretsmanager/secret?name=EMD-APIKey-Secrets&region=${AWS::Region}"
+        - !Sub "https://console.aws.amazon.com/secretsmanager/secret?name=EMD-APIKey-Secrets&region=${AWS::Region}"
     Value: "****"
