@@ -388,25 +388,6 @@ Resources:
         GroupId: !Ref ServiceSecurityGroup
         IpProtocol: -1
         SourceSecurityGroupId: !Ref PublicLoadBalancerSecurityGroup
-  ListenerRulePath:
-    Type: AWS::ElasticLoadBalancingV2::ListenerRule
-    Properties:
-      ListenerArn: !Ref PublicLoadBalancerListenerArn
-      Priority: !GetAtt GetPriorityNumber.Priority
-      Conditions:
-        - Field: path-pattern
-          PathPatternConfig:
-            Values:
-              - !Join
-                - ''
-                - - '/'
-                  - !Ref ModelId
-                  - '/'
-                  - !Ref ModelTag
-                  - '/*'
-      Actions:
-        - Type: forward
-          TargetGroupArn: !Ref ServiceTargetGroup
 
   ForceApiRouterDeployment:
     Type: Custom::ForceApiRouterDeployment
