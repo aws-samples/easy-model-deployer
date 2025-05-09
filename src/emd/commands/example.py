@@ -31,12 +31,12 @@ def example(
     else:
         model_id = model_id_with_tag
         model_tag = MODEL_DEFAULT_TAG
-    
+
     # Get model status to retrieve base URL
     ret = get_model_status(model_id, model_tag=model_tag)
     inprogress = ret['inprogress']
     completed = ret['completed']
-    
+
     # Extract base URL from model outputs
     base_url = None
     for model_data in completed + inprogress:
@@ -50,11 +50,11 @@ def example(
                     break
         except (SyntaxError, ValueError):
             continue
-    
+
     if not base_url:
         console.print("[bold red]No deployed model found with a base URL.[/bold red]")
         return
-    
+
     # Get model type
     try:
         model = Model.get_model(model_id)
@@ -62,7 +62,7 @@ def example(
     except KeyError:
         console.print(f"[bold red]Model ID '{model_id}' is not supported.[/bold red]")
         return
-    
+
     # Generate example based on model type
     if model_type == ModelType.LLM:
         _generate_chat_completion_example(base_url, model_id, model_tag)
@@ -81,7 +81,7 @@ def _generate_chat_completion_example(base_url, model_id, model_tag):
     """Generate example for chat completion models"""
     # Always include the tag in the example payload
     full_model_id = f"{model_id}/{model_tag}"
-    
+
     curl_example = f"""curl {base_url}/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer <API Key>" \\
@@ -93,22 +93,22 @@ def _generate_chat_completion_example(base_url, model_id, model_tag):
         ],
         "stream": false
       }}'"""
-    
+
     console.print("\n[bold]Create Chat Completion[/bold]")
-    
+
     # Create a simple table for POST and URL
     table = Table(show_header=False, box=None)
     table.add_column(style="bold")
     table.add_column(overflow="fold")
     table.add_row("POST", f"{base_url}/v1/chat/completions")
     console.print(table)
-    
+
     console.print("\n[bold]Request Example[/bold]")
-    
+
     # CURL example
     console.print("[bold]CURL[/bold]")
     console.print(curl_example)
-    
+
     # Python example
     python_example = f"""# Please install OpenAI SDK first: `pip3 install openai`
 
@@ -126,7 +126,7 @@ response = client.chat.completions.create(
 )
 
 print(response.choices[0].message.content)"""
-    
+
     console.print("\n[bold]PYTHON[/bold]")
     console.print(python_example)
 
@@ -135,7 +135,7 @@ def _generate_vision_example(base_url, model_id, model_tag):
     """Generate example for vision models"""
     # Always include the tag in the example payload
     full_model_id = f"{model_id}/{model_tag}"
-    
+
     curl_example = f"""curl {base_url}/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer <API Key>" \\
@@ -159,22 +159,22 @@ def _generate_vision_example(base_url, model_id, model_tag):
           }}
         ]
       }}'"""
-    
+
     console.print("\n[bold]Create Vision Completion[/bold]")
-    
+
     # Create a simple table for POST and URL
     table = Table(show_header=False, box=None)
     table.add_column(style="bold")
     table.add_column(overflow="fold")
     table.add_row("POST", f"{base_url}/v1/chat/completions")
     console.print(table)
-    
+
     console.print("\n[bold]Request Example[/bold]")
-    
+
     # CURL example
     console.print("[bold]CURL[/bold]")
     console.print(curl_example)
-    
+
     # Python example
     python_example = f"""# Please install OpenAI SDK first: `pip3 install openai`
 
@@ -211,7 +211,7 @@ response = client.chat.completions.create(
 )
 
 print(response.choices[0].message.content)"""
-    
+
     console.print("\n[bold]PYTHON[/bold]")
     console.print(python_example)
 
@@ -220,7 +220,7 @@ def _generate_embedding_example(base_url, model_id, model_tag):
     """Generate example for embedding models"""
     # Always include the tag in the example payload
     full_model_id = f"{model_id}/{model_tag}"
-    
+
     curl_example = f"""curl {base_url}/v1/embeddings \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer <API Key>" \\
@@ -228,22 +228,22 @@ def _generate_embedding_example(base_url, model_id, model_tag):
         "model": "{full_model_id}",
         "input": "The food was delicious and the service was excellent."
       }}'"""
-    
+
     console.print("\n[bold]Create Embedding[/bold]")
-    
+
     # Create a simple table for POST and URL
     table = Table(show_header=False, box=None)
     table.add_column(style="bold")
     table.add_column(overflow="fold")
     table.add_row("POST", f"{base_url}/v1/embeddings")
     console.print(table)
-    
+
     console.print("\n[bold]Request Example[/bold]")
-    
+
     # CURL example
     console.print("[bold]CURL[/bold]")
     console.print(curl_example)
-    
+
     # Python example
     python_example = f"""# Please install OpenAI SDK first: `pip3 install openai`
 
@@ -258,7 +258,7 @@ response = client.embeddings.create(
 
 print(response.data[0].embedding)  # Vector representation of the input text
 """
-    
+
     console.print("\n[bold]PYTHON[/bold]")
     console.print(python_example)
 
@@ -267,28 +267,28 @@ def _generate_asr_example(base_url, model_id, model_tag):
     """Generate example for ASR models"""
     # Always include the tag in the example payload
     full_model_id = f"{model_id}/{model_tag}"
-    
+
     curl_example = f"""curl {base_url}/v1/audio/transcriptions \\
   -H "Authorization: Bearer <API Key>" \\
   -F file="@/path/to/audio.mp3" \\
   -F model="{full_model_id}"
 """
-    
+
     console.print("\n[bold]Create Audio Transcription[/bold]")
-    
+
     # Create a simple table for POST and URL
     table = Table(show_header=False, box=None)
     table.add_column(style="bold")
     table.add_column(overflow="fold")
     table.add_row("POST", f"{base_url}/v1/audio/transcriptions")
     console.print(table)
-    
+
     console.print("\n[bold]Request Example[/bold]")
-    
+
     # CURL example
     console.print("[bold]CURL[/bold]")
     console.print(curl_example)
-    
+
     # Python example
     python_example = f"""# Please install OpenAI SDK first: `pip3 install openai`
 
@@ -305,7 +305,7 @@ with open(audio_file_path, "rb") as audio_file:
 
 print(response.text)  # Transcribed text
 """
-    
+
     console.print("\n[bold]PYTHON[/bold]")
     console.print(python_example)
 
