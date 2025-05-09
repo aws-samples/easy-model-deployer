@@ -1,125 +1,192 @@
-## Installation Guide
+# Quick Start Guide
 
-### Prerequisites
-- Python 3.9 or higher
-- pip (Python package installer)
+This guide provides simple step-by-step instructions for using Easy Model Deployer (EMD).
 
-### Setting up the Environment
+## Prerequisites
 
-1. Create a virtual environment:
+Before installing Easy Model Deployer, ensure your environment meets the following requirements:
+
+| Requirement | Details |
+|-------------|---------|
+| **Python** | Version 3.9 or higher required. EMD leverages modern Python features for optimal performance. |
+| **pip** | The Python package installer must be available to install EMD and its dependencies. |
+| **AWS Account** | Required for deploying models to AWS services (SageMaker, ECS, EC2). |
+| **AWS CLI** | Configured with appropriate credentials and permissions for resource creation. |
+| **Internet Connection** | Required for downloading model artifacts and dependencies. |
+
+For local deployments, additional requirements apply. See the [Local Deployment Guide](local_deployment.md) for details.
+
+## Installation
+
+**Optional: Create a Virtual Environment**
+
+It's recommended to install EMD in a virtual environment to avoid conflicts with other Python packages:
+
 ```bash
-python -m venv emd-env
+# Create a virtual environment
+python -m venv .venv
+
+# Activate the virtual environment
+# On macOS/Linux:
+source .venv/bin/activate
+# On Windows:
+# .venv\Scripts\activate
 ```
 
-2. Activate the virtual environment:
+After activating the virtual environment, your terminal prompt should change to indicate the active environment. You can then proceed with installation.
+
+Easy Model Deployer can be installed using various package managers. Choose the method that best suits your workflow:
+
+**Using pip:**
 ```bash
-source emd-env/bin/activate
+pip install easy-model-deployer
 ```
 
-3. Install the required packages:
+**Using pipx:**
 ```bash
-pip install https://github.com/aws-samples/easy-model-deployer/releases/download/emd-0.7.1/emd-0.7.1-py3-none-any.whl
+# Install pipx if you don't have it
+pip install --user pipx
+pipx ensurepath
+
+# Install EMD
+pipx install easy-model-deployer
 ```
 
+**Using uv:**
+```bash
+# Install uv if you don't have it
+pip install uv
 
-## Deployment parameters
+# Install EMD
+uv pip install easy-model-deployer
+```
 
-### --force-update-env-stack
-No additional ```emd bootstrap``` required for deployment. Because of other commands, status/destroy etc. require pre-bootstrapping. Therefore, it is recommended to run ```emd bootstrap``` separately after each upgrade.
+**Verification:**
+After installation, verify that EMD is working correctly by running:
+```bash
+emd --version
+```
+This should display the installed version of Easy Model Deployer.
 
-### --extra-params
-Extra parameters passed to the model deployment. extra-params should be a Json object of dictionary format as follows:
+**Upgrading:**
+To upgrade to the latest version:
+
+```bash
+# Using pip
+pip install --upgrade easy-model-deployer
+
+# Using pipx
+pipx upgrade easy-model-deployer
+
+# Using uv
+uv pip install --upgrade easy-model-deployer
+```
+
+> **Note**: After upgrading, you should run `emd bootstrap` again to ensure your environment is updated.
+
+## Bootstrap
+
+Before deploying models, you need to bootstrap the environment:
+
+```bash
+emd bootstrap
+```
+
+> **Note**: You need to run this command again after upgrading EMD with pip to update the environment.
+
+## Deploy a Model
+
+Deploy a model using the interactive CLI:
+
+```bash
+emd deploy
+```
+
+The CLI will guide you through selecting:
+- Model series
+- Specific model
+- Deployment service (SageMaker, ECS, EC2, or Local)
+- Instance type or GPU IDs
+- Inference engine
+- Additional parameters
+
+You can also deploy models directly with command line parameters:
+
+```bash
+emd deploy --model-series llama --model-name llama-3.3-70b-instruct-awq --service SageMaker
+```
+
+For secure API access, you can configure an API key during deployment using the `--extra-params` option:
+
+```bash
+emd deploy --model-id <model-id> --instance-type <instance-type> --engine-type <engine-type> --service-type <service-type> --extra-params '{
+  "service_params": {
+    "api_key": "your-secure-api-key"
+  }
+}'
+```
+
+When using the interactive CLI (`emd deploy`), you can also provide this JSON configuration in the "Extra Parameters" step of the deployment process. Simply paste the JSON structure when prompted for additional parameters:
 
 ```json
 {
-
-  "model_params": {
-  },
-  "service_params":{
-  },
-  "instance_params":{
-  },
-  "engine_params":{
-      "cli_args": "<command line arguments of current engine>",
-      "api_key":"<api key>"
-  },
-  "framework_params":{
-      "uvicorn_log_level":"info",
-      "limit_concurrency":200
+  "service_params": {
+    "api_key": "your-secure-api-key"
   }
 }
 ```
-To learn some practice examples, please refer to the [Best Deployment Practices](https://aws-samples.github.io/easy-model-deployer/en/best_deployment_practices/).
 
+This API key will be required for authentication when accessing your deployed model's endpoint, enhancing security for your inference services.
 
+> **Note**: For local deployment options and detailed model configurations, see the [Local Deployment Guide](local_deployment.md).
 
-## Local deployment on the ec2 instance
+## Check Deployment Status
 
-This is suitable for deploying models using local GPU resources.
+Monitor the status of your deployment:
 
-### Pre-requisites
-
-#### Start and connect to EC2 instance
-
-It is recommended to launch the instance using the AMI "**Deep Learning OSS Nvidia Driver AMI GPU PyTorch 2.6 (Ubuntu 22.04)**".
-
-
-### Deploy model using EMD
-
-```sh
-emd deploy --allow-local-deploy
+```bash
+emd status
 ```
 
-There some EMD configuration sample settings for model deployment in the following two sections: [Non-reasoning Model deployment configuration](#non-reasoning-model-deployment-configuration) and [Reasoning Model deployment configuration](#reasoning-model-deployment-configuration).
-Wait for the model deployment to complete.
+This command shows all active deployments with their ModelIds, endpoints, and status.
 
-#### Non-reasoning Model deployment configuration
+## Invoke the Model
 
-##### Qwen2.5-72B-Instruct-AWQ
+Test your deployed model using the CLI:
 
-```
-? Select the model series: qwen2.5
-? Select the model name: Qwen2.5-72B-Instruct-AWQ
-? Select the service for deployment: Local
-? input the local gpu ids to deploy the model (e.g. 0,1,2): 0,1,2,3
-? Select the inference engine to use: tgi
-? (Optional) Additional deployment parameters (JSON string or local file path), you can skip by pressing Enter: {"engine_params":{"api_key":"<YOUR_API_KEY>", "default_cli_args": "--max-total-tokens 30000 --max-concurrent-requests 30"}}
+```bash
+emd invoke <ModelId>
 ```
 
-##### llama-3.3-70b-instruct-awq
-```
-? Select the model series: llama
-? Select the model name: llama-3.3-70b-instruct-awq
-? Select the service for deployment: Local
-? input the local gpu ids to deploy the model (e.g. 0,1,2): 0,1,2,3
-engine type: tgi
-framework type: fastapi
-? (Optional) Additional deployment parameters (JSON string or local file path), you can skip by pressing Enter: {"engine_params":{"api_key":"<YOUR_API_KEY>", "default_cli_args": "--max-total-tokens 30000 --max-concurrent-requests 30"}}
+Replace `<ModelId>` with the ID shown in the status output.
+
+## Integration Options
+
+EMD provides an OpenAI-compatible API that allows you to integrate with your deployed models using standard tools and libraries:
+
+- **OpenAI Compatible API**: The primary integration method using the OpenAI API format. Once you have the base URL and API key from the `emd status` command, you can access the API using the OpenAI SDK or any OpenAI-compatible client. [API Documentation](api.md)
+- **EMD Client**: For direct Python integration
+- **LangChain Interface**: For integration with LangChain applications
+
+The API uses an OpenAI-compatible format, making it easy to switch between OpenAI's services and your deployed models with minimal code changes.
+
+## Destroy the Deployment
+
+When you no longer need the model, remove the deployment:
+
+```bash
+emd destroy <ModelId>
 ```
 
-#### Reasoning Model deployment configuration
+Replace `<ModelId>` with the ID shown in the status output.
 
-##### DeepSeek-R1-Distill-Qwen-32B
-```
-? Select the model series: deepseek reasoning model
-? Select the model name: DeepSeek-R1-Distill-Qwen-32B
-? Select the service for deployment: Local
-? input the local gpu ids to deploy the model (e.g. 0,1,2): 0,1,2,3
-engine type: vllm
-framework type: fastapi
-? (Optional) Additional deployment parameters (JSON string or local file path), you can skip by pressing Enter: {"engine_params":{"api_key":"<YOUR_API_KEY>", "default_cli_args": "--enable-reasoning --reasoning-parser deepseek_r1 --max_model_len 16000 --disable-log-stats --chat-template emd/models/chat_templates/deepseek_r1_distill.jinja --max_num_seq 20 --gpu_memory_utilization 0.9"}}
-```
+## Advanced Options
 
-##### deepseek-r1-distill-llama-70b-awq
+For more detailed information on:
 
-```
-? Select the model series: deepseek reasoning model
-? Select the model name: deepseek-r1-distill-llama-70b-awq
-? Select the service for deployment: Local
-? input the local gpu ids to deploy the model (e.g. 0,1,2): 0,1,2,3
-? Select the inference engine to use: tgi
-framework type: fastapi
-? (Optional) Additional deployment parameters (JSON string or local file path), you can skip by pressing Enter: {"engine_params":{"api_key":"<YOUR_API_KEY>", "default_cli_args": "--max-total-tokens 30000 --max-concurrent-requests 30"}}
-```
-
-## Examples
+- Advanced deployment parameters: See [Best Deployment Practices](https://aws-samples.github.io/easy-model-deployer/en/best_deployment_practices/)
+- Architecture details: See [Architecture](https://aws-samples.github.io/easy-model-deployer/en/architecture/)
+- Supported models: See [Supported Models](https://aws-samples.github.io/easy-model-deployer/en/supported_models/)
+- Local deployment: See [Local Deployment Guide](local_deployment.md)
+- CLI commands reference: See [CLI Commands](commands.md)
+- API documentation: See [API Documentation](api.md)
