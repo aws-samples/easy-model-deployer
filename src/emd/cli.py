@@ -1,32 +1,18 @@
 import typer
-from rich.console import Console
-from rich.panel import Panel
-from typing import Optional
-from pathlib import Path
-import boto3
-from botocore.exceptions import ClientError, NoCredentialsError
-import time
-import os
-from enum import Enum
-import shutil
-import zipfile
-from emd.revision import VERSION, COMMIT_HASH
-
 from emd.commands import (
     bootstrap,
     deploy,
-    # models,
+    models,
     destroy,
     version,
     status,
-    config
+    config,
+    example
 )
 from emd.commands.invoke import invoke
-from emd.utils.aws_service_management import check_aws_environment
-from typing_extensions import Annotated
-from emd.utils.decorators import load_aws_profile,catch_aws_credential_errors
-from emd.models import Model
-import json
+from emd.revision import VERSION, COMMIT_HASH
+from rich.console import Console
+from rich.panel import Panel
 
 app = typer.Typer(
     add_completion=False,
@@ -38,17 +24,17 @@ console = Console()
 app.add_typer(
     bootstrap.app,
     name="bootstrap",
-    help="Set up AWS environment for model deployment",
+    help="Initialize AWS resources for model deployment",
 )
 app.add_typer(
     deploy.app,
     name="deploy",
-    help="Deploy a model",
+    help="Deploy models to AWS infrastructure",
 )
 app.add_typer(
     status.app,
     name="status",
-    help="Query model status",
+    help="Display status of deployed models",
 )
 
 # app.add_typer(
@@ -58,48 +44,36 @@ app.add_typer(
 # )
 
 app.add_typer(
-    destroy.app,
-    name="destroy",
-    help="Destroy a model deployment",
+    invoke.app,
+    name="invoke",
+    help="Test deployed models with sample requests",
 )
 
 app.add_typer(
-    invoke.app,
-    name="invoke",
-    help="Invoke a model for testing, after deployment",
+    example.app,
+    name="example",
+    help="Generate sample code for API integration",
 )
+
+app.add_typer(
+    destroy.app,
+    name="destroy",
+    help="Remove deployed models and clean up resources",
+)
+
+app.add_typer(models.app, name="list-supported-models", help="Display available models")
 
 app.add_typer(
     config.app,
-    name="config",
-    help="Set default config",
+    name="profile",
+    help="Configure AWS profile credentials",
 )
 
 app.add_typer(
     version.app,
     name="version",
-    help="Show version",
+    help="Display tool version information",
 )
-
-@app.command(help="List supported models")
-@catch_aws_credential_errors
-def list_supported_models(
-    model_id: Annotated[
-        str, typer.Argument(help="Model ID")
-    ] = None,
-    detail: Annotated[
-        Optional[bool],
-        typer.Option("-a", "--detail", help="output model information in details.")
-    ] = False
-):
-    # console.print("[bold blue]Retrieving models...[/bold blue]")
-    support_models = Model.get_supported_models(detail=detail)
-    if model_id:
-        support_models = [model for _model_id,model in support_models.items() if _model_id == model_id]
-    r = json.dumps(support_models,indent=2,ensure_ascii=False)
-    print(f"{r}")
-
-# app.add_typer(models.app, name="model",help="list supported models")
 
 @app.callback(invoke_without_command=True)
 def callback(ctx: typer.Context):
