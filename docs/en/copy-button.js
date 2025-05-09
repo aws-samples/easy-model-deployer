@@ -2,16 +2,16 @@
 function addCopyButtons() {
   // Add copy buttons to all code blocks
   var codeBlocks = document.querySelectorAll('pre, div.highlight pre, .rst-content pre, code.literal-block');
-  
+
   codeBlocks.forEach(function(codeBlock) {
     // Skip if already has a header
     if (codeBlock.parentNode.querySelector('.code-header')) {
       return;
     }
-    
+
     // Try to determine the language
     var language = "code";
-    
+
     // Check for class-based language indicators
     if (codeBlock.className) {
       var classNames = codeBlock.className.split(' ');
@@ -29,7 +29,7 @@ function addCopyButtons() {
         }
       }
     }
-    
+
     // Check parent elements for language hints
     if (language === "code") {
       var parent = codeBlock.parentNode;
@@ -47,12 +47,12 @@ function addCopyButtons() {
         parent = parent.parentNode;
       }
     }
-    
+
     // Check for data attributes
     if (language === "code" && codeBlock.dataset && codeBlock.dataset.language) {
       language = codeBlock.dataset.language;
     }
-    
+
     // Format the language name to be more readable
     if (language !== "code") {
       // Capitalize first letter and format common language names
@@ -76,7 +76,7 @@ function addCopyButtons() {
           language = language.charAt(0).toUpperCase() + language.slice(1);
       }
     }
-    
+
     // Create header div
     var headerDiv = document.createElement('div');
     headerDiv.className = 'code-header';
@@ -88,7 +88,7 @@ function addCopyButtons() {
     headerDiv.style.borderTopLeftRadius = '8px';
     headerDiv.style.borderTopRightRadius = '8px';
     headerDiv.style.borderBottom = '1px solid #e1e4e5';
-    
+
     // Create language label
     var languageLabel = document.createElement('span');
     languageLabel.className = 'code-language';
@@ -98,7 +98,7 @@ function addCopyButtons() {
     languageLabel.style.fontSize = '0.75em'; // Match CSS: smaller font size
     languageLabel.style.fontWeight = 'normal'; // Match CSS: normal instead of bold
     languageLabel.style.color = '#666'; // Match CSS: lighter color
-    
+
     // Create copy button
     var button = document.createElement('button');
     button.className = 'copy-button';
@@ -114,34 +114,34 @@ function addCopyButtons() {
     button.style.transition = 'background-color 0.2s';
     button.style.fontSize = '0.8em'; // Match CSS: smaller font size
     button.style.color = '#555'; // Match CSS: lighter color
-    
+
     // Add hover effect
     button.addEventListener('mouseover', function() {
       button.style.backgroundColor = '#d0d0d0'; // Darker on hover
     });
-    
+
     button.addEventListener('mouseout', function() {
       button.style.backgroundColor = '#eaeaea'; // Back to normal
     });
-    
+
     // Create icon span
     var iconSpan = document.createElement('span');
     iconSpan.className = 'copy-icon';
     iconSpan.innerHTML = '📋'; // Clipboard icon
-    
+
     // Create text span
     var textSpan = document.createElement('span');
     textSpan.className = 'copy-text';
     textSpan.textContent = 'Copy';
-    
+
     // Add icon and text to button
     button.appendChild(iconSpan);
     button.appendChild(textSpan);
-    
+
     // Add language label and button to header
     headerDiv.appendChild(languageLabel);
     headerDiv.appendChild(button);
-    
+
     // Create a wrapper div if needed
     var wrapper = codeBlock.parentNode;
     if (wrapper.nodeName.toLowerCase() !== 'div' || !wrapper.classList.contains('code-wrapper')) {
@@ -155,7 +155,7 @@ function addCopyButtons() {
       codeBlock.parentNode.insertBefore(wrapper, codeBlock);
       wrapper.appendChild(codeBlock);
     }
-    
+
     // Style the code block
     codeBlock.style.margin = '0';
     codeBlock.style.borderTopLeftRadius = '0';
@@ -165,15 +165,15 @@ function addCopyButtons() {
     codeBlock.style.backgroundColor = '#f8f8f8'; // Light background color
     codeBlock.style.padding = '12px';
     codeBlock.style.border = 'none'; // Ensure no border on the code block
-    
+
     // Add header before code block
     wrapper.insertBefore(headerDiv, codeBlock);
-    
+
     // Add click event
     button.addEventListener('click', function() {
       // Get the text content
       var text = codeBlock.textContent;
-      
+
       // Create a temporary textarea element
       var textarea = document.createElement('textarea');
       textarea.value = text;
@@ -181,17 +181,17 @@ function addCopyButtons() {
       textarea.style.position = 'absolute';
       textarea.style.left = '-9999px';
       document.body.appendChild(textarea);
-      
+
       // Select the text and copy it
       textarea.select();
       document.execCommand('copy');
-      
+
       // Remove the textarea
       document.body.removeChild(textarea);
-      
+
       // Change icon to checkmark
       iconSpan.innerHTML = '✓'; // Checkmark icon
-      
+
       // Reset icon after a delay
       setTimeout(function() {
         iconSpan.innerHTML = '📋'; // Back to clipboard icon

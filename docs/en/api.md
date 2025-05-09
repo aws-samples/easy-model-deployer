@@ -15,7 +15,7 @@
 > │                        │ Secrets&region=us-east-1                                              │
 > │ SageMakerEndpointName  │ EMD-Model-qwen2-5-0-5b-instruct-endpoint                              │
 > └────────────────────────┴───────────────────────────────────────────────────────────────────────┘
-> 
+>
 > Base URL
 > http://your-emd-endpoint.region.elb.amazonaws.com/v1
 > ```

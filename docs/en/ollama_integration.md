@@ -47,12 +47,12 @@ import json
 def generate_text(prompt, use_local=True, max_tokens=100):
     """
     Generate text using either Ollama (local) or EMD-deployed model (cloud)
-    
+
     Args:
         prompt (str): The input prompt
         use_local (bool): Whether to use local Ollama model
         max_tokens (int): Maximum tokens to generate
-        
+
     Returns:
         str: Generated text
     """
@@ -99,11 +99,11 @@ You can implement a fallback mechanism that tries the local Ollama model first a
 def generate_with_fallback(prompt, max_tokens=100):
     """
     Try local model first, fall back to cloud model if needed
-    
+
     Args:
         prompt (str): The input prompt
         max_tokens (int): Maximum tokens to generate
-        
+
     Returns:
         str: Generated text
     """
@@ -118,14 +118,14 @@ def generate_with_fallback(prompt, max_tokens=100):
             },
             timeout=5  # Set a timeout for local model
         )
-        
+
         if response.status_code == 200:
             result = response.json().get("response", "")
             if result and len(result) > 20:  # Simple quality check
                 return {"source": "local", "text": result}
     except Exception as e:
         print(f"Local model error: {e}")
-    
+
     # Fall back to EMD-deployed model
     try:
         response = requests.post(
@@ -140,13 +140,13 @@ def generate_with_fallback(prompt, max_tokens=100):
                 "max_tokens": max_tokens
             }
         )
-        
+
         if response.status_code == 200:
             result = response.json().get("choices", [{}])[0].get("message", {}).get("content", "")
             return {"source": "cloud", "text": result}
     except Exception as e:
         print(f"Cloud model error: {e}")
-    
+
     return {"source": "none", "text": "Failed to generate response from both local and cloud models."}
 ```
 
