@@ -1,0 +1,93 @@
+/* Code block styles - no borders */
+pre, div.highlight pre, .rst-content pre, code.literal-block,
+.rst-content code, .rst-content tt, code {
+  border: none !important;
+  border-width: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  font-size: 0.95em !important; /* Default font size for all code elements */
+}
+
+/* Specifically target the elements mentioned by the user */
+.rst-content code, .rst-content tt, code {
+  border: 0 !important;
+  padding: 2px 4px;
+  font-size: 0.95em !important; /* Default font size for inline code */
+}
+
+/* Target code blocks specifically within our wrapper */
+.code-wrapper pre {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Override any theme-specific borders */
+.highlight, div.highlight {
+  border: none !important;
+  background-clip: padding-box !important;
+}
+
+/* Code wrapper styles */
+.code-wrapper {
+  margin-bottom: 1.5em;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Header styles */
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 10px; /* Smaller padding to reduce height */
+  background-color: #eaeaea;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border-bottom: 1px solid #e1e4e5;
+}
+
+/* Language label styles */
+.code-language {
+  font-family: monospace;
+  font-size: 0.75em; /* Even smaller font size */
+  font-weight: normal; /* Remove bold styling */
+  color: #666; /* Slightly lighter color */
+}
+
+/* Copy button styles */
+.copy-button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px; /* Smaller padding */
+  border: none;
+  border-radius: 4px;
+  background-color: #eaeaea;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.8em; /* Smaller font size */
+  color: #555; /* Lighter dark color */
+}
+
+.copy-button:hover {
+  background-color: #d0d0d0;
+}
+
+/* Code block content styles */
+.code-wrapper pre {
+  margin: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  background-color: #f8f8f8;
+  padding: 12px;
+  border: 0 !important;
+  font-size: 0.95em !important; /* Default font size for code blocks */
+}
+
+/* Ensure code in pre blocks has consistent sizing */
+pre code {
+  font-size: 0.95em !important; /* Reset to prevent double-scaling when nested */
+}

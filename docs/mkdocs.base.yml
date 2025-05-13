@@ -4,13 +4,7 @@ repo_url: https://github.com/aws-samples/easy-model-deployer/
 repo_name: aws-samples/easy-model-deployer
 
 theme:
-  name: material
-  features:
-    - navigation.tabs
-  favicon: https://s3.cn-north-1.amazonaws.com.cn/aws-assets-prod/libra-css/images/site/fav/favicon.ico
-  logo: https://s3.cn-north-1.amazonaws.com.cn/aws-assets-prod/libra-css/images/site/fav/favicon.ico
-  icon:
-      repo: fontawesome/brands/github
+  name: readthedocs
   language: en
 
 extra:
@@ -20,18 +14,38 @@ extra:
     - name: English
       link: /easy-model-deployer/en/
       lang: en
-  bucket: aws-gcr-solutions
-  version: develop
+
+extra_css:
+  - custom.css
+
+extra_javascript:
+  - copy-button.js
 
 plugins:
   - search
   - include-markdown
   - macros
-  - with-pdf
+  # - with-pdf
   - print-site
 
 markdown_extensions:
   - admonition
   - attr_list
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: false
+      line_spans: __span
+      pygments_lang_class: true
+      linenums: false
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.caret
+  - pymdownx.mark
+  - pymdownx.tilde
