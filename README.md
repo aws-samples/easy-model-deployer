@@ -34,6 +34,13 @@ Easy Model Deployer is a lightweight tool designed for simplify deploy **Open-So
 - Different instance types (CPU/GPU/AWS Inferentia)
 - Convenient integration (OpenAI Compatible API, LangChain client, etc.)
 
+## Support Models
+<details>
+<summary>Deepseek Reasoning Model</summary>
+  <a href="https://github.com/deepseek-ai/DeepSeek-R1"><strong>DeepSeek-R1-Distill-Qwen-14B</strong></a>
+
+</details>
+
 ## 🔧 Get Started
 
 ### Installation
