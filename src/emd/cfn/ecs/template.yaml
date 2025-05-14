@@ -307,7 +307,6 @@ Resources:
     DependsOn:
       - ECSTaskExecutionRole
       - EC2Role
-      - ServiceTargetGroup
       - UpdateCapacityProvider
     Properties:
       ServiceName: !Sub '${AWS::StackName}'
@@ -331,10 +330,6 @@ Resources:
         MinimumHealthyPercent: 75
       DesiredCount: !Ref DesiredCount
       TaskDefinition: !Ref TaskDefinition
-      LoadBalancers:
-        - ContainerName: !Sub '${AWS::StackName}'
-          ContainerPort: !Ref ContainerPort
-          TargetGroupArn: !Ref ServiceTargetGroup
       ServiceConnectConfiguration:
         Enabled: true
         Namespace: emd-service-connect-namespace
@@ -362,32 +357,6 @@ Resources:
       ToPort: !Ref ContainerPort
       SourceSecurityGroupId: !Ref APIRouterSecurityGroup
       Description: Allow traffic from API router service to model service
-
-  ServiceTargetGroup:
-    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
-    Properties:
-      HealthCheckIntervalSeconds: 120
-      HealthCheckPath: /ping
-      HealthCheckProtocol: HTTP
-      HealthCheckTimeoutSeconds: 5
-      HealthyThresholdCount: 2
-      TargetType: ip
-      Port: !Ref ContainerPort
-      Protocol: HTTP
-      Matcher:
-        HttpCode: 200-404
-      UnhealthyThresholdCount: 10
-      VpcId: !Ref VPCID
-      TargetGroupAttributes:
-        - Key: deregistration_delay.timeout_seconds
-          Value: 0
-  ServiceIngressfromLoadBalancer:
-      Type: 'AWS::EC2::SecurityGroupIngress'
-      Properties:
-        Description: Ingress from the public ALB
-        GroupId: !Ref ServiceSecurityGroup
-        IpProtocol: -1
-        SourceSecurityGroupId: !Ref PublicLoadBalancerSecurityGroup
 
   ForceApiRouterDeployment:
     Type: Custom::ForceApiRouterDeployment
