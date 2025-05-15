@@ -29,5 +29,5 @@ LOCAL_REGION = "local"
 
 LOCAL_DEPLOY_PIPELINE_ZIP_DIR = os.path.join(
     os.path.expanduser("~"),
-    f"emd_{VERSION}"
+    ".emd-local"
 )
