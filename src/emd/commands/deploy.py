@@ -89,8 +89,6 @@ def supported_services_filter(
             continue
         if service.service_type == ServiceType.LOCAL and not allow_local_deploy:
             continue
-        if service.service_type == ServiceType.SAGEMAKER_ASYNC:
-            continue
         ret.append(service)
 
     if only_allow_local_deploy:
@@ -172,16 +170,19 @@ def ask_model_id(region, allow_local_deploy, only_allow_local_deploy, model_id=N
         from prompt_toolkit import PromptSession
         from prompt_toolkit.application.current import get_app
 
-        session = PromptSession(completer=completer)
-
+        session = PromptSession(
+            completer=completer,
+            complete_while_typing=True,
+        )
+        
         def get_prompt_message():
             buffer = get_app().current_buffer
             if buffer.text:
                 return HTML('<b>? Enter model name: </b>')
             else:
-                return HTML('<b>? Enter model name: </b><span fg="#888888">(start typing to see suggestions, run "emd list-supported-models" or visit https://aws-samples.github.io/easy-model-deployer/en/supported_models for full model list)</span>')
+                return HTML('<b>? Enter model name: </b><span fg="#888888">(Type to search, run "emd list-supported-models" for full model list)</span>')
 
-        selected_model = session.prompt(get_prompt_message)
+        selected_model = session.prompt(get_prompt_message, pre_run=lambda: get_app().current_buffer.start_completion())
 
         if not selected_model:
             console.print("[bold yellow]Model selection cancelled[/bold yellow]")
