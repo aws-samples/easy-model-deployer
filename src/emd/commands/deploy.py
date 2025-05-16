@@ -40,14 +40,14 @@ layout = make_layout()
 from questionary import Style
 
 custom_style = Style([
-    ('qmark', 'fg:#66BB6A bold'),  # 问题前的标记
-    ('question', 'fg:default'),     # 将问题文本颜色设置为默认颜色
-    ('answer', 'fg:#4CAF50 bold'),  # 提交的答案文本
-    ('pointer', 'fg:#66BB6A bold'),  # 选择提示符
-    ('highlighted', 'fg:#4CAF50 bold'),  # 高亮的选项
-    ('selected', 'fg:#A5D6A7 bold'),  # 选中的选项
-    ('disabled', 'fg:#CED4DA italic'),  # 禁用的选项
-    ('error', 'fg:#F44336 bold'),  # 错误信息
+    ('qmark', 'fg:#66BB6A bold'),
+    ('question', 'fg:default'),
+    ('answer', 'fg:#4CAF50 bold'),
+    ('pointer', 'fg:#66BB6A bold'),
+    ('highlighted', 'fg:#4CAF50 bold'),
+    ('selected', 'fg:#A5D6A7 bold'),
+    ('disabled', 'fg:#CED4DA italic'),
+    ('error', 'fg:#F44336 bold'),
 ])
 
 def show_help(choice):
@@ -145,7 +145,6 @@ def is_valid_model_tag(name,pattern=MODEL_TAG_PATTERN):
     return bool(re.match(pattern, name))
 
 
-# Define a natural sort key function to handle numeric values in model names
 def natural_sort_key(s):
     # Split the string into text and numeric parts
     return [int(c) if c.isdigit() else float(c) if c.replace('.', '', 1).isdigit() else c.lower()
@@ -173,30 +172,31 @@ def ask_model_id(region, allow_local_deploy, only_allow_local_deploy, model_id=N
         session = PromptSession(
             completer=completer,
             complete_while_typing=True,
+            rprompt=HTML('<span fg="#888888">(Run "emd list-supported-models" for full model list)</span>')
         )
 
         def get_prompt_message():
-            buffer = get_app().current_buffer
-            if buffer.text:
-                return HTML('<b>? Enter model name: </b>')
-            else:
-                return HTML('<b>? Enter model name: </b><span fg="#888888">(Type to search, run "emd list-supported-models" for full model list)</span>')
+            return HTML('<b>? Enter model name: </b>')
 
-        selected_model = session.prompt(get_prompt_message, pre_run=lambda: get_app().current_buffer.start_completion())
+        while True:
+            selected_model = session.prompt(
+                get_prompt_message,
+                pre_run=lambda: get_app().current_buffer.start_completion()
+            )
 
-        if not selected_model:
-            console.print("[bold yellow]Model selection cancelled[/bold yellow]")
-            raise typer.Exit(0)
+            if not selected_model:
+                console.print("[bold yellow]Model selection cancelled[/bold yellow]")
+                raise typer.Exit(0)
 
-        if selected_model not in model_ids:
-            console.print(f"[bold red]Invalid model name: {selected_model}[/bold red]")
-            raise typer.Exit(1)
+            if selected_model not in model_ids:
+                console.print(f"[bold #FFA726]Invalid model name, please try again or press Ctrl+C to cancel[/bold #FFA726]")
+                continue
 
-        return selected_model
+            return selected_model
 
     except Exception as e:
         if not isinstance(e, (ModelNotSupported, typer.Exit)):
-            console.print(f"[bold red]Error during model selection: {str(e)}[/bold red]")
+            console.print(f"[bold #FFA726]Error during model selection: {str(e)}[/bold #FFA726]")
             raise typer.Exit(1)
         raise
 
@@ -304,7 +304,10 @@ def deploy(
                 ],
                 style=custom_style
             ).ask()
-            service_type = Service.get_service_from_name(service_name).service_type
+            try:
+                service_type = Service.get_service_from_name(service_name).service_type
+            except:
+                raise typer.Exit(0)
         else:
             service_type = supported_services[0].service_type
             console.print(f"[bold blue]service type: {supported_services[0].name}[/bold blue]")
@@ -509,8 +512,7 @@ def deploy(
     if extra_params is None:
         while True:
             extra_params = questionary.text(
-                "(Optional) Additional parameters, you can skip by pressing Enter:",
-                instruction="Usage: https://aws-samples.github.io/easy-model-deployer/en/best_deployment_practices/#extra-parameters-usage",
+                "(Optional) Additional parameters, usage (https://aws-samples.github.io/easy-model-deployer/en/best_deployment_practices/#extra-parameters-usage), you can skip by pressing Enter:",
                 default="{}"
             ).ask()
 
@@ -543,10 +545,13 @@ def deploy(
             # else:
             #     console.print(f"[bold blue] model tag: {model_tag}[/bold blue]")
             #     break
-            if not model_tag and not is_valid_model_tag(model_tag):
-                console.print(f"[bold blue]invalid model tag: {model_tag}. Please ensure that the tag complies with the standard rules: {MODEL_TAG_PATTERN}.[/bold blue]")
-            else:
-                break
+            try:
+                if not model_tag and not is_valid_model_tag(model_tag):
+                    console.print(f"[bold blue]invalid model tag: {model_tag}. Please ensure that the tag complies with the standard rules: {MODEL_TAG_PATTERN}.[/bold blue]")
+                else:
+                    break
+            except:
+                raise typer.Exit(0)
 
     if not model_tag:
         raise ValueError("Model tag is required.")
