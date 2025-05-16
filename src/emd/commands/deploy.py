@@ -174,7 +174,7 @@ def ask_model_id(region, allow_local_deploy, only_allow_local_deploy, model_id=N
             completer=completer,
             complete_while_typing=True,
         )
-        
+
         def get_prompt_message():
             buffer = get_app().current_buffer
             if buffer.text:
