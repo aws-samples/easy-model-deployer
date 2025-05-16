@@ -28,6 +28,8 @@ from emd.utils.accelerator_utils import get_gpu_num,check_cuda_exists,check_neur
 from emd.utils.decorators import catch_aws_credential_errors,check_emd_env_exist,load_aws_profile
 from emd.utils.logger_utils import make_layout
 from emd.utils.exceptions import ModelNotSupported,ServiceNotSupported,InstanceNotSupported
+from prompt_toolkit import prompt
+from prompt_toolkit.completion import FuzzyWordCompleter
 
 app = typer.Typer(pretty_exceptions_enable=False)
 console = Console()
@@ -52,13 +54,26 @@ def show_help(choice):
     return f"{choice} (shortcut)"
 
 
-def supported_models_filter(region:str,support_models:list[Model]):
+def supported_models_filter(
+    region:str,
+    allow_local_deploy,
+    only_allow_local_deploy,
+    support_models:list[Model]
+):
     ret = []
     is_cn_region = check_cn_region(region)
 
     for model in support_models:
         if is_cn_region and not model.allow_china_region:
             continue
+
+        # Skip models that only support local services when local deployment is not allowed
+        if not allow_local_deploy:
+            # Check if all supported services are local services
+            all_local_services = all(service.service_type == ServiceType.LOCAL for service in model.supported_services)
+            if all_local_services:
+                continue
+
         ret.append(model)
     return ret
 
@@ -73,6 +88,8 @@ def supported_services_filter(
         if is_cn_region and not service.support_cn_region:
             continue
         if service.service_type == ServiceType.LOCAL and not allow_local_deploy:
+            continue
+        if service.service_type == ServiceType.SAGEMAKER_ASYNC:
             continue
         ret.append(service)
 
@@ -130,72 +147,57 @@ def is_valid_model_tag(name,pattern=MODEL_TAG_PATTERN):
     return bool(re.match(pattern, name))
 
 
-def ask_model_id(region,model_id=None):
+# Define a natural sort key function to handle numeric values in model names
+def natural_sort_key(s):
+    # Split the string into text and numeric parts
+    return [int(c) if c.isdigit() else float(c) if c.replace('.', '', 1).isdigit() else c.lower()
+            for c in re.split(r'(\d+\.\d+|\d+)', s)]
+
+
+def ask_model_id(region, allow_local_deploy, only_allow_local_deploy, model_id=None):
     if model_id is not None:
         return model_id
 
-    # step 1: select model series name
-    support_models:list[Model] = sorted(
-        [Model.get_model(m) for m in Model.get_supported_models()
-         if hasattr(Model.get_model(m), 'model_series') and hasattr(Model.get_model(m).model_series, 'model_series_name')],
-        key=lambda x:x.model_series.model_series_name
-    )
-    # filter models
-    support_models = supported_models_filter(region,support_models)
+    try:
+        supported_models = [Model.get_model(m) for m in Model.get_supported_models()]
+        filtered_models = supported_models_filter(region, allow_local_deploy, only_allow_local_deploy, supported_models)
 
-    if not support_models:
-        raise ModelNotSupported(region)
+        if not filtered_models:
+            raise ModelNotSupported(region)
 
-    model_series_map = defaultdict(list)
-    for model in support_models:
-        model_series_map[model.model_series.model_series_name].append(model)
+        model_ids = sorted([model.model_id for model in filtered_models], key=natural_sort_key)
+        completer = FuzzyWordCompleter(model_ids, WORD=True)
 
-    def _get_series_description(models:list[Model]):
-        model = models[0]
-        description = "\n"
-        description += model.model_series.description
-        description += f"\nreference link: {model.model_series.reference_link}"
-        description += "\nSupported models: "+ "\n - " + "\n - ".join(model.model_id for model in models)
-        return description
+        from prompt_toolkit.formatted_text import HTML
+        from prompt_toolkit import PromptSession
+        from prompt_toolkit.application.current import get_app
 
-    series_name = select_with_help(
-        "Select the model series:",
-        choices=[
-            Choice(
-                title=series_name,
-                description=_get_series_description(models),
-            )
-            for series_name,models in model_series_map.items()
-        ],
-        show_description=True,
-        style=custom_style
-    ).ask()
-    if series_name is None:
-        raise typer.Exit(0)
+        session = PromptSession(completer=completer)
 
-    def _get_model_description(model:Model):
-        description=f"\n\nModelType: {model.model_type}\nApplication Scenario: {model.application_scenario}"
-        if model.description:
-            description += f"\nDescription: {model.description}"
-        return description
+        def get_prompt_message():
+            buffer = get_app().current_buffer
+            if buffer.text:
+                return HTML('<b>? Enter model name: </b>')
+            else:
+                return HTML('<b>? Enter model name: </b><span fg="#888888">(start typing to see suggestions, run "emd list-supported-models" or visit https://aws-samples.github.io/easy-model-deployer/en/supported_models for full model list)</span>')
 
-    # step 2 select model_id
-    model_id = select_with_help(
-        "Select the model name:",
-        choices=[
-            Choice(
-                title=model.model_id,
-                description=_get_model_description(model)
-            )
-            for model in model_series_map[series_name]
-        ],
-        show_description=True,
-        style=custom_style
-    ).ask()
+        selected_model = session.prompt(get_prompt_message)
 
-    if model_id is None:
-        raise typer.Exit(0)
-    return model_id
+        if not selected_model:
+            console.print("[bold yellow]Model selection cancelled[/bold yellow]")
+            raise typer.Exit(0)
+
+        if selected_model not in model_ids:
+            console.print(f"[bold red]Invalid model name: {selected_model}[/bold red]")
+            raise typer.Exit(1)
+
+        return selected_model
+
+    except Exception as e:
+        if not isinstance(e, (ModelNotSupported, typer.Exit)):
+            console.print(f"[bold red]Error during model selection: {str(e)}[/bold red]")
+            raise typer.Exit(1)
+        raise
 
 
 #@app.callback(invoke_without_command=True)(invoke_without_command=True)
@@ -268,7 +270,12 @@ def deploy(
 
     vpc_id = None
     # ask model id
-    model_id = ask_model_id(region,model_id=model_id)
+    model_id = ask_model_id(
+        region,
+        allow_local_deploy,
+        only_allow_local_deploy,
+        model_id=model_id
+    )
 
     if not check_model_support_on_cn_region(model_id,region):
         raise ModelNotSupported(region,model_id=model_id)
@@ -286,7 +293,7 @@ def deploy(
     if service_type is None:
         if len(supported_services) > 1:
             service_name = select_with_help(
-                "Select the service for deployment:",
+                "Select model hosting service:",
                 choices=[
                     Choice(
                         title=service.name,
@@ -328,7 +335,7 @@ def deploy(
                 vpc_name = next((tag['Value'] for tag in vpc.get('Tags', []) if tag.get('Key') == 'Name'), None)
                 vpc['Name'] = vpc_name if vpc_name else '-'
             emd_vpc = select_with_help(
-                "Select the VPC (Virtual Private Cloud) you want to deploy the ESC service:",
+                "Select VPC (Virtual Private Cloud):",
                 choices=[
                     Choice(
                         title=f"{emd_default_vpc['VpcId']} ({emd_default_vpc['CidrBlock']}) (EMD-vpc)" if emd_default_vpc else 'Create a new VPC',
@@ -412,7 +419,7 @@ def deploy(
         if instance_type is None:
             if len(supported_instances)>1:
                 instance_type = select_with_help(
-                    "Select the instance type:",
+                    "Select instance type:",
                     choices=[
                         Choice(
                             title=instance.instance_type,
@@ -449,7 +456,7 @@ def deploy(
     if engine_type is None:
         if len(supported_engines)>1:
             engine_type = select_with_help(
-                "Select the inference engine to use:",
+                "Select inference engine:",
                 choices=[
                     Choice(
                         title=engine.engine_type,
@@ -476,7 +483,7 @@ def deploy(
     if framework_type is None:
         if len(supported_frameworks)>1:
             framework_type = select_with_help(
-                "Select the inference engine to use:",
+                "Select inference engine:",
                 choices=[
                     Choice(
                         title=framework.framework_type,
@@ -488,7 +495,6 @@ def deploy(
             ).ask()
         else:
             framework_type = supported_frameworks[0].framework_type
-            console.print(f"[bold blue]framework type: {framework_type}[/bold blue]")
     else:
         supported_framework_types = model.supported_framework_types
         console.print(f"[bold blue]framework type: {framework_type}[/bold blue]")
@@ -502,8 +508,8 @@ def deploy(
     if extra_params is None:
         while True:
             extra_params = questionary.text(
-                "(Optional) Additional deployment parameters (JSON string or local file path), you can skip by pressing Enter:",
-                instruction="Parameters format: https://aws-samples.github.io/easy-model-deployer/en/installation/#-extra-params.",
+                "(Optional) Additional parameters, you can skip by pressing Enter:",
+                instruction="Usage: https://aws-samples.github.io/easy-model-deployer/en/best_deployment_practices/#extra-parameters-usage",
                 default="{}"
             ).ask()
 
@@ -528,7 +534,7 @@ def deploy(
     if not skip_confirm and not service_type == ServiceType.LOCAL:
         while True:
             model_tag = questionary.text(
-                    "(Optional) Add a model deployment tag (custom label), you can skip by pressing Enter:",
+                    "(Optional) Custom tag (label), you can skip by pressing Enter:",
                     default=MODEL_DEFAULT_TAG
                 ).ask()
             # if model_tag == MODEL_DEFAULT_TAG:
@@ -547,7 +553,7 @@ def deploy(
 
     if not skip_confirm:
         if not typer.confirm(
-            "Would you like to proceed with the deployment? Please verify your selections above.",
+            "Ready to deploy? Please confirm your selections above.",
             abort=True,
         ):
             raise typer.Exit(0)
