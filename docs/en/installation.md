@@ -64,7 +64,7 @@ uv pip install easy-model-deployer
 **Verification:**
 After installation, verify that EMD is working correctly by running:
 ```bash
-emd --version
+emd version
 ```
 This should display the installed version of Easy Model Deployer.
 
