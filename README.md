@@ -142,4 +142,3 @@ For advanced configurations and detailed guides, visit our [documentation site](
 ## 🤝 Contributing
 
 We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
