@@ -1,5 +1,10 @@
 <p align="center">
-    <h3 align="center">Easy Model Deployer: Simple, Efficient, and Easy-to-Integrate</h3>
+    <h3 align="center">Easy Model Deployer: Easy Foundation Model Hosting on AWS</h3>
+</p>
+
+<p align="center">
+  <a href="README.md"><strong>English</strong></a> |
+  <a href="README_zh.md"><strong>简体中文</strong></a>
 </p>
 
 <p align="center">
@@ -10,15 +15,15 @@
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellowgreen.svg" alt="MIT License"></a>
   <a href="https://pypi.org/project/easy_model_deployer"><img src="https://img.shields.io/pypi/v/easy_model_deployer.svg?logo=pypi&label=PyPI&logoColor=gold"></a>
-  <a href="https://pypi.org/project/easy_model_deployer"><img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dw/easy-model-deployer"></a>
+  <a href="https://pypi.org/project/easy_model_deployer"><img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dw/easy_model_deployer"></a>
   <a href="https://github.com/aws-samples/easy-model-deployer/actions/workflows/release-package.yml"><img src="https://github.com/aws-samples/easy-model-deployer/actions/workflows/release-package.yml/badge.svg" alt="Build Status"></a>
 </p>
 
 ## 🔥 Latest News
-- 2025-04-29: Deploy Qwen 3 series models with [one command line](https://github.com/aws-samples/easy-model-deployer/blob/main/docs/en/best_deployment_practices.md##famous-models###Qwen-3-Series).
-- 2025-04-21: Deploy GLM Z1/0414 series models with [one command line](https://github.com/aws-samples/easy-model-deployer/blob/main/docs/en/best_deployment_practices.md##famous-models###GLM-Z1/0414-Series).
-- 2025-03-17: Deploy Gemma 3 series models with [one command line](https://github.com/aws-samples/easy-model-deployer/blob/main/docs/en/best_deployment_practices.md##famous-models###gemma-3-series).
-- 2025-03-06: Deploy QwQ-32B with [one command line](docs/en/best_deployment_practices.md##famous-models###qwen-series###qwq-32b).
+- 2024-04-29: Deploy Qwen 3 series models with [one command line](https://github.com/aws-samples/easy-model-deployer/blob/main/docs/en/best_deployment_practices.md#famous-models#qwen-3-series).
+- 2024-04-21: Deploy GLM Z1/0414 series models with [one command line](https://github.com/aws-samples/easy-model-deployer/blob/main/docs/en/best_deployment_practices.md#famous-models#glm-z1-0414-series).
+- 2024-03-17: Deploy Gemma 3 series models with [one command line](https://github.com/aws-samples/easy-model-deployer/blob/main/docs/en/best_deployment_practices.md#famous-models#gemma-3-series).
+- 2024-03-06: Deploy QwQ-32B with [one command line](https://github.com/aws-samples/easy-model-deployer/blob/main/docs/en/best_deployment_practices.md#famous-models#qwen-series#qwq-32b).
 
 ## Introduction
 
@@ -34,12 +39,18 @@ Easy Model Deployer is a lightweight tool designed for simplify deploy **Open-So
 - Different instance types (CPU/GPU/AWS Inferentia)
 - Convenient integration (OpenAI Compatible API, LangChain client, etc.)
 
-## Support Models
-<details>
-<summary>Deepseek Reasoning Model</summary>
-  <a href="https://github.com/deepseek-ai/DeepSeek-R1"><strong>DeepSeek-R1-Distill-Qwen-14B</strong></a>
+## Supported Models
 
-</details>
+Easy Model Deployer supports a wide range of models including:
+
+- **LLMs**: Qwen, Llama, DeepSeek, GLM, InternLM, Baichuan, and more
+- **Vision-Language Models**: Qwen-VL, InternVL, Gemma3-Vision, and more
+- **Embedding Models**: BGE, Jina, BERT-based models
+- **Reranking Models**: BGE-Reranker, Jina-Reranker
+- **ASR Models**: Whisper variants
+- **Custom Models**: Support for custom Docker images
+
+For the complete list of supported models and deployment configurations, see [Supported Models](docs/en/supported_models.md).
 
 ## 🔧 Get Started
 
@@ -93,10 +104,10 @@ emd status
 Invoke the deployed model for testing by CLI.
 
 ```bash
-emd invoke DeepSeek-R1-Distill-Qwen-1.5B
+emd invoke <ModelId>
 ```
 
-> **💡 Tip** You can find the *ModelId* in the output by `emd status`.
+> **💡 Tip** You can find the *ModelId* in the output by `emd status`. For example: `emd invoke DeepSeek-R1-Distill-Qwen-1.5B`
 
 - [Integration examples](https://aws-samples.github.io/easy-model-deployer/)
 - [EMD client](docs/en/emd_client.md)
@@ -107,7 +118,7 @@ emd invoke DeepSeek-R1-Distill-Qwen-1.5B
 
 ### List Supported Models
 
-Quickly see what models are supported, this command will output all information related to deployment. (Plese browse [Supported Models](docs/en/supported_models.md) for more information.)
+Quickly see what models are supported, this command will output all information related to deployment. (Please browse [Supported Models](docs/en/supported_models.md) for more information.)
 
 ```bash
 emd list-supported-models
@@ -119,10 +130,10 @@ emd list-supported-models
 Delete the deployed model.
 
 ```bash
-emd destroy DeepSeek-R1-Distill-Qwen-1.5B
+emd destroy <ModelId>
 ```
 
-> **💡 Tip** You can find the *ModelId* in the output by `emd status`.
+> **💡 Tip** You can find the *ModelId* in the output by `emd status`. For example: `emd destroy DeepSeek-R1-Distill-Qwen-1.5B`
 
 ## 📖 Documentation
 
@@ -131,3 +142,4 @@ For advanced configurations and detailed guides, visit our [documentation site](
 ## 🤝 Contributing
 
 We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
