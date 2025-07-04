@@ -283,7 +283,7 @@ func httpProxyHandler(c *gin.Context, endpointURL string, inputBytes []byte) {
 		Stream bool `json:"stream"`
 	}
 	_ = json.Unmarshal(inputBytes, &streamRequest) // Best effort check
-	
+
 	// log.Printf("[DEBUG] ECS proxy handler - URL: %s, Streaming: %v", endpointURL, streamRequest.Stream)
 
 	client := &http.Client{
