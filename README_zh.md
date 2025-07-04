@@ -19,11 +19,7 @@
   <a href="https://github.com/aws-samples/easy-model-deployer/actions/workflows/release-package.yml"><img src="https://github.com/aws-samples/easy-model-deployer/actions/workflows/release-package.yml/badge.svg" alt="Build Status"></a>
 </p>
 
-## 🔥 最新动态
-- 2024-04-29: 通过[一行命令](https://github.com/aws-samples/easy-model-deployer/blob/main/docs/en/best_deployment_practices.md#famous-models#qwen-3-series)部署 Qwen 3 系列模型。
-- 2024-04-21: 通过[一行命令](https://github.com/aws-samples/easy-model-deployer/blob/main/docs/en/best_deployment_practices.md#famous-models#glm-z1-0414-series)部署 GLM Z1/0414 系列模型。
-- 2024-03-17: 通过[一行命令](https://github.com/aws-samples/easy-model-deployer/blob/main/docs/en/best_deployment_practices.md#famous-models#gemma-3-series)部署 Gemma 3 系列模型。
-- 2024-03-06: 通过[一行命令](https://github.com/aws-samples/easy-model-deployer/blob/main/docs/en/best_deployment_practices.md#famous-models#qwen-series#qwq-32b)部署 QwQ-32B。
+![header](docs/images/header.jpg)
 
 ## 简介
 
@@ -33,7 +29,7 @@
 
 专为追求高效、稳定模型服务的开发者打造，让技术门槛不再成为创新的阻碍。
 
-![cli](docs/images/demo.avif)
+![deploy](docs/images/demo-deploy.avif)
 
 **核心特性**
 
@@ -64,6 +60,7 @@ Easy Model Deployer 支持广泛的模型类型，包括：
 
 ```bash
 pip install easy-model-deployer
+
 emd
 ```
 

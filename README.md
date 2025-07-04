@@ -19,17 +19,14 @@
   <a href="https://github.com/aws-samples/easy-model-deployer/actions/workflows/release-package.yml"><img src="https://github.com/aws-samples/easy-model-deployer/actions/workflows/release-package.yml/badge.svg" alt="Build Status"></a>
 </p>
 
-## 🔥 Latest News
-- 2024-04-29: Deploy Qwen 3 series models with [one command line](https://github.com/aws-samples/easy-model-deployer/blob/main/docs/en/best_deployment_practices.md#famous-models#qwen-3-series).
-- 2024-04-21: Deploy GLM Z1/0414 series models with [one command line](https://github.com/aws-samples/easy-model-deployer/blob/main/docs/en/best_deployment_practices.md#famous-models#glm-z1-0414-series).
-- 2024-03-17: Deploy Gemma 3 series models with [one command line](https://github.com/aws-samples/easy-model-deployer/blob/main/docs/en/best_deployment_practices.md#famous-models#gemma-3-series).
-- 2024-03-06: Deploy QwQ-32B with [one command line](https://github.com/aws-samples/easy-model-deployer/blob/main/docs/en/best_deployment_practices.md#famous-models#qwen-series#qwq-32b).
+![header](docs/images/header.jpg)
+
 
 ## Introduction
 
 Easy Model Deployer is a lightweight tool designed for simplify deploy **Open-Source LLMs** ([Supported Models](docs/en/supported_models.md)) and Custom Models on AWS. It provides **OpenAI's Completions API** and [**LangChain Interface**](https://github.com/langchain-ai/langchain). Built for developers who need reliable and scalable model serving without complex environment setup.
 
-![cli](docs/images/demo.avif)
+![deploy](docs/images/demo-deploy.avif)
 
 **Key Features**
 
@@ -60,6 +57,7 @@ Install Easy Model Deployer with PyPI, currently support for Python 3.9 or above
 
 ```bash
 pip install easy-model-deployer
+
 emd
 ```
 
