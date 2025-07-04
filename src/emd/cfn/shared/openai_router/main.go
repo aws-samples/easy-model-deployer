@@ -36,6 +36,9 @@ var (
 		IdleConnTimeout:     90 * time.Second,
 		DisableCompression:  false,
 		MaxIdleConnsPerHost: 20,
+		// Add buffer sizes to handle large responses
+		ReadBufferSize:  32 * 1024,  // 32KB read buffer
+		WriteBufferSize: 32 * 1024,  // 32KB write buffer
 	}
 	httpClient = &http.Client{
 		Transport: httpTransport,
@@ -80,12 +83,24 @@ func main() {
 
 	// Create router with ALB support
 	router := gin.Default()
+
+	// Add request logging middleware
 	router.Use(func(c *gin.Context) {
+		start := time.Now()
+
 		// Trust X-Forwarded-For header
 		if forwardedFor := c.GetHeader("X-Forwarded-For"); forwardedFor != "" {
 			c.Request.RemoteAddr = strings.Split(forwardedFor, ",")[0]
 		}
+
 		c.Next()
+
+		// Log request details after processing
+		duration := time.Since(start)
+		if logLevel == "DEBUG" {
+			log.Printf("[DEBUG] %s %s - Status: %d, Duration: %v, Size: %d bytes",
+				c.Request.Method, c.Request.URL.Path, c.Writer.Status(), duration, c.Writer.Size())
+		}
 	})
 
 	// Health checks (ALB requires / and /health)
@@ -276,6 +291,9 @@ func httpProxyHandler(c *gin.Context, endpointURL string, inputBytes []byte) {
 			IdleConnTimeout:     90 * time.Second,
 			DisableCompression:  false,
 			MaxIdleConnsPerHost: 20,
+			// Add buffer sizes to handle large responses
+			ReadBufferSize:      32 * 1024,  // 32KB read buffer
+			WriteBufferSize:     32 * 1024,  // 32KB write buffer
 		},
 	}
 
@@ -336,14 +354,37 @@ func httpProxyHandler(c *gin.Context, endpointURL string, inputBytes []byte) {
 			return
 		}
 
-		// Forward the response
+		// Forward the response with better error handling
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			c.JSON(500, gin.H{"error": fmt.Sprintf("Failed to read response body: %v", err)})
 			return
 		}
 
-		c.Data(resp.StatusCode, resp.Header.Get("Content-Type"), body)
+		// Validate JSON response if content type is application/json
+		contentType := resp.Header.Get("Content-Type")
+		if strings.Contains(contentType, "application/json") {
+			if !json.Valid(body) {
+				bodyStr := string(body)
+				log.Printf("[ERROR] Invalid JSON response from ECS endpoint: %s", bodyStr)
+				if isPartialJSON(bodyStr) {
+					log.Printf("[ERROR] Detected partial JSON response from ECS, likely truncated")
+					c.JSON(500, gin.H{"error": "Response was truncated, please try again"})
+				} else {
+					c.JSON(500, gin.H{"error": "Invalid JSON response from backend"})
+				}
+				return
+			}
+		}
+
+		// Copy response headers
+		for k, v := range resp.Header {
+			if k != "Content-Length" { // Let Gin handle Content-Length
+				c.Header(k, strings.Join(v, ","))
+			}
+		}
+
+		c.Data(resp.StatusCode, contentType, body)
 	}
 }
 
@@ -361,6 +402,52 @@ func isPartialJSON(s string) bool {
 	openBraces := strings.Count(s, "{") + strings.Count(s, "[")
 	closeBraces := strings.Count(s, "}") + strings.Count(s, "]")
 	return openBraces > closeBraces
+}
+
+// findCompleteJSON finds the end position of the first complete JSON object in the string
+// Returns -1 if no complete JSON object is found
+func findCompleteJSON(s string) int {
+	if len(s) == 0 {
+		return -1
+	}
+
+	// Track brace/bracket depth
+	depth := 0
+	inString := false
+	escaped := false
+
+	for i, char := range s {
+		if escaped {
+			escaped = false
+			continue
+		}
+
+		switch char {
+		case '\\':
+			if inString {
+				escaped = true
+			}
+		case '"':
+			if !escaped {
+				inString = !inString
+			}
+		case '{', '[':
+			if !inString {
+				depth++
+			}
+		case '}', ']':
+			if !inString {
+				depth--
+				if depth == 0 {
+					// Found complete JSON object, return position after the closing brace
+					return i + 1
+				}
+			}
+		}
+	}
+
+	// No complete JSON object found
+	return -1
 }
 
 func getEndpointForModel(modelKey string) (string, error) {
@@ -547,6 +634,9 @@ func requestHandler(c *gin.Context) {
 				eventStream := resp.GetStream()
 				defer eventStream.Close()
 
+				// Buffer for accumulating partial chunks
+				var buffer strings.Builder
+
 				for event := range eventStream.Events() {
 					switch e := event.(type) {
 					case *sagemakerruntime.PayloadPart:
@@ -555,27 +645,62 @@ func requestHandler(c *gin.Context) {
 							continue
 						}
 
-                chunk := string(e.Bytes)
-                // log.Printf("[DEBUG] Received chunk: %s", chunk)
+						chunk := string(e.Bytes)
+						// log.Printf("[DEBUG] Received raw chunk: %s", chunk)
 
-                // Format as proper SSE event
-                formattedChunk := "data: " + chunk
+						// Add chunk to buffer
+						buffer.WriteString(chunk)
+						bufferContent := buffer.String()
 
-                // Check for finish_reason=stop to end stream
-                if strings.Contains(chunk, `"finish_reason":"stop"`) ||
-                   strings.Contains(chunk, `"finish_reason": "stop"`) {
-                    // log.Printf("[DEBUG] Detected finish_reason=stop, ending stream")
-                    stream <- []byte(formattedChunk + "\n\n")
-                    return // Exit the goroutine completely
-                }
+						// Process complete lines from buffer (SSE data should be line-based)
+						for strings.Contains(bufferContent, "\n") {
+							lines := strings.SplitN(bufferContent, "\n", 2)
+							if len(lines) < 2 {
+								break
+							}
 
-                // Forward as properly formatted SSE event
-                stream <- []byte(formattedChunk + "\n\n")
+							line := strings.TrimSpace(lines[0])
+							if line != "" {
+								// Validate JSON
+								if json.Valid([]byte(line)) {
+									// Format as proper SSE event and send
+									formattedChunk := "data: " + line
+
+									// Check for finish_reason=stop to end stream
+									if strings.Contains(line, `"finish_reason":"stop"`) ||
+									   strings.Contains(line, `"finish_reason": "stop"`) {
+										// log.Printf("[DEBUG] Detected finish_reason=stop, ending stream")
+										stream <- []byte(formattedChunk + "\n\n")
+										return // Exit the goroutine completely
+									}
+
+									// Forward as properly formatted SSE event
+									stream <- []byte(formattedChunk + "\n\n")
+								} else {
+									log.Printf("[WARNING] Invalid JSON line: %s", line)
+								}
+							}
+
+							// Update buffer with remaining content
+							bufferContent = lines[1]
+							buffer.Reset()
+							buffer.WriteString(bufferContent)
+						}
+
 					case *sagemakerruntime.InternalStreamFailure:
 						stream <- []byte(`data: {"error": "` + e.Error() + `"}` + "\n\n")
 						return
 					}
 				}
+
+				// Process any remaining data in buffer
+				if buffer.Len() > 0 {
+					remaining := strings.TrimSpace(buffer.String())
+					if remaining != "" && json.Valid([]byte(remaining)) {
+						stream <- []byte("data: " + remaining + "\n\n")
+					}
+				}
+
 				// Send final done message
 				stream <- []byte("data: [DONE]\n\n")
 			}()
@@ -592,8 +717,11 @@ func requestHandler(c *gin.Context) {
 			})
 
 		} else {
-			// Non-streaming request
-			output, err := sagemakerClient.InvokeEndpoint(&sagemakerruntime.InvokeEndpointInput{
+			// Non-streaming request with timeout context
+			ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Minute)
+			defer cancel()
+
+			output, err := sagemakerClient.InvokeEndpointWithContext(ctx, &sagemakerruntime.InvokeEndpointInput{
 				EndpointName: aws.String(endpointAddress),
 				ContentType:  aws.String("application/json"),
 				Body:         modifiedBytes,
@@ -611,8 +739,24 @@ func requestHandler(c *gin.Context) {
 				return
 			}
 
-			// log.Printf("[DEBUG] SageMaker response: %s", string(output.Body))
-			// Forward raw SageMaker response
+			// Validate JSON before forwarding to catch truncation issues
+			responseStr := string(output.Body)
+			if !json.Valid(output.Body) {
+				log.Printf("[ERROR] Invalid JSON response from SageMaker: %s", responseStr)
+				// Try to detect if it's a partial JSON
+				if isPartialJSON(responseStr) {
+					log.Printf("[ERROR] Detected partial JSON response, likely truncated")
+					c.JSON(500, gin.H{"error": "Response was truncated, please try again"})
+				} else {
+					c.JSON(500, gin.H{"error": "Invalid JSON response from backend"})
+				}
+				return
+			}
+
+			// log.Printf("[DEBUG] SageMaker response length: %d bytes", len(output.Body))
+			// Set proper headers and forward response
+			c.Header("Content-Type", "application/json")
+			c.Header("Content-Length", fmt.Sprintf("%d", len(output.Body)))
 			c.Data(200, "application/json", output.Body)
 		}
 	} else if endpointType == "ecs" {
