@@ -53,6 +53,11 @@ JINA_SERIES = ModelSeries(
     reference_link="https://huggingface.co/jinaai"
 )
 
+QWNE_EMBEDDING = ModelSeries(
+    model_series_name=ModelSeriesType.JINA,
+    description="Search foundation models: embeddings, rerankers, small LMs for better search",
+    reference_link="https://huggingface.co/jinaai"
+)
 
 QWEN2VL_SERIES = ModelSeries(
     model_series_name=ModelSeriesType.QWEN2VL,

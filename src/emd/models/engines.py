@@ -169,6 +169,13 @@ vllm_qwen3_engin084 = VllmEngine(**{
             "default_cli_args": " --max_model_len 16000 --max_num_seq 30 --disable-log-stats  --enable-reasoning --reasoning-parser qwen3 --enable-auto-tool-choice --tool-call-parser hermes --enable-prefix-caching"
 })
 
+vllm_qwen3_engin091 = VllmEngine(**{
+             **vllm_engine064.model_dump(),
+             "engine_dockerfile_config": {"VERSION":"v0.9.1"},
+            "environment_variables": "export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True",
+            "default_cli_args": " --max_model_len 16000 --max_num_seq 30 --disable-log-stats  --enable-reasoning --reasoning-parser qwen3 --enable-auto-tool-choice --tool-call-parser hermes --enable-prefix-caching"
+})
+
 
 vllm_qwen2vl72b_engine064 = VllmEngine(**{
              **vllm_engine064.model_dump(),
