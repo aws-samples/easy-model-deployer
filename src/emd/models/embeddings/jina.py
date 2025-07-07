@@ -53,3 +53,32 @@ Model.register(
         model_series=JINA_SERIES
     )
 )
+
+Model.register(
+    dict(
+        model_id = "jina-embeddings-v4-vllm-retrieval",
+        supported_engines=[huggingface_embedding_engine449],
+        supported_instances=[
+            g5dxlarge_instance,
+            g5d2xlarge_instance,
+            g5d4xlarge_instance,
+            g5d8xlarge_instance
+        ],
+        supported_services=[
+            sagemaker_service,
+            ecs_service,
+            local_service
+        ],
+        supported_frameworks=[
+            fastapi_framework
+        ],
+        allow_china_region=True,
+        huggingface_model_id="jinaai/jina-embeddings-v4-vllm-retrieval",
+        modelscope_model_id="jinaai/jina-embeddings-v4-vllm-retrieval",
+        require_huggingface_token=False,
+        application_scenario="RAG",
+        model_type=ModelType.EMBEDDING,
+        description="jina-embeddings-v4 is a universal embedding model for multimodal and multilingual retrieval",
+        model_series=JINA_SERIES
+    )
+)
