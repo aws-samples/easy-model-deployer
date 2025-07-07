@@ -9,6 +9,7 @@ nav:
   - Best Deployment Practices: best_deployment_practices.md
   - CLI Commands: commands.md
   - API Reference: api.md
+  - SDK API: sdk_api.md
   - Local Deployment: local_deployment.md
   - Architecture: architecture.md
   - LangChain Integration: sdk_integration.md
