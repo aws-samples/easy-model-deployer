@@ -1,6 +1,7 @@
 from .. import Model
 from ..engines import (
     vllm_deepseek_r1_distill_qwen_engine071,
+    vllm_deepseek_r1_distill_qwen_engine085,
     vllm_deepseek_r1_distill_llama_engine071,
     ollama_deepseek_r1_qwen2d5_1d5b_engine057,
     llama_cpp_deepseek_r1_1d58_bit_engine_b9ab0a4,
@@ -307,7 +308,7 @@ Model.register(
 Model.register(
     dict(
         model_id = "DeepSeek-R1-0528-Qwen3-8B",
-        supported_engines=[vllm_deepseek_r1_distill_llama_engine071],
+        supported_engines=[vllm_deepseek_r1_distill_qwen_engine085],
         supported_instances=[
             g5dxlarge_instance,
             g5d2xlarge_instance,
