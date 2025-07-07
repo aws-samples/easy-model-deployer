@@ -6,8 +6,7 @@ from emd.commands import (
     destroy,
     version,
     status,
-    config,
-    example
+    config
 )
 from emd.commands.invoke import invoke
 from emd.revision import VERSION, COMMIT_HASH
@@ -47,12 +46,6 @@ app.add_typer(
     invoke.app,
     name="invoke",
     help="Test deployed models with sample requests",
-)
-
-app.add_typer(
-    example.app,
-    name="example",
-    help="Generate sample code for API integration",
 )
 
 app.add_typer(
