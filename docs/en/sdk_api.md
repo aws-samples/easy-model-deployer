@@ -6,10 +6,10 @@
 > ```python
 > from emd.sdk import bootstrap, deploy, destroy
 > from emd.sdk.clients import SageMakerClient
-> 
+>
 > # Bootstrap infrastructure
 > bootstrap()
-> 
+>
 > # Deploy a model
 > result = deploy(
 >     model_id="Qwen2.5-7B-Instruct",
@@ -17,7 +17,7 @@
 >     engine_type="vllm",
 >     service_type="sagemaker"
 > )
-> 
+>
 > # Use the deployed model
 > client = SageMakerClient(model_id="Qwen2.5-7B-Instruct")
 > response = client.invoke({
@@ -445,13 +445,13 @@ def lambda_handler(event, context):
         model_id=event['model_id'],
         region_name=context.invoked_function_arn.split(':')[3]
     )
-    
+
     # Invoke model
     response = client.invoke({
         "messages": event['messages'],
         "max_tokens": event.get('max_tokens', 100)
     })
-    
+
     return {
         'statusCode': 200,
         'body': json.dumps(response)
@@ -466,7 +466,7 @@ from emd.sdk import deploy, destroy, get_model_status
 def lambda_handler(event, context):
     action = event['action']
     model_id = event['model_id']
-    
+
     if action == 'deploy':
         result = deploy(
             model_id=model_id,
@@ -476,11 +476,11 @@ def lambda_handler(event, context):
             waiting_until_deploy_complete=False
         )
         return {'statusCode': 200, 'body': json.dumps(result)}
-    
+
     elif action == 'destroy':
         destroy(model_id, waiting_until_complete=False)
         return {'statusCode': 200, 'body': json.dumps({'status': 'initiated'})}
-    
+
     elif action == 'status':
         status = get_model_status(model_id)
         return {'statusCode': 200, 'body': json.dumps(status)}
@@ -504,15 +504,15 @@ try:
         engine_type="vllm",
         service_type="sagemaker"
     )
-    
+
     # Initialize client
     client = SageMakerClient(model_id="Qwen2.5-7B-Instruct")
-    
+
     # Invoke model
     response = client.invoke({
         "messages": [{"role": "user", "content": "Hello"}]
     })
-    
+
 except RuntimeError as e:
     print(f"Deployment error: {e}")
 except ValueError as e:
