@@ -10,7 +10,6 @@ import torch
 from emd.constants import EMD_MODELS_LOCAL_DIR_TEMPLATE
 from emd.utils.logger_utils import get_logger
 from transformers import AutoModelForCausalLM, AutoTokenizer
-import torch
 from transformers import TextIteratorStreamer
 from threading import Thread
 import json
@@ -50,7 +49,7 @@ class TransformerLLMBackend(BackendBase):
             )
         model_abs_path = os.path.abspath(model_dir)
 
-        # TODO add model iint args from model's definition
+        # TODO add model init args from model's definition
         self.model = AutoModelForCausalLM.from_pretrained(
                 model_abs_path,
                 torch_dtype="auto",

@@ -14,7 +14,7 @@ from emd.constants import (
     EMD_STACK_OK_STATUS,
     ENV_STACK_NAME,
     MODEL_STACK_NAME_PREFIX,
-    STACK_COMPLATE_STATUS_LIST,
+    STACK_COMPLETE_STATUS_LIST,
 )
 from emd.models import Service, Model
 from emd.models.utils.constants import (

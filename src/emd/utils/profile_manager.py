@@ -1,5 +1,5 @@
 
-from emd.constants import EMD_DEFAULT_PROFILE_PARH
+from emd.constants import EMD_DEFAULT_PROFILE_PATH
 import os
 from emd.utils.logger_utils import get_logger
 
@@ -10,7 +10,7 @@ logger = get_logger(
 
 
 class ProfileManager:
-    def __init__(self,profile_path = EMD_DEFAULT_PROFILE_PARH):
+    def __init__(self,profile_path = EMD_DEFAULT_PROFILE_PATH):
         self.profile_path = os.path.expanduser(profile_path)
 
     def write_default_profile_name_to_local(self,aws_profile_name: str):
@@ -26,6 +26,7 @@ class ProfileManager:
 
 
     def set_default_aws_profile_from_local(self):
+        profile_name = None
         try:
             profile_name = self.load_profile_name_from_local()
         except Exception as e:

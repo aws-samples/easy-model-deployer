@@ -5,7 +5,6 @@ from botocore.exceptions import ClientError, NoCredentialsError
 from .logger_utils import get_logger
 import json
 import hashlib
-import boto3
 from emd.utils.aws_service_utils import get_current_region
 logger = get_logger(__name__)
 
@@ -39,7 +38,7 @@ def get_account_id():
     return account_id
 
 def create_s3_bucket(bucket_name,region):
-    s3 = boto3.client('s3')
+    s3 = boto3.client('s3', region_name=region)
     try:
         s3.head_bucket(Bucket=bucket_name)
     except:
@@ -58,8 +57,6 @@ def create_s3_bucket(bucket_name,region):
             )
         except (s3.exceptions.BucketAlreadyOwnedByYou,):
             logger.info(f"bucket: {bucket_name} exists")
-        except Exception as e:
-            raise
 
 
 def get_role_create_template(

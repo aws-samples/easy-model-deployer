@@ -388,7 +388,7 @@ class Model(ModelBase,Generic[T]):
         return current_account_id
 
     def get_image_uri(
-        sef,
+        self,
         account_id,
         region,
         image_name,

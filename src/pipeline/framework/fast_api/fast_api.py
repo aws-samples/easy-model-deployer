@@ -72,7 +72,7 @@ def health():
     return "200 OK"
 
 # As sagemaker endpoint requires...
-@app.post("/invocations")
+@app.post("/v1/invocations")
 @app.post("/v1/chat/completions")
 @app.post("/v1/embeddings")
 @app.post("/v1/rerank")

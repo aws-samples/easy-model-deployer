@@ -9,7 +9,6 @@ from utils.common import download_dir_from_s3_by_s5cmd
 import torch
 from emd.constants import EMD_MODELS_LOCAL_DIR_TEMPLATE
 from emd.utils.logger_utils import get_logger
-import torch
 from threading import Thread
 import json
 from transformers import AutoModelForSequenceClassification
@@ -47,7 +46,7 @@ class TransformerRerankBackend(BackendBase):
             )
         model_abs_path = os.path.abspath(model_dir)
 
-        # TODO add model iint args from model's definition
+        # TODO add model init args from model's definition
         torch_dtype = self.pretrained_model_init_kwargs.get("torch_dtype")
         if torch_dtype is not None:
             self.pretrained_model_init_kwargs['torch_dtype'] = {
