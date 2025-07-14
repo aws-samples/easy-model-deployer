@@ -134,6 +134,8 @@ print()
 
 ## Embeddings
 
+> Some embedding models may have additional parameters or usage guidelines specified in their official documentation. For model-specific details, please refer to the provider's documentation.
+
 Get vector representations of text.
 
 **Endpoint:** `POST /v1/embeddings`
@@ -187,6 +189,8 @@ print(f"Generated {len(response.data)} embeddings")
 ```
 
 ## Rerank
+
+> Some reranking models may have additional parameters or usage guidelines specified in their official documentation. For model-specific details, please refer to the provider's documentation.
 
 Rerank a list of documents based on their relevance to a query.
 
