@@ -1,5 +1,5 @@
 from .. import Model
-from ..engines import vllm_qwen3_engin091
+from ..engines import vllm_qwen3_engin091, vllm_gme_qwen2vl_engine091
 from ..services import sagemaker_service,local_service,ecs_service
 from ..frameworks import fastapi_framework
 from ..instances import (
@@ -7,12 +7,13 @@ from ..instances import (
     g5d2xlarge_instance,
     g5d4xlarge_instance,
     g5d8xlarge_instance,
+    g5d12xlarge_instance,
     g5d16xlarge_instance,
     local_instance
 )
 from emd.models.utils.constants import ModelType
 from emd.models import ModelSeries
-from ..model_series import QWEN3_SERIES
+from ..model_series import QWEN3_SERIES, GME_SERIES
 
 
 Model.register(
@@ -102,5 +103,35 @@ Model.register(
         application_scenario="RAG",
         model_type=ModelType.EMBEDDING,
         model_series=QWEN3_SERIES
+    )
+)
+
+Model.register(
+    dict(
+        model_id = "gme-Qwen2-VL-7B-Instruct",
+        supported_engines=[vllm_gme_qwen2vl_engine091],
+        supported_instances=[
+            g5d4xlarge_instance,
+            g5d8xlarge_instance,
+            g5d12xlarge_instance,
+            g5d16xlarge_instance,
+            local_instance
+        ],
+        supported_services=[
+            sagemaker_service,
+            ecs_service,
+            local_service
+        ],
+        supported_frameworks=[
+            fastapi_framework
+        ],
+        allow_china_region=True,
+        huggingface_model_id="Alibaba-NLP/gme-Qwen2-VL-7B-Instruct",
+        modelscope_model_id="Alibaba-NLP/gme-Qwen2-VL-7B-Instruct",
+        require_huggingface_token=False,
+        application_scenario="Multimodal RAG, image-text retrieval, visual search",
+        description="General Multimodal Embedding model based on Qwen2-VL architecture, supporting text, image, and image-text pair inputs for unified multimodal representation learning and retrieval tasks.",
+        model_type=ModelType.EMBEDDING,
+        model_series=GME_SERIES
     )
 )

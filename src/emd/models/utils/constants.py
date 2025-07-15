@@ -227,6 +227,7 @@ class ModelSeriesType(ConstantBase):
     BCE = "bce"
     COMFYUI = "comfyui"
     QWEN2VL = "qwen2vl"
+    GME = "gme"
     AGENT = "agent"
     INTERNVL25 = "internvl2.5"
     LLAMA = "llama"

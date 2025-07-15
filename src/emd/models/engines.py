@@ -183,6 +183,13 @@ vllm_embedding_engine091 = VllmEngine(**{
             "default_cli_args": " --max_num_seq 30 --disable-log-stats --trust-remote-code --task embed"
 })
 
+vllm_gme_qwen2vl_engine091 = VllmEngine(**{
+            **vllm_embedding_engine091.model_dump(),
+            "environment_variables": "export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True",
+            "default_cli_args": " --max_num_seq 20 --disable-log-stats --trust-remote-code --task embed --limit-mm-per-prompt image=10 --gpu_memory_utilization 0.8",
+            "description": "VLLM engine for GME multimodal embedding models based on Qwen2-VL"
+})
+
 
 vllm_qwen2vl72b_engine064 = VllmEngine(**{
              **vllm_engine064.model_dump(),

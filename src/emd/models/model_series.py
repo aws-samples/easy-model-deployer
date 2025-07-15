@@ -151,3 +151,9 @@ BAICHAUN_SERIES= ModelSeries(
     description="Baichuan Intelligent Technology.",
     reference_link="https://github.com/baichuan-inc"
 )
+
+GME_SERIES = ModelSeries(
+    model_series_name=ModelSeriesType.GME,
+    description="General Multimodal Embedding (GME) models based on Qwen2-VL architecture, designed for unified multimodal representation learning supporting text, image, and image-text pair inputs for retrieval and search applications.",
+    reference_link="https://huggingface.co/Alibaba-NLP/gme-Qwen2-VL-7B-Instruct"
+)
