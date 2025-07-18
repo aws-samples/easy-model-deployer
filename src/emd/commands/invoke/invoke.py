@@ -8,7 +8,7 @@ from emd.constants import MODEL_DEFAULT_TAG
 from emd.models import Model
 from emd.models.utils.constants import ModelType
 from emd.utils.logger_utils import make_layout
-from emd.utils.decorators import catch_aws_credential_errors,check_emd_env_exist,load_aws_profile
+from emd.utils.decorators import catch_aws_credential_errors,check_emd_env_exist,load_aws_profile,show_update_notification
 
 app = typer.Typer(pretty_exceptions_enable=False)
 console = Console()
@@ -121,6 +121,7 @@ def vlm_invoke(model_id,model_tag):
 
 
 @app.callback(invoke_without_command=True)
+@show_update_notification
 @catch_aws_credential_errors
 @check_emd_env_exist
 @load_aws_profile

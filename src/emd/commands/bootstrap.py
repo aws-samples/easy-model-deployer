@@ -4,7 +4,7 @@ from typing import Optional
 from emd.constants import ENV_STACK_NAME,ENV_BUCKET_NAME_PREFIX
 from typing_extensions import Annotated
 from emd.sdk.bootstrap import create_env_stack,get_bucket_name
-from emd.utils.decorators import catch_aws_credential_errors, load_aws_profile
+from emd.utils.decorators import catch_aws_credential_errors, load_aws_profile, show_update_notification
 from emd.utils.logger_utils import make_layout
 from emd.utils.aws_service_utils import get_current_region
 
@@ -15,6 +15,7 @@ console = Console()
 layout = make_layout()
 
 @app.callback(invoke_without_command=True)
+@show_update_notification
 @catch_aws_credential_errors
 @load_aws_profile
 def bootstrap(
@@ -22,10 +23,17 @@ def bootstrap(
         Optional[bool], typer.Option("--skip-confirm", help="Skip confirmation")
     ] = False,
 ):
+    """
+    Manually initialize AWS resources for model deployment.
+    
+    Note: This command is optional. Running 'emd deploy' will automatically
+    set up infrastructure when needed.
+    """
+    console.print("[dim]ℹ️  Note: 'emd deploy' now automatically sets up infrastructure when needed.[/dim]")
+    console.print()
 
     region = get_current_region()
-    typer.echo("AWS environment is properly configured.")
-    layout["main"].update("[bold red]Initalizing environment...[/bold red]")
+    layout["main"].update("[bold red]Initializing environment...[/bold red]")
     try:
         bucket_name = get_bucket_name(
             bucket_prefix=ENV_BUCKET_NAME_PREFIX,

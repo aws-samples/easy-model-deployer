@@ -3,7 +3,7 @@ from typing import Optional
 
 import typer
 from emd.models import Model
-from emd.utils.decorators import catch_aws_credential_errors
+from emd.utils.decorators import catch_aws_credential_errors, show_update_notification
 from rich.console import Console
 from typing_extensions import Annotated
 
@@ -11,6 +11,7 @@ app = typer.Typer(pretty_exceptions_enable=False)
 console = Console()
 
 @app.callback(invoke_without_command=True)
+@show_update_notification
 @catch_aws_credential_errors
 def list_supported_models(
     model_id: Annotated[

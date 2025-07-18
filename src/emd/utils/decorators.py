@@ -15,6 +15,18 @@ from emd.utils.profile_manager import profile_manager
 
 logger =  get_logger(__name__)
 
+def show_update_notification(func):
+    """Decorator to show update notification before command execution"""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        # Import here to avoid circular imports
+        from .update_notifier import update_notifier
+        # Show update notification at the start
+        update_notifier.show_update_notification()
+        # Execute the original command
+        return func(*args, **kwargs)
+    return wrapper
+
 def catch_aws_credential_errors(fn):
     @wraps(fn)
     def inner(*args,**kwargs):
@@ -38,9 +50,9 @@ def check_emd_env_exist(fn):
             logger.error(traceback.format_exc())
             console = Console()
             if "does not exist" in str(e) and ENV_STACK_NAME in str(e):
-                console.print("[yellow]Infrastructure not bootstrapped.[/yellow]")
+                console.print("[yellow]Infrastructure not set up.[/yellow]")
                 console.print(
-                    "Please run 'emd bootstrap' first to set up required AWS resources."
+                    "Run 'emd deploy' to automatically set up required AWS resources."
                 )
             raise typer.Exit(1)
     return inner
@@ -95,20 +107,20 @@ def check_emd_env_exist(fn):
 
 
 @catch_aws_credential_errors
-def print_aws_profile():
+def print_aws_config():
     console = Console()
     sts = boto3.client("sts", region_name=get_current_region())
     response = sts.get_caller_identity()
-    profile_name = os.environ.get("AWS_PROFILE","default")
     account_id = response["Account"]
     region = get_current_region()
+    
     if region is None:
         console.print("[yellow]warning: Unable to determine AWS region.[/yellow]")
         raise typer.Exit(1)
+    
     console.print(Panel.fit(
         f"[bold green]Account ID:[/bold green] {account_id}\n"
-        f"[bold green]Region    :[/bold green] {region}\n"
-        f"[bold green]Profile   :[/bold green] {profile_name}",
+        f"[bold green]Region    :[/bold green] {region}",
         title="[bold blue]AWS Configuration[/bold blue]",
         border_style="blue"
     ))
@@ -119,14 +131,19 @@ def load_aws_profile(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
         try:
-            print_aws_profile()
-        except:
-            if kwargs.get("allow_local_deploy") or kwargs.get("only_allow_local_deploy",False):
-                logger.warning("Unable to load AWS profile. Proceeding with local deployment.")
+            print_aws_config()
+        except Exception as e:
+            error_msg = str(e)
+            logger.error(f"AWS configuration loading failed: {error_msg}")
+            logger.debug(traceback.format_exc())
+            
+            if kwargs.get("allow_local_deploy") or kwargs.get("only_allow_local_deploy", False):
+                logger.warning(f"AWS configuration error: {error_msg}. Proceeding with local deployment.")
                 kwargs['only_allow_local_deploy'] = True
                 return fn(*args, **kwargs)
+            
             console = Console()
-            console.print("[red]Error: Unable to load AWS profile.[/red]")
+            console.print(f"[red]❌ AWS Configuration Error: {error_msg}[/red]")
             raise typer.Exit(1)
         return fn(*args, **kwargs)
     return wrapper

@@ -2,7 +2,7 @@ import typer
 from rich.console import Console
 import boto3
 from typing import Annotated
-from emd.utils.decorators import catch_aws_credential_errors
+from emd.utils.decorators import catch_aws_credential_errors, show_update_notification
 
 from emd.patch_questionary.select_with_help import select_with_help,Choice
 from emd.utils.profile_manager import profile_manager
@@ -17,6 +17,7 @@ console = Console()
 
 
 @app.command(help="Set the default profile name for deployment")
+@show_update_notification
 @catch_aws_credential_errors
 def set_default_profile_name(
     name: Annotated[
@@ -57,6 +58,7 @@ def set_default_profile_name(
 
 
 @app.command(help="Show current default profile")
+@show_update_notification
 @catch_aws_credential_errors
 def show_default_profile_name():
     name = profile_manager.load_profile_name_from_local()
@@ -67,6 +69,7 @@ def show_default_profile_name():
 
 
 @app.command(help="Remove the default profile")
+@show_update_notification
 @catch_aws_credential_errors
 def remove_default_profile_name():
     name = profile_manager.remove_profile_name_from_local()

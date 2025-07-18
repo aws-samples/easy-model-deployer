@@ -31,7 +31,6 @@ def check_aws_environment():
         # Try to create a boto3 client and make a simple API call
         sts = boto3.client('sts', region_name=get_current_region())
         response = sts.get_caller_identity()
-        typer.echo("AWS environment is properly configured.")
         account_id = response['Account']
         region = boto3.session.Session().region_name
         typer.echo(f"AWS Account: {account_id}")

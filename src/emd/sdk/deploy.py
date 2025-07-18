@@ -180,7 +180,6 @@ def deploy(
         if resource["ResourceType"] == "AWS::CodePipeline::Pipeline"
     ]
     pipeline_name = pipeline_resources[0]["PhysicalResourceId"]
-    logger.info("AWS environment is properly configured.")
 
     if dockerfile_local_path:
         if not os.path.exists(dockerfile_local_path):

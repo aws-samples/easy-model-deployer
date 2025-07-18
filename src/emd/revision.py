@@ -1,6 +1,6 @@
 # import importlib.metadata
-VERSION = "0.0.0"
-COMMIT_HASH = "00000000"
+VERSION = "0.0.2"
+COMMIT_HASH = "00000001"
 
 def convert_version_name_to_stack_name(version_name:str):
     return version_name.replace(".","-")
