@@ -23,7 +23,7 @@ console = Console()
 app.add_typer(
     bootstrap.app,
     name="bootstrap",
-    help="Initialize AWS resources for model deployment",
+    help="[Optional] Manually initialize AWS resources (auto-handled by deploy)",
 )
 app.add_typer(
     deploy.app,

@@ -4,7 +4,7 @@ import typer
 from emd.constants import MODEL_DEFAULT_TAG
 from emd.sdk.status import get_model_status
 from emd.utils.aws_service_utils import get_account_id
-from emd.utils.decorators import catch_aws_credential_errors, check_emd_env_exist, load_aws_profile
+from emd.utils.decorators import catch_aws_credential_errors, check_emd_env_exist, load_aws_profile, show_update_notification
 from emd.utils.logger_utils import make_layout
 from rich.console import Console
 from rich.table import Table
@@ -15,6 +15,7 @@ layout = make_layout()
 
 
 @app.callback(invoke_without_command=True)
+@show_update_notification
 @catch_aws_credential_errors
 @check_emd_env_exist
 @load_aws_profile

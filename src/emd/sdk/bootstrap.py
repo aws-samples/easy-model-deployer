@@ -29,11 +29,8 @@ from emd.utils.aws_service_utils import (
 logger = get_logger(__name__)
 
 
-def get_version_md5_value():
-    version_md5_value = calculate_md5_string(
-        f"{VERSION}-{get_account_id()}"
-    )[:8]
-    return version_md5_value
+def get_bucket_mid_name():
+    return get_account_id()
 
 
 def get_bucket_name(
@@ -44,7 +41,7 @@ def get_bucket_name(
     get bucket name
     """
     assert region is not None,region
-    version_md5_value = get_version_md5_value()
+    version_md5_value = get_bucket_mid_name()
     bucket_name = f"{bucket_prefix}-{version_md5_value}-{region}"
     return bucket_name
 
@@ -75,7 +72,7 @@ def create_env_stack(
         logger.info(f"env stack: {stack_name} exists...")
         return
     logger.info(f"create env stack: {stack_name}...")
-    # version_md5_value = get_version_md5_value()
+    # version_md5_value = get_bucket_mid_name()
     if bucket_name is None:
         bucket_name = get_bucket_name(
             bucket_prefix=bucket_prefix,

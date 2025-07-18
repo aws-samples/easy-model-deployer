@@ -25,7 +25,8 @@ from emd.sdk.deploy import parse_extra_params
 from emd.utils.aws_service_utils import check_cn_region
 import questionary
 from emd.utils.accelerator_utils import get_gpu_num,check_cuda_exists,check_neuron_exists
-from emd.utils.decorators import catch_aws_credential_errors,check_emd_env_exist,load_aws_profile
+from emd.utils.decorators import catch_aws_credential_errors,check_emd_env_exist,load_aws_profile,show_update_notification
+from emd.utils.smart_bootstrap import smart_bootstrap_manager
 from emd.utils.logger_utils import make_layout
 from emd.utils.exceptions import ModelNotSupported,ServiceNotSupported,InstanceNotSupported
 from prompt_toolkit import prompt
@@ -203,6 +204,7 @@ def ask_model_id(region, allow_local_deploy, only_allow_local_deploy, model_id=N
 
 #@app.callback(invoke_without_command=True)(invoke_without_command=True)
 @app.callback(invoke_without_command=True)
+@show_update_notification
 @catch_aws_credential_errors
 @check_emd_env_exist
 @load_aws_profile
@@ -245,12 +247,19 @@ def deploy(
     local_gpus:Annotated[
         str, typer.Option("--local-gpus", help="Local gpu ids to deploy the model (e.g. `0,1,2`), only working with local deployment mode.")
     ] = None,
+    disable_auto_bootstrap: Annotated[
+        Optional[bool], typer.Option("--disable-auto-bootstrap", help="Disable automatic bootstrap when infrastructure version mismatch is detected")
+    ] = False,
 ):
     if only_allow_local_deploy:
         allow_local_deploy = True
         region = LOCAL_REGION
     else:
         region = get_current_region()
+
+    # SMART BOOTSTRAP CHECK - Auto bootstrap if infrastructure version mismatch
+    if region != LOCAL_REGION and not disable_auto_bootstrap:  # Skip for local deployments or if disabled
+        smart_bootstrap_manager.auto_bootstrap_if_needed(region)
 
     if dockerfile_local_path:
         response = sdk_deploy(

@@ -1,7 +1,7 @@
 from emd.constants import ENV_STACK_NAME
 class EnvStackNotExistError(Exception):
     def __init__(self,env_stack_name=ENV_STACK_NAME):
-        super().__init__( f"Environment stack '{env_stack_name}' does not exist. Please run `emd bootstrap` to build the emd environment.")
+        super().__init__( f"Environment stack '{env_stack_name}' does not exist. Run 'emd deploy' to automatically set up the EMD environment.")
 
 
 class AWSCredentialsError(Exception):
@@ -12,7 +12,7 @@ class AWSCredentialsError(Exception):
 
 class DmaaEnvStackNotReadyError(Exception):
     def __init__(self, env_stack_name=ENV_STACK_NAME):
-        super().__init__( f"Environment stack '{env_stack_name}' is not ready. Please run `emd bootstrap` to build the emd environment.")
+        super().__init__( f"Environment stack '{env_stack_name}' is not ready. Run 'emd deploy' to automatically set up the EMD environment.")
 
 
 
