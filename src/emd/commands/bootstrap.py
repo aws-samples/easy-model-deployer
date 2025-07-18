@@ -25,7 +25,7 @@ def bootstrap(
 ):
     """
     Manually initialize AWS resources for model deployment.
-    
+
     Note: This command is optional. Running 'emd deploy' will automatically
     set up infrastructure when needed.
     """

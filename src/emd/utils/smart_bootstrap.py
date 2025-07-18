@@ -18,7 +18,7 @@ def get_deployed_infrastructure_version(region: str) -> Optional[str]:
     try:
         cfn = boto3.client('cloudformation', region_name=region)
         stack_info = cfn.describe_stacks(StackName=ENV_STACK_NAME)['Stacks'][0]
-        
+
         # Get ArtifactVersion parameter from stack
         for param in stack_info.get('Parameters', []):
             if param['ParameterKey'] == 'ArtifactVersion':
@@ -36,20 +36,20 @@ def check_infrastructure_completeness(region: str) -> Tuple[bool, str]:
     try:
         cfn = boto3.client('cloudformation', region_name=region)
         s3 = boto3.client('s3', region_name=region)
-        
+
         # Check CloudFormation stack
         try:
             stack_info = cfn.describe_stacks(StackName=ENV_STACK_NAME)['Stacks'][0]
             stack_status = stack_info['StackStatus']
-            
+
             if stack_status not in ['CREATE_COMPLETE', 'UPDATE_COMPLETE']:
                 return False, f"CloudFormation stack status: {stack_status}"
-                
+
         except cfn.exceptions.ClientError as e:
             if "does not exist" in str(e):
                 return False, "CloudFormation stack does not exist"
             raise
-        
+
         # Check S3 bucket (get bucket name from stack resources)
         try:
             from emd.sdk.bootstrap import get_bucket_name
@@ -60,9 +60,9 @@ def check_infrastructure_completeness(region: str) -> Tuple[bool, str]:
             s3.head_bucket(Bucket=bucket_name)
         except Exception as e:
             return False, f"S3 bucket issue: {str(e)}"
-        
+
         return True, "Infrastructure is complete"
-        
+
     except Exception as e:
         logger.debug(f"Infrastructure completeness check failed: {e}")
         return False, f"Infrastructure check failed: {str(e)}"
@@ -71,7 +71,7 @@ def check_infrastructure_completeness(region: str) -> Tuple[bool, str]:
 class SmartBootstrapManager:
     def __init__(self):
         self.console = Console()
-        
+
     def check_version_compatibility(self, current_version: str, deployed_version: str, region: str) -> str:
         """
         Check version compatibility and infrastructure completeness
@@ -82,14 +82,14 @@ class SmartBootstrapManager:
         if not is_complete:
             logger.debug(f"Infrastructure incomplete: {status_msg}")
             return 'auto_bootstrap'  # Infrastructure missing/incomplete, need bootstrap
-        
+
         if not deployed_version:
             return 'auto_bootstrap'  # No version info, need bootstrap
-        
+
         try:
             current_parsed = packaging.version.parse(current_version)
             deployed_parsed = packaging.version.parse(deployed_version)
-            
+
             if current_parsed > deployed_parsed:
                 return 'auto_bootstrap'  # Local newer, auto bootstrap
             elif deployed_parsed > current_parsed:
@@ -99,7 +99,7 @@ class SmartBootstrapManager:
         except Exception as e:
             logger.debug(f"Failed to parse versions: {e}")
             return 'auto_bootstrap'  # Default to bootstrap if parsing fails
-    
+
     def show_bootstrap_notification(self, current_version: str, deployed_version: str):
         """Show notification about automatic bootstrap"""
         self.console.print()  # Empty line for spacing
@@ -108,18 +108,18 @@ class SmartBootstrapManager:
         else:
             self.console.print(f"🚀 [bold green]Setting up infrastructure...[/bold green] [bold green]{current_version}[/bold green]")
         self.console.print()  # Empty line for spacing
-    
+
     def show_version_mismatch_warning(self, current_version: str, deployed_version: str):
         """Show warning when cloud version is newer than local version"""
         self.console.print()  # Empty line for spacing
         self.console.print(f"⚠️  [bold yellow]Version mismatch:[/bold yellow] Local [dim]{current_version}[/dim] < Cloud [bold yellow]{deployed_version}[/bold yellow]")
         self.console.print(f"   [bold]Recommendation:[/bold] pip install --upgrade easy-model-deployer")
         self.console.print()  # Empty line for spacing
-    
+
     def is_auto_bootstrap_disabled(self) -> bool:
         """Check if auto bootstrap is disabled via environment variable"""
         return os.getenv("EMD_DISABLE_AUTO_BOOTSTRAP", "").lower() in ["true", "1", "yes"]
-    
+
     def auto_bootstrap_if_needed(self, region: str) -> bool:
         """
         Automatically run bootstrap if needed based on comprehensive infrastructure check
@@ -129,29 +129,29 @@ class SmartBootstrapManager:
         if self.is_auto_bootstrap_disabled():
             logger.debug("Auto bootstrap disabled via EMD_DISABLE_AUTO_BOOTSTRAP")
             return False
-        
+
         current_version = VERSION
         deployed_version = get_deployed_infrastructure_version(region)
-        
+
         action = self.check_version_compatibility(current_version, deployed_version, region)
-        
+
         if action == 'compatible':
             return False  # No action needed
-        
+
         elif action == 'version_mismatch_warning':
             # Cloud version > Local version - show warning and ask user
             self.show_version_mismatch_warning(current_version, deployed_version)
-            
+
             if not typer.confirm("Continue deployment despite version mismatch?", default=False):
                 self.console.print("[yellow]Deployment cancelled. Please update EMD to the latest version.[/yellow]")
                 raise typer.Exit(0)
-            
+
             return False  # User chose to continue, no bootstrap
-        
+
         elif action == 'auto_bootstrap':
             # Infrastructure missing/incomplete OR version mismatch - ask for confirmation
             self.show_bootstrap_notification(current_version, deployed_version)
-            
+
             # Ask for user confirmation
             if deployed_version:
                 # Update scenario
@@ -159,35 +159,35 @@ class SmartBootstrapManager:
             else:
                 # Initialize scenario
                 confirm_msg = f"Initialize EMD infrastructure for version {current_version}?"
-            
+
             if not typer.confirm(confirm_msg, default=True):
                 self.console.print("[yellow]Bootstrap cancelled. Infrastructure will not be updated.[/yellow]")
                 self.console.print("[red]Deployment cannot proceed without compatible infrastructure.[/red]")
                 raise typer.Exit(1)
-            
+
             # User confirmed - proceed with bootstrap
             try:
                 from emd.sdk.bootstrap import create_env_stack, get_bucket_name
-                
+
                 bucket_name = get_bucket_name(
                     bucket_prefix=ENV_BUCKET_NAME_PREFIX,
                     region=region
                 )
-                
+
                 create_env_stack(
                     region=region,
                     stack_name=ENV_STACK_NAME,
                     bucket_name=bucket_name,
                     force_update=True
                 )
-                
+
                 self.console.print("[bold green]✅ Infrastructure setup completed successfully![/bold green]")
                 return True
-                
+
             except Exception as e:
                 self.console.print(f"[bold red]❌ Infrastructure setup failed: {str(e)}[/bold red]")
                 raise typer.Exit(1)
-        
+
         return False
 
 

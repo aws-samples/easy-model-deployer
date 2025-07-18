@@ -113,11 +113,11 @@ def print_aws_config():
     response = sts.get_caller_identity()
     account_id = response["Account"]
     region = get_current_region()
-    
+
     if region is None:
         console.print("[yellow]warning: Unable to determine AWS region.[/yellow]")
         raise typer.Exit(1)
-    
+
     console.print(Panel.fit(
         f"[bold green]Account ID:[/bold green] {account_id}\n"
         f"[bold green]Region    :[/bold green] {region}",
@@ -136,12 +136,12 @@ def load_aws_profile(fn):
             error_msg = str(e)
             logger.error(f"AWS configuration loading failed: {error_msg}")
             logger.debug(traceback.format_exc())
-            
+
             if kwargs.get("allow_local_deploy") or kwargs.get("only_allow_local_deploy", False):
                 logger.warning(f"AWS configuration error: {error_msg}. Proceeding with local deployment.")
                 kwargs['only_allow_local_deploy'] = True
                 return fn(*args, **kwargs)
-            
+
             console = Console()
             console.print(f"[red]❌ AWS Configuration Error: {error_msg}[/red]")
             raise typer.Exit(1)
