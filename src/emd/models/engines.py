@@ -190,6 +190,15 @@ vllm_gme_qwen2vl_engine091 = VllmEngine(**{
             "description": "VLLM engine for GME multimodal embedding models based on Qwen2-VL"
 })
 
+# GME-compatible engine with transformers 4.51.3
+vllm_gme_qwen2vl_engine084_compat = VllmEngine(**{
+            **vllm_embedding_engine091.model_dump(),
+            "engine_dockerfile_config": {"VERSION":"v0.8.4"},
+            "environment_variables": "export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True",
+            "default_cli_args": " --max_num_seq 20 --disable-log-stats --trust-remote-code --task embed --limit-mm-per-prompt image=10 --gpu_memory_utilization 0.8",
+            "description": "VLLM engine v0.8.4 for GME multimodal embedding models with compatible transformers version"
+})
+
 
 vllm_qwen2vl72b_engine064 = VllmEngine(**{
              **vllm_engine064.model_dump(),
