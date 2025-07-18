@@ -16,7 +16,7 @@ import requests
 import uvicorn
 from fastapi import APIRouter, FastAPI, Request, HTTPException
 
-TIMEOUT_KEEP_ALIVE = 30
+TIMEOUT_KEEP_ALIVE = 300
 SAGEMAKER_PORT = 8080
 LOCALHOST = '0.0.0.0'
 PHY_LOCALHOST = '127.0.0.1'

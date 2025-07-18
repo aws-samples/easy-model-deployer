@@ -52,7 +52,7 @@ Resources:
       Scheme: internet-facing
       LoadBalancerAttributes:
         - Key: idle_timeout.timeout_seconds
-          Value: '30'
+          Value: '300'
       Subnets: !Ref Subnets
       SecurityGroups:
         - !Ref PublicLoadBalancerSecurityGroup
