@@ -57,9 +57,7 @@ Model.register(
             local_instance,
         ],
         supported_services=[
-            sagemaker_service,
-            ecs_service,
-            local_service
+            ecs_service
         ],
         supported_frameworks=[
             fastapi_framework
