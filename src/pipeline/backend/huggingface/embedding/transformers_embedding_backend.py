@@ -65,7 +65,7 @@ class TransformerEmbeddingBackend(BackendBase):
                 device_map="cuda",
                 **self.pretrained_model_init_kwargs
         )
-        
+
         # BGE-VL specific initialization
         if self.is_bge_vl:
             try:
@@ -73,7 +73,7 @@ class TransformerEmbeddingBackend(BackendBase):
                 logger.info(f"BGE-VL processor set successfully for model: {self.model_id}")
             except Exception as e:
                 logger.warning(f"Failed to set BGE-VL processor: {e}")
-        
+
         logger.info(f"model: {self.model}")
         # TODO add tokenizer init args from model's definition
         # self.tokenizer =  AutoTokenizer.from_pretrained(
@@ -106,20 +106,20 @@ class TransformerEmbeddingBackend(BackendBase):
             # Handle data URL format
             if image_data.startswith('data:image'):
                 image_data = image_data.split(',')[1]
-            
+
             # Decode base64
             image_bytes = base64.b64decode(image_data)
             image = Image.open(io.BytesIO(image_bytes))
-            
+
             # Convert to RGB if needed
             if image.mode != 'RGB':
                 image = image.convert('RGB')
-                
+
             return image
         except Exception as e:
             logger.error(f"Failed to process base64 image: {e}")
             raise ValueError(f"Invalid image data: {e}")
-    
+
     def _convert_pil_to_bytesio(self, pil_image: Image.Image) -> io.BytesIO:
         """Convert PIL Image to BytesIO object for BGE-VL compatibility"""
         try:
@@ -131,13 +131,13 @@ class TransformerEmbeddingBackend(BackendBase):
         except Exception as e:
             logger.error(f"Failed to convert PIL image to BytesIO: {e}")
             raise ValueError(f"Image conversion failed: {e}")
-    
+
     def _parse_multimodal_inputs(self, inputs):
         """Parse and categorize multimodal inputs for BGE-VL"""
         text_inputs = []
         image_inputs = []
         multimodal_inputs = []
-        
+
         for inp in inputs:
             if isinstance(inp, str):
                 # Simple text input
@@ -162,14 +162,14 @@ class TransformerEmbeddingBackend(BackendBase):
                         # Convert PIL Image to BytesIO for BGE-VL compatibility
                         bytesio_image = self._convert_pil_to_bytesio(pil_image)
                         multimodal_inputs.append((text, bytesio_image))
-        
+
         return text_inputs, image_inputs, multimodal_inputs
-    
+
     def _generate_bge_vl_embeddings(self, inputs):
         """Generate embeddings using BGE-VL model"""
         text_inputs, image_inputs, multimodal_inputs = self._parse_multimodal_inputs(inputs)
         all_embeddings = []
-        
+
         # Process text-only inputs
         if text_inputs:
             try:
@@ -182,7 +182,7 @@ class TransformerEmbeddingBackend(BackendBase):
             except Exception as e:
                 logger.error(f"Failed to encode text inputs: {e}")
                 raise ValueError(f"BGE-VL text encoding failed: {e}")
-        
+
         # Process image-only inputs
         if image_inputs:
             try:
@@ -195,7 +195,7 @@ class TransformerEmbeddingBackend(BackendBase):
             except Exception as e:
                 logger.error(f"Failed to encode image inputs: {e}")
                 raise ValueError(f"BGE-VL image encoding failed: {e}")
-        
+
         # Process multimodal inputs (text + image)
         if multimodal_inputs:
             for text, bytesio_image in multimodal_inputs:
@@ -209,7 +209,7 @@ class TransformerEmbeddingBackend(BackendBase):
                 except Exception as e:
                     logger.error(f"Failed to encode multimodal input: {e}")
                     raise ValueError(f"BGE-VL multimodal encoding failed: {e}")
-        
+
         return all_embeddings
 
     def invoke(self, request:dict):
@@ -219,7 +219,7 @@ class TransformerEmbeddingBackend(BackendBase):
 
         logger.info(f'request: {request}')
         t0 = time.time()
-        
+
         if self.is_bge_vl:
             # Use BGE-VL multimodal processing
             embeddings_list = self._generate_bge_vl_embeddings(inputs)
@@ -229,10 +229,10 @@ class TransformerEmbeddingBackend(BackendBase):
             truncate_dim = request.get('truncate_dim', None)
             embeddings = self.model.encode(inputs, task=task, truncate_dim=truncate_dim)
             embeddings_list = embeddings.tolist()
-        
+
         logger.info(f'embeddings generated, count: {len(embeddings_list)}, elapsed time: {time.time()-t0}')
         return self.format_openai_response(embeddings_list)
-    
+
     async def ainvoke(self, request: dict):
         """Async version of invoke method"""
         return self.invoke(request)
