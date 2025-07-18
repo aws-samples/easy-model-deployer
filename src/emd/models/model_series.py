@@ -151,3 +151,9 @@ BAICHAUN_SERIES= ModelSeries(
     description="Baichuan Intelligent Technology.",
     reference_link="https://github.com/baichuan-inc"
 )
+
+KIMI_SERIES = ModelSeries(
+    model_series_name=ModelSeriesType.KIMI,
+    description="Kimi K2 is a state-of-the-art mixture-of-experts (MoE) language model with 32 billion activated parameters and 1 trillion total parameters. Trained with the Muon optimizer, Kimi K2 achieves exceptional performance across frontier knowledge, reasoning, and coding tasks while being meticulously optimized for agentic capabilities.",
+    reference_link="https://github.com/moonshotai/Kimi-K2"
+)
