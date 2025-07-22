@@ -5,7 +5,7 @@
 > Quick example:
 > ```python
 > from emd.sdk import bootstrap, deploy, destroy
-> from emd.sdk.clients import SageMakerClient
+> from emd.sdk.clients.sagemaker_client import SageMakerClient
 >
 > # Bootstrap infrastructure
 > bootstrap()
@@ -167,7 +167,7 @@ Interact with models deployed on Amazon SageMaker.
 
 **Initialization:**
 ```python
-from emd.sdk.clients import SageMakerClient
+from emd.sdk.clients.sagemaker_client import SageMakerClient
 
 # Initialize with model ID
 client = SageMakerClient(
@@ -327,7 +327,7 @@ Work with text embedding models.
 
 **Python Example:**
 ```python
-from emd.sdk.clients import SageMakerClient
+from emd.sdk.clients.sagemaker_client import SageMakerClient
 
 # Initialize embedding model client
 client = SageMakerClient(
@@ -362,7 +362,7 @@ Rerank documents based on relevance to a query.
 
 **Python Example:**
 ```python
-from emd.sdk.clients import SageMakerClient
+from emd.sdk.clients.sagemaker_client import SageMakerClient
 
 # Initialize reranking model client
 client = SageMakerClient(
@@ -394,7 +394,7 @@ Process images with vision-language models.
 
 **Python Example:**
 ```python
-from emd.sdk.clients import SageMakerClient
+from emd.sdk.clients.sagemaker_client import SageMakerClient
 import base64
 
 # Function to encode image
@@ -437,7 +437,7 @@ Use the SDK in AWS Lambda functions.
 **Lambda Function Example:**
 ```python
 import json
-from emd.sdk.clients import SageMakerClient
+from emd.sdk.clients.sagemaker_client import SageMakerClient
 
 def lambda_handler(event, context):
     # Initialize client
@@ -493,7 +493,7 @@ Handle common errors when using the SDK.
 **Python Example:**
 ```python
 from emd.sdk import deploy
-from emd.sdk.clients import SageMakerClient
+from emd.sdk.clients.sagemaker_client import SageMakerClient
 from botocore.exceptions import ClientError
 
 try:
@@ -530,7 +530,7 @@ End-to-end example of deploying and using a model.
 **Python Example:**
 ```python
 from emd.sdk import bootstrap, deploy, get_model_status, destroy
-from emd.sdk.clients import SageMakerClient
+from emd.sdk.clients.sagemaker_client import SageMakerClient
 import time
 
 # 1. Bootstrap infrastructure
