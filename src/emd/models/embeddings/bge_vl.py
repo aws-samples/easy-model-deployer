@@ -1,5 +1,5 @@
 from .. import Model
-from ..engines import huggingface_embedding_engine449
+from ..engines import huggingface_embedding_engine449, huggingface_embedding_engine_447
 from ..services import sagemaker_service, local_service, ecs_service
 from ..frameworks import fastapi_framework
 from ..instances import (
@@ -50,6 +50,7 @@ Model.register(
         model_id="bge-vl-large",
         supported_engines=[huggingface_embedding_engine449],
         supported_instances=[
+            g5dxlarge_instance,
             g5d2xlarge_instance,
             g5d4xlarge_instance,
             g5d8xlarge_instance,
@@ -70,5 +71,34 @@ Model.register(
         model_type=ModelType.EMBEDDING,
         model_series=BGE_SERIES,
         description="BGE-VL-large is a larger multimodal embedding model that supports text, image, and text-image pair inputs for high-performance multimodal representation learning and cross-modal retrieval tasks."
+    )
+)
+
+Model.register(
+    dict(
+        model_id="bge-vl-mllm-s1",
+        supported_engines=[huggingface_embedding_engine_447],
+        supported_instances=[
+            g5dxlarge_instance,
+            g5d2xlarge_instance,
+            g5d4xlarge_instance,
+            g5d8xlarge_instance,
+            g5d16xlarge_instance,
+            local_instance,
+        ],
+        supported_services=[
+            ecs_service
+        ],
+        supported_frameworks=[
+            fastapi_framework
+        ],
+        allow_china_region=True,
+        huggingface_model_id="BAAI/BGE-VL-MLLM-S1",
+        modelscope_model_id="BAAI/BGE-VL-MLLM-S1",
+        require_huggingface_token=False,
+        application_scenario="Multimodal RAG, composed image retrieval, visual search",
+        model_type=ModelType.EMBEDDING,
+        model_series=BGE_SERIES,
+        description="BGE-VL-MLLM-S1 is a larger multimodal embedding model that supports text, image, and text-image pair inputs for high-performance multimodal representation learning and cross-modal retrieval tasks."
     )
 )
