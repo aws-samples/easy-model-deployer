@@ -72,6 +72,7 @@ def health():
     return "200 OK"
 
 # As sagemaker endpoint requires...
+@app.post("/invocations")
 @app.post("/v1/invocations")
 @app.post("/v1/chat/completions")
 @app.post("/v1/embeddings")
@@ -98,6 +99,7 @@ endpoints = {
     "health": {"func": health, "methods": ["GET"]},
     # Note: The functions for the POST endpoints all use "invocations".
     "invocations": {"func": invocations, "methods": ["POST"]},
+    "v1/invocations": {"func": invocations, "methods": ["POST"]},
     "v1/chat/completions": {"func": invocations, "methods": ["POST"]},
     "v1/embeddings": {"func": invocations, "methods": ["POST"]},
     "score": {"func": invocations, "methods": ["POST"]},
