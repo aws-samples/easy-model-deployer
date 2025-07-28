@@ -134,3 +134,4 @@ emd_models/
 **artifacts
 src/pipeline/emd
 *.log
+.venv-vl/*

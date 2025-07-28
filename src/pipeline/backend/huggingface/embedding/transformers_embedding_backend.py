@@ -36,6 +36,8 @@ class TransformerEmbeddingBackend(BackendBase):
         self.model = None
         self.pretrained_model_init_kwargs = self.execute_model.executable_config.current_engine.pretrained_model_init_kwargs or {}
         self.is_bge_vl = "bge-vl" in self.model_id.lower()
+        self.is_bge_vl_mllm = "bge-vl-mllm" in self.model_id.lower()
+        self.model_abs_path = None
 
 
     def start(self):
@@ -48,7 +50,7 @@ class TransformerEmbeddingBackend(BackendBase):
                 s3_key = model_dir,
                 model_files_s3_path=self.model_files_s3_path
             )
-        model_abs_path = os.path.abspath(model_dir)
+        self.model_abs_path = os.path.abspath(model_dir)
 
         # TODO add model init args from model's definition
         torch_dtype = self.pretrained_model_init_kwargs.get("torch_dtype")
@@ -61,15 +63,18 @@ class TransformerEmbeddingBackend(BackendBase):
             }[torch_dtype]
 
         self.model = AutoModel.from_pretrained(
-                model_abs_path,
+                self.model_abs_path,
                 device_map="cuda",
                 **self.pretrained_model_init_kwargs
         )
 
+        if self.is_bge_vl_mllm:
+            self.model.eval()
+
         # BGE-VL specific initialization
-        if self.is_bge_vl:
+        if self.is_bge_vl and not self.is_bge_vl_mllm:
             try:
-                self.model.set_processor(model_abs_path)
+                self.model.set_processor(self.model_abs_path)
                 logger.info(f"BGE-VL processor set successfully for model: {self.model_id}")
             except Exception as e:
                 logger.warning(f"Failed to set BGE-VL processor: {e}")
@@ -165,6 +170,74 @@ class TransformerEmbeddingBackend(BackendBase):
 
         return text_inputs, image_inputs, multimodal_inputs
 
+    def _generate_bge_vl_mllm_embeddings(self, inputs):
+        """Generate embeddings using BGE-VL-MLLM model"""
+        text_inputs, image_inputs, multimodal_inputs = self._parse_multimodal_inputs(inputs)
+        all_embeddings = []
+
+        # Process text-only inputs
+        if text_inputs:
+            try:
+                with torch.no_grad():
+                    self.model.set_processor(self.model_abs_path)
+                    candidate_inputs = self.model.data_process(
+                        text=text_inputs,
+                        q_or_c="c"
+                    )
+                    text_emb = self.model(**candidate_inputs, output_hidden_states=True)[:, -1, :]
+                    text_emb = torch.nn.functional.normalize(text_emb, dim=-1)
+                    if hasattr(text_emb, 'tolist'):
+                        all_embeddings.extend(text_emb.tolist())
+                    else:
+                        all_embeddings.extend(text_emb)
+            except Exception as e:
+                logger.error(f"Failed to encode text inputs with MLLM: {e}")
+                raise ValueError(f"BGE-VL-MLLM text encoding failed: {e}")
+
+        # Process image-only inputs
+        if image_inputs:
+            try:
+                with torch.no_grad():
+                    self.model.set_processor(self.model_abs_path)
+                    candidate_inputs = self.model.data_process(
+                        images=image_inputs,
+                        q_or_c="c"
+                    )
+                    image_embeddings = self.model(**candidate_inputs, output_hidden_states=True)[:, -1, :]
+                    image_embeddings = torch.nn.functional.normalize(image_embeddings, dim=-1)
+                    if hasattr(image_embeddings, 'tolist'):
+                        all_embeddings.extend(image_embeddings.tolist())
+                    else:
+                        all_embeddings.extend(image_embeddings)
+            except Exception as e:
+                logger.error(f"Failed to encode image inputs with MLLM: {e}")
+                raise ValueError(f"BGE-VL-MLLM image encoding failed: {e}")
+
+        # Process multimodal inputs (text + image)
+        if multimodal_inputs:
+            with torch.no_grad():
+                self.model.set_processor(self.model_abs_path)
+                for text, bytesio_image in multimodal_inputs:
+                    try:
+                        # Convert BytesIO back to PIL Image for MLLM model
+                        candidate_inputs = self.model.data_process(
+                            text=[text],
+                            images=[bytesio_image],
+                            q_or_c="c"
+                        )
+                        with torch.no_grad():
+                            multimodal_emb = self.model(**candidate_inputs, output_hidden_states=True)[:, -1, :]
+                            multimodal_emb = torch.nn.functional.normalize(multimodal_emb, dim=-1)
+                            if hasattr(multimodal_emb, 'tolist'):
+                                all_embeddings.extend(multimodal_emb.tolist())
+                            else:
+                                all_embeddings.extend(multimodal_emb)
+                    except Exception as e:
+                        logger.error(f"Failed to encode multimodal input with MLLM: {e}")
+                        raise ValueError(f"BGE-VL-MLLM multimodal encoding failed: {e}")
+
+        return all_embeddings
+
     def _generate_bge_vl_embeddings(self, inputs):
         """Generate embeddings using BGE-VL model"""
         text_inputs, image_inputs, multimodal_inputs = self._parse_multimodal_inputs(inputs)
@@ -220,7 +293,10 @@ class TransformerEmbeddingBackend(BackendBase):
         logger.info(f'request: {request}')
         t0 = time.time()
 
-        if self.is_bge_vl:
+        if self.is_bge_vl_mllm:
+            # Use BGE-VL-MLLM multimodal processing
+            embeddings_list = self._generate_bge_vl_mllm_embeddings(inputs)
+        elif self.is_bge_vl:
             # Use BGE-VL multimodal processing
             embeddings_list = self._generate_bge_vl_embeddings(inputs)
         else:
