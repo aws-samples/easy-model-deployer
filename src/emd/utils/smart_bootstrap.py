@@ -123,6 +123,12 @@ class SmartBootstrapManager:
         Returns: True if bootstrap was run, False otherwise
         """
         current_version = VERSION
+        
+        # Development mode check: if version is 0.0.0, skip upgrade checks
+        if current_version == "0.0.0":
+            logger.debug("Development mode detected (version 0.0.0), skipping version upgrade checks")
+            return False
+        
         deployed_version = get_deployed_infrastructure_version(region)
 
         action = self.check_version_compatibility(current_version, deployed_version, region)
