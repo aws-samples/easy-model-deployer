@@ -24,7 +24,7 @@ def bootstrap(
 ):
 
     region = get_current_region()
-    typer.echo("AWS environment is properly configured.")
+    typer.echo("AWS environment configuration verified.")
     layout["main"].update("[bold red]Initalizing environment...[/bold red]")
     try:
         bucket_name = get_bucket_name(

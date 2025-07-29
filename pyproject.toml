@@ -12,8 +12,7 @@ readme = "README.md"
 [tool.poetry]
 packages = [
     { include = "**/*", from = "src/emd", to = "emd" },
-    { include = "pipeline", from = "src", to = "emd" },
-    { include = "s5cmd", from = "assets", to = "emd/pipeline" }
+    { include = "pipeline", from = "src", to = "emd" }
 ]
 exclude = [".venv"]
 

@@ -29,11 +29,11 @@ from emd.utils.aws_service_utils import (
 logger = get_logger(__name__)
 
 
-def get_version_md5_value():
-    version_md5_value = calculate_md5_string(
-        f"{VERSION}-{get_account_id()}"
-    )[:8]
-    return version_md5_value
+# def get_version_md5_value():
+#     version_md5_value = calculate_md5_string(
+#         f"{VERSION}-{get_account_id()}"
+#     )[:8]
+#     return version_md5_value
 
 
 def get_bucket_name(
@@ -44,8 +44,8 @@ def get_bucket_name(
     get bucket name
     """
     assert region is not None,region
-    version_md5_value = get_version_md5_value()
-    bucket_name = f"{bucket_prefix}-{version_md5_value}-{region}"
+    # version_md5_value = get_version_md5_value()
+    bucket_name = f"{bucket_prefix}-{get_account_id()}-{region}"
     return bucket_name
 
 
@@ -74,7 +74,6 @@ def create_env_stack(
     if check_stack_exist_and_complete(stack_name) and not force_update:
         logger.info(f"env stack: {stack_name} exists...")
         return
-    logger.info(f"create env stack: {stack_name}...")
     # version_md5_value = get_version_md5_value()
     if bucket_name is None:
         bucket_name = get_bucket_name(
@@ -92,7 +91,6 @@ def create_env_stack(
     # logger.info(f'pipeline s3 path: {pipeline_s3_path}')
 
     # create env stack
-    logger.info('create env stack...')
     cloudformation = boto3.client('cloudformation', region_name=region)
     cfn_template_path = os.path.join(emd_package_dir, "cfn", "codepipeline", "template.yaml")
     with open(cfn_template_path, 'r') as f:
@@ -152,7 +150,7 @@ def create_env_stack(
 
     # Track stack events during creation
     # stack_id = response['StackId']
-    logger.info(f"monitor stack: {stack_name}")
+    logger.info(f"Monitoring deployment stack {stack_name}")
     monitor_stack(stack_name)
 
 def bootstrap():

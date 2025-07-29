@@ -175,7 +175,6 @@ def destroy(
         # Parse new format
         try:
             model_id, model_tag = parse_model_identifier(model_identifier)
-            logger.info(f"Parsed model identifier '{model_identifier}' -> model_id='{model_id}', model_tag='{model_tag}'")
         except ValueError as e:
             logger.error(f"Invalid model identifier format: {e}")
             raise
@@ -187,7 +186,6 @@ def destroy(
         raise ValueError("Must specify either model_identifier (new format) or model_id (legacy format)")
 
     stack_name = Model.get_model_stack_name_prefix(model_id, model_tag=model_tag)
-    logger.info(f"Target stack name: {stack_name}")
 
     if not check_stack_exists(stack_name):
         logger.info(f"Stack {stack_name} does not exist, checking for active pipeline executions...")
@@ -204,11 +202,9 @@ def destroy(
     cf_client.delete_stack(StackName=stack_name)
 
     logger.info(f"CloudFormation stack deletion started: {stack_name}")
-    logger.info("Deleting model infrastructure (compute instances, load balancers, security groups, etc.)")
 
     # check delete status
     if waiting_until_complete:
-        logger.info("Waiting for stack deletion to complete...")
         while True:
             status_info = get_destroy_status(stack_name)
             status = status_info['status']
@@ -216,7 +212,7 @@ def destroy(
             if status_code == 0:
                 break
             logger.info(f'Stack deletion progress: {status}')
-            time.sleep(5)
+            time.sleep(10)
 
         if status == EMD_STACK_NOT_EXISTS_STATUS:
             status = "DELETE_COMPLETED"

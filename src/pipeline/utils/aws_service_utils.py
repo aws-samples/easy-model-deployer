@@ -17,14 +17,14 @@ def calculate_md5_string(input_string):
 
 def check_aws_environment():
     """
-    Check if AWS environment is properly configured by attempting to access AWS services.
+    Check if AWS environment configuration verified.by attempting to access AWS services.
     Raises typer.Exit if AWS is not configured correctly.
     """
     try:
         # Try to create a boto3 client and make a simple API call
         sts = boto3.client("sts", region_name=get_current_region())
         response = sts.get_caller_identity()
-        logger.info("AWS environment is properly configured.")
+        logger.info("AWS environment configuration verified.")
         account_id = response['Account']
         region = boto3.session.Session().region_name
         logger.info(f"AWS Account: {account_id}\nAWS Region: {region}")

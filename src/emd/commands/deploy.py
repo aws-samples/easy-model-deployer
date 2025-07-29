@@ -26,6 +26,7 @@ from emd.utils.aws_service_utils import check_cn_region
 import questionary
 from emd.utils.accelerator_utils import get_gpu_num,check_cuda_exists,check_neuron_exists
 from emd.utils.decorators import catch_aws_credential_errors,check_emd_env_exist,load_aws_profile
+from emd.utils.smart_bootstrap import smart_bootstrap_manager
 from emd.utils.logger_utils import make_layout
 from emd.utils.exceptions import ModelNotSupported,ServiceNotSupported,InstanceNotSupported
 from prompt_toolkit import prompt
@@ -251,6 +252,9 @@ def deploy(
         region = LOCAL_REGION
     else:
         region = get_current_region()
+
+    if region != LOCAL_REGION:
+        smart_bootstrap_manager.auto_bootstrap_if_needed(region)
 
     if dockerfile_local_path:
         response = sdk_deploy(
@@ -571,13 +575,13 @@ def deploy(
     engine_info_str = json.dumps(engine_info,indent=2,ensure_ascii=False)
     framework_info_str = json.dumps(framework_info, indent=2, ensure_ascii=False)
     extra_params_info = json.dumps(extra_params, indent=2, ensure_ascii=False)
-    console.print(f"[bold blue]Deployment parameters:[/bold blue]")
-    console.print(f"[bold blue]model_id: {model_id},model_tag: {model_tag}[/bold blue]")
-    console.print(f"[bold blue]instance_type: {instance_type}[/bold blue]")
-    console.print(f"[bold blue]service_type: {service_type}[/bold blue]")
-    console.print(f"[bold blue]engine info:\n {engine_info_str}[/bold blue]")
-    console.print(f"[bold blue]framework info:\n {framework_info_str}[/bold blue]")
-    console.print(f"[bold blue]extra_params:\n {extra_params_info}[/bold blue]")
+    console.print(f"[bold magenta]Deployment parameters:[/bold magenta]")
+    console.print(f"[bold cyan]model_id: {model_id}, model_tag: {model_tag}[/bold cyan]")
+    console.print(f"[bold cyan]instance_type: {instance_type}[/bold cyan]")
+    console.print(f"[bold cyan]service_type: {service_type}[/bold cyan]")
+    console.print(f"[bold white]engine_parameters:[/bold white]\n[dim cyan]{engine_info_str}[/dim cyan]")
+    console.print(f"[bold white]framework_parameters:[/bold white]\n[dim cyan]{framework_info_str}[/dim cyan]")
+    console.print(f"[bold white]extra_parameters:[/bold white]\n[dim cyan]{extra_params_info}[/dim cyan]")
     # Start pipeline execution
     if service_type != ServiceType.LOCAL:
         response = sdk_deploy(
@@ -592,7 +596,7 @@ def deploy(
             force_env_stack_update = force_update_env_stack,
             waiting_until_deploy_complete=True
         )
-        console.print(f"[bold green]Model deployment pipeline execution initiated. Execution ID: {response['pipeline_execution_id']}[/bold green]")
+        console.print(f"[bold green]Model deployment pipeline started. Execution ID: {response['pipeline_execution_id']}[/bold green]")
     else:
         response = sdk_deploy_local(
             model_id=model_id,

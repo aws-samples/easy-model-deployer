@@ -51,14 +51,14 @@ def calculate_md5_string(input_string):
 
 def check_aws_environment():
     """
-    Check if AWS environment is properly configured by attempting to access AWS services.
+    Check if AWS environment configuration verified.by attempting to access AWS services.
     Raises typer.Exit if AWS is not configured correctly.
     """
     try:
         # Try to create a boto3 client and make a simple API call
         sts = boto3.client("sts", region_name=get_current_region())
         response = sts.get_caller_identity()
-        logger.info("AWS environment is properly configured.")
+        logger.info("AWS environment configuration verified.")
         account_id = response["Account"]
         region = boto3.session.Session().region_name
         logger.info(f"AWS Account: {account_id}\nAWS Region: {region}")
@@ -162,6 +162,60 @@ def check_stack_status(stack_name) -> StackStatus:
     return StackStatus(is_stack_exist=is_stack_exist, stack_info=stack_info)
 
 
+def batch_check_stack_status(stack_names: list) -> dict:
+    """
+    Check status of multiple CloudFormation stacks in a single API call.
+
+    This is a performance optimization to avoid individual stack checks.
+
+    Args:
+        stack_names: List of stack names to check
+
+    Returns:
+        dict: Dictionary mapping stack names to StackStatus objects
+    """
+    if not stack_names:
+        return {}
+
+    cf = boto3.client("cloudformation", region_name=get_current_region())
+    stack_statuses = {}
+
+    try:
+        # Use describe_stacks with no specific stack name to get all stacks
+        paginator = cf.get_paginator('describe_stacks')
+        all_stacks = {}
+
+        for page in paginator.paginate():
+            for stack in page['Stacks']:
+                all_stacks[stack['StackName']] = stack
+
+        # Check each requested stack
+        for stack_name in stack_names:
+            if stack_name in all_stacks:
+                stack_info = all_stacks[stack_name]
+                stack_statuses[stack_name] = StackStatus(
+                    is_stack_exist=True,
+                    stack_info=stack_info
+                )
+            else:
+                stack_statuses[stack_name] = StackStatus(
+                    is_stack_exist=False,
+                    stack_info={}
+                )
+
+    except Exception as e:
+        logger.error(f"Error in batch stack check: {e}")
+        # Fallback to individual checks on error
+        for stack_name in stack_names:
+            try:
+                stack_statuses[stack_name] = check_stack_status(stack_name)
+            except Exception as individual_error:
+                logger.error(f"Error checking individual stack {stack_name}: {individual_error}")
+                stack_statuses[stack_name] = StackStatus(is_stack_exist=False, stack_info={})
+
+    return stack_statuses
+
+
 def get_pipeline_stages(pipeline_name: str) -> list[str]:
     client = boto3.client("codepipeline", region_name=get_current_region())
     response = client.get_pipeline_state(name=pipeline_name)
@@ -178,6 +232,61 @@ def get_pipeline_execution_info(
         pipelineName=pipeline_name, pipelineExecutionId=pipeline_execution_id
     )["pipelineExecution"]
     return execution_info
+
+
+def _find_stage_for_execution_via_actions_utils(pipeline_name: str, execution_id: str, client) -> str:
+    """
+    Find the current/failed stage for a specific pipeline execution using list_action_executions.
+
+    This is a utility version of the function from status.py for use in aws_service_utils.py
+    """
+    try:
+        response = client.list_action_executions(
+            pipelineName=pipeline_name,
+            filter={
+                'pipelineExecutionId': execution_id
+            }
+        )
+
+        action_executions = response.get('actionExecutionDetails', [])
+        logger.debug(f"Found {len(action_executions)} action executions for {execution_id}")
+
+        if not action_executions:
+            return "Unknown"
+
+        # Find the stage where execution is currently running or failed
+        current_stage = "Unknown"
+
+        # Look for failed or in-progress actions first (these indicate current stage)
+        for action_exec in action_executions:
+            stage_name = action_exec.get('stageName', 'Unknown')
+            status = action_exec.get('status', 'Unknown')
+
+            # If we find a failed or in-progress action, that's the current stage
+            if status in ['Failed', 'InProgress', 'Stopping']:
+                current_stage = stage_name
+                logger.debug(f"Found current/failed stage: {stage_name} (status: {status})")
+                break
+
+        # If no failed/in-progress actions, find the last stage (for completed executions)
+        if current_stage == "Unknown" and action_executions:
+            # Get all unique stages and find the last one in pipeline order
+            stages_found = []
+            for action_exec in action_executions:
+                stage_name = action_exec.get('stageName', 'Unknown')
+                if stage_name not in stages_found:
+                    stages_found.append(stage_name)
+
+            # For completed executions, return the last stage
+            if stages_found:
+                current_stage = stages_found[-1]  # Last stage in the list
+                logger.debug(f"Execution completed, using last stage: {current_stage}")
+
+        return current_stage
+
+    except Exception as e:
+        logger.debug(f"Error getting stage via action executions for {execution_id}: {e}")
+        return "Unknown"
 
 
 def get_pipeline_active_executions(
@@ -213,7 +322,7 @@ def get_pipeline_active_executions(
     if filter_failed:
         status_filter.remove("Failed")
 
-    # Get pipeline state for stage information
+    # Get pipeline state for stage information (fallback method)
     try:
         pipeline_state = client.get_pipeline_state(name=pipeline_name)
         stage_states = pipeline_state["stageStates"]
@@ -256,31 +365,40 @@ def get_pipeline_active_executions(
                 .strftime("%Y-%m-%d %H:%M:%S %Z")
             )
 
-            # Find current stage for this execution
-            current_stage = "Unknown"
-            for stage_state in stage_states:
-                # Check if this execution is in this stage
-                stage_execution_ids = []
+            # Find current stage for this execution - IMPROVED APPROACH
+            # First try the action-based approach (works for all execution states)
+            current_stage = _find_stage_for_execution_via_actions_utils(
+                pipeline_name, execution_id, client
+            )
 
-                # Check inbound executions
-                stage_execution_ids.extend([
-                    d["pipelineExecutionId"] for d in stage_state.get("inboundExecutions", [])
-                ])
+            # If action-based approach fails, fall back to pipeline state approach
+            if current_stage == "Unknown":
+                logger.debug(f"Action-based stage detection failed for {execution_id}, trying pipeline state")
 
-                # Check latest execution
-                latest_execution = stage_state.get("latestExecution", {})
-                if latest_execution and latest_execution.get("pipelineExecutionId"):
-                    stage_execution_ids.append(latest_execution["pipelineExecutionId"])
+                for stage_state in stage_states:
+                    # Check if this execution is in this stage
+                    stage_execution_ids = []
 
-                # Check action states for parallel executions
-                for action_state in stage_state.get("actionStates", []):
-                    latest_action = action_state.get("latestExecution", {})
-                    if latest_action and latest_action.get("pipelineExecutionId"):
-                        stage_execution_ids.append(latest_action["pipelineExecutionId"])
+                    # Check inbound executions
+                    stage_execution_ids.extend([
+                        d["pipelineExecutionId"] for d in stage_state.get("inboundExecutions", [])
+                    ])
 
-                if execution_id in stage_execution_ids:
-                    current_stage = stage_state["stageName"]
-                    break
+                    # Check latest execution
+                    latest_execution = stage_state.get("latestExecution", {})
+                    if latest_execution and latest_execution.get("pipelineExecutionId"):
+                        stage_execution_ids.append(latest_execution["pipelineExecutionId"])
+
+                    # Check action states for parallel executions
+                    for action_state in stage_state.get("actionStates", []):
+                        latest_action = action_state.get("latestExecution", {})
+                        if latest_action and latest_action.get("pipelineExecutionId"):
+                            stage_execution_ids.append(latest_action["pipelineExecutionId"])
+
+                    if execution_id in stage_execution_ids:
+                        current_stage = stage_state["stageName"]
+                        logger.debug(f"Found stage via pipeline state: {current_stage}")
+                        break
 
             active_executuion_infos.append(
                 {

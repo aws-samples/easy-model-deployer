@@ -33,10 +33,45 @@ from emd.utils.upload_pipeline import ziped_pipeline
 from emd.utils.aws_service_utils import get_current_region
 
 from .bootstrap import create_env_stack, get_bucket_name
-from .status import get_pipeline_execution_status
+from .status import get_pipeline_execution_status, get_pipeline_execution_status_with_retry
 from emd.models.utils.constants import ServiceType
 
+from rich.console import Console
+
+console = Console()
+
 logger = get_logger(__name__)
+
+
+def _get_robust_status_info(execution_id: str, region: str) -> dict:
+    """Get robust status information with enhanced retry and fallback handling"""
+    try:
+        # Use the enhanced retry function to handle AWS eventual consistency
+        status_info = get_pipeline_execution_status_with_retry(
+            pipeline_execution_id=execution_id,
+            region=region
+        )
+        # Ensure all required fields are present with defaults
+        return {
+            "status": status_info.get("status", "InProgress"),
+            "status_code": status_info.get("status_code", 1),
+            "is_succeeded": status_info.get("is_succeeded", False),
+            "stage_name": status_info.get("stage_name"),
+            "status_summary": status_info.get("status_summary"),
+            "pipeline_execution_id": status_info.get("pipeline_execution_id", execution_id)
+        }
+
+    except Exception as e:
+        # Enhanced fallback: keep monitoring with informative status
+        logger.warning(f"Enhanced retry failed for execution {execution_id}: {e}")
+        return {
+            "status": "InProgress",
+            "status_code": 1,  # Keep monitoring
+            "is_succeeded": False,
+            "stage_name": "Initializing",
+            "status_summary": f"Waiting for pipeline execution to become available: {str(e)}",
+            "pipeline_execution_id": execution_id
+        }
 
 
 def parse_extra_params(extra_params=None):
@@ -74,7 +109,7 @@ def prepare_deploy(
     # check if model_id is inprogress in pipeline execution
     if check_stack_exists(model_stack_name):
         raise RuntimeError(
-            f"A model with the ID: {model_id} and tag: {model_tag} already exists. Kindly use a different tag to proceed."
+            f"A model with ID: {model_id} and tag: {model_tag} already exists. Please use a different tag to continue."
         )
 
     client = boto3.client("codepipeline", region_name=region)
@@ -124,124 +159,108 @@ def deploy(
     waiting_until_deploy_complete=True,
     dockerfile_local_path=None,
 ) -> dict:
+    with console.status("[bold blue]Retrieving model deployment status... (Press Ctrl+C to return)[/bold blue]"):
     # Check if AWS environment is properly configured
-    if service_type == ServiceType.SAGEMAKER_OLDER:
-        service_type = ServiceType.SAGEMAKER
-        logger.warning(
-            f"Service type {ServiceType.SAGEMAKER_OLDER} is deprecated, please use {ServiceType.SAGEMAKER}"
-        )
+        if service_type == ServiceType.SAGEMAKER_OLDER:
+            service_type = ServiceType.SAGEMAKER
+            logger.warning(
+                f"Service type {ServiceType.SAGEMAKER_OLDER} is deprecated, please use {ServiceType.SAGEMAKER}"
+            )
 
-    logger.info("checking if model is exists...")
-    assert (
-        model_stack_name is None
-    ), f"It is currently not supported to custom model stack name."
-    region = get_current_region()
-    prepare_deploy(
-        model_id,
-        model_tag=model_tag,
-        service_type=service_type,
-        instance_type=instance_type,
-        region=region,
-        dockerfile_local_path=dockerfile_local_path
-    )
-    # logger.info("Checking AWS environment...")
-    if isinstance(extra_params, str):
-        extra_params = json.loads(extra_params)
-    else:
-        extra_params = extra_params or {}
-    if model_stack_name is None:
+        assert (
+            model_stack_name is None
+        ), f"It is currently not supported to custom model stack name."
+        region = get_current_region()
+        prepare_deploy(
+            model_id,
+            model_tag=model_tag,
+            service_type=service_type,
+            instance_type=instance_type,
+            region=region,
+            dockerfile_local_path=dockerfile_local_path
+        )
+        if isinstance(extra_params, str):
+            extra_params = json.loads(extra_params)
+        else:
+            extra_params = extra_params or {}
+        if model_stack_name is None:
+            # stack_name_suffix = random_suffix()
+            model_stack_name = (
+                f"{Model.get_model_stack_name_prefix(model_id,model_tag=model_tag)}"
+            )
+        # Check if CloudFormation stack exists for CodePipeline
+        cfn = boto3.client("cloudformation", region_name=region)
+        bucket_name = get_bucket_name(
+            bucket_prefix="emd-env-artifactbucket", region=region
+        )
+        bootstrap_stack = cfn.describe_stacks(StackName=ENV_STACK_NAME)["Stacks"][0]
+        # # Get the pipeline name from the bootstrap stack
+        pipeline_resources = [
+            resource
+            for resource in cfn.describe_stack_resources(
+                StackName=bootstrap_stack["StackName"]
+            )["StackResources"]
+            if resource["ResourceType"] == "AWS::CodePipeline::Pipeline"
+        ]
+        pipeline_name = pipeline_resources[0]["PhysicalResourceId"]
+
+        if dockerfile_local_path:
+            if not os.path.exists(dockerfile_local_path):
+                raise FileNotFoundError(f"Dockerfile path {dockerfile_local_path} does not exist.")
+
+            # Create a zip file of the dockerfile directory
+            zip_buffer = zipped_dockerfile(dockerfile_local_path)
+
+            # Upload the zip file to S3
+            s3 = boto3.client('s3', region_name=region)
+            s3_key = f"emd_models/{model_id}-{model_tag}.zip"
+            s3.upload_fileobj(zip_buffer, bucket_name, s3_key)
+            extra_params["model_params"] = extra_params.get("model_params", {})
+            extra_params["model_params"]["custom_dockerfile_path"] = f"s3://{bucket_name}/{s3_key}"
+            logger.info(f"extra_params: {extra_params}")
+        else:
+            model = Model.get_model(model_id)
+
+            # check instance,service,engine
+            supported_instances = model.supported_instance_types
+            assert (
+                instance_type in supported_instances
+            ), f"Instance type {instance_type} is not supported for model {model_id}"
+
+            supported_engines = model.supported_engine_types
+            assert (
+                engine_type in supported_engines
+            ), f"Engine type {engine_type} is not supported for model {model_id}"
+
+            supported_services = model.supported_service_types
+            assert (
+                service_type in supported_services
+            ), f"Service type {service_type} is not supported for model {model_id}"
+
+        # Start pipeline execution
+        codepipeline = boto3.client("codepipeline", region_name=region)
         # stack_name_suffix = random_suffix()
-        model_stack_name = (
-            f"{Model.get_model_stack_name_prefix(model_id,model_tag=model_tag)}"
+        extra_params = dump_extra_params(extra_params)
+        variables = [
+            {"name": "ModelStackName", "value": model_stack_name},
+            {"name": "ModelId", "value": model_id},
+            {"name": "ModelTag", "value": model_tag},
+            {"name": "ServiceType", "value": service_type},
+            {"name": "InstanceType", "value": instance_type},
+            {"name": "EngineType", "value": engine_type},
+            {"name": "ExtraParams", "value": extra_params},
+            {"name": "CreateTime", "value": f"{time.time()}"},
+            {"name": "FrameworkType", "value": framework_type},
+            {"name": "Region", "value": region},
+        ]
+
+        start_deploy_time = time.time()
+
+        response = codepipeline.start_pipeline_execution(
+            name=pipeline_name, variables=variables
         )
-    # Check if CloudFormation stack exists for CodePipeline
-    cfn = boto3.client("cloudformation", region_name=region)
-    bucket_name = get_bucket_name(
-        bucket_prefix="emd-env-artifactbucket", region=region
-    )
-    logger.info(f"bucket: {bucket_name}")
-    pipeline_zip_s3_key = f"{VERSION}/pipeline.zip"
-    create_env_stack(
-        bucket_name=bucket_name,
-        stack_name=ENV_STACK_NAME,
-        region=region,
-        pipeline_zip_s3_key=pipeline_zip_s3_key,
-        on_failure=env_stack_on_failure,
-        force_update=force_env_stack_update,
-    )
-
-    bootstrap_stack = cfn.describe_stacks(StackName=ENV_STACK_NAME)["Stacks"][0]
-    # # Get the pipeline name from the bootstrap stack
-    pipeline_resources = [
-        resource
-        for resource in cfn.describe_stack_resources(
-            StackName=bootstrap_stack["StackName"]
-        )["StackResources"]
-        if resource["ResourceType"] == "AWS::CodePipeline::Pipeline"
-    ]
-    pipeline_name = pipeline_resources[0]["PhysicalResourceId"]
-    logger.info("AWS environment is properly configured.")
-
-    if dockerfile_local_path:
-        if not os.path.exists(dockerfile_local_path):
-            raise FileNotFoundError(f"Dockerfile path {dockerfile_local_path} does not exist.")
-
-        # Create a zip file of the dockerfile directory
-        zip_buffer = zipped_dockerfile(dockerfile_local_path)
-
-        # Upload the zip file to S3
-        s3 = boto3.client('s3', region_name=region)
-        s3_key = f"emd_models/{model_id}-{model_tag}.zip"
-        s3.upload_fileobj(zip_buffer, bucket_name, s3_key)
-        extra_params["model_params"] = extra_params.get("model_params", {})
-        extra_params["model_params"]["custom_dockerfile_path"] = f"s3://{bucket_name}/{s3_key}"
-        logger.info(f"extra_params: {extra_params}")
-    else:
-        model = Model.get_model(model_id)
-
-        # check instance,service,engine
-        supported_instances = model.supported_instance_types
-        assert (
-            instance_type in supported_instances
-        ), f"Instance type {instance_type} is not supported for model {model_id}"
-
-        supported_engines = model.supported_engine_types
-        assert (
-            engine_type in supported_engines
-        ), f"Engine type {engine_type} is not supported for model {model_id}"
-
-        supported_services = model.supported_service_types
-        assert (
-            service_type in supported_services
-        ), f"Service type {service_type} is not supported for model {model_id}"
-
-    # Start pipeline execution
-    codepipeline = boto3.client("codepipeline", region_name=region)
-    # stack_name_suffix = random_suffix()
-    extra_params = dump_extra_params(extra_params)
-    variables = [
-        {"name": "ModelStackName", "value": model_stack_name},
-        {"name": "ModelId", "value": model_id},
-        {"name": "ModelTag", "value": model_tag},
-        {"name": "ServiceType", "value": service_type},
-        {"name": "InstanceType", "value": instance_type},
-        {"name": "EngineType", "value": engine_type},
-        {"name": "ExtraParams", "value": extra_params},
-        {"name": "CreateTime", "value": f"{time.time()}"},
-        {"name": "FrameworkType", "value": framework_type},
-        {"name": "Region", "value": region},
-    ]
-    # logger.info(
-    #     f"start pipeline execution.\nvariables:\n{json.dumps(variables,ensure_ascii=False,indent=2)}"
-    # )
-
-    start_deploy_time = time.time()
-
-    response = codepipeline.start_pipeline_execution(
-        name=pipeline_name, variables=variables
-    )
     logger.info(
-        f"Model deployment pipeline execution initiated. Execution ID: {response['pipelineExecutionId']}"
+        f"Model deployment pipeline started. Execution ID: {response['pipelineExecutionId']}"
     )
     execution_id = response["pipelineExecutionId"]
     ret = {
@@ -259,36 +278,64 @@ def deploy(
 
     is_succeeded = False
     if waiting_until_deploy_complete:
-        logger.info(f"monitor stack: {model_stack_name}")
+        logger.info(f"Monitoring deployment stack {model_stack_name}")
         client = boto3.client("codepipeline", region_name=region)
+
         while True:
             try:
-                status_info = get_pipeline_execution_status(
-                    pipeline_execution_id=response["pipelineExecutionId"],
-                    region=region
-                )
-            except client.exceptions.PipelineExecutionNotFoundException as e:
+                # Get robust status information
+                status_info = _get_robust_status_info(execution_id, region)
+
+                # Extract status information with safe defaults
+                status = status_info["status"]
+                status_code = status_info["status_code"]
+                is_succeeded = status_info["is_succeeded"]
+                stage_name = status_info.get("stage_name")
+                status_summary = status_info.get("status_summary")
+
+                # Build user-friendly log message (same format as original)
+                log_info = f"Waiting for deployment to complete: model {model_id} (tag: {model_tag}, service: {service_type}, instance: {InstanceType.convert_instance_type(instance_type,service_type)}). Current status: {status}"
+
+                # Add optional information if available
+                if stage_name:
+                    log_info += f"({stage_name})"
+                if status_summary:
+                    log_info += f", {status_summary}"
+
+
+                # Add duration
+                log_info += f". Duration: {int(time.time() - start_deploy_time)} seconds"
+
+                # Display status to user
+                logger.info(log_info)
+
+                # Check if deployment is complete
+                if status_code == 0:
+                    break
+
+                time.sleep(10)
+
+            except client.exceptions.PipelineExecutionNotFoundException:
                 logger.info("Waiting for pipeline execution to start...")
                 time.sleep(10)
                 continue
-            status = status_info["status"]
-            status_code = status_info["status_code"]
-            is_succeeded = status_info["is_succeeded"]
-            stage_name = status_info.get("stage_name")
-            status_summary = status_info.get("status_summary")
-            log_info = f"waiting for model: {model_id} (tag: {model_tag}, service: {service_type}, instance: {InstanceType.convert_instance_type(instance_type,service_type)}) deployment pipeline execution to complete. Current status: {status}"
-            if status_summary:
-                log_info += f", status_summary: {status_summary}"
-            if stage_name:
-                log_info += f", in stage: {stage_name}"
-            # log_info += f", Execution ID: {execution_id}"
-            log_info += f", Duration time: {int(time.time() - start_deploy_time)}s"
-            logger.info(log_info)
-            if status_code == 0:
-                break
-            time.sleep(10)
+
+            except Exception as e:
+                # Robust error handling - continue monitoring with basic status
+                logger.info(f"waiting for model: {model_id} (tag: {model_tag}, service: {service_type}, instance: {InstanceType.convert_instance_type(instance_type,service_type)}) deployment pipeline execution to complete. Current status: InProgress, Duration time: {int(time.time() - start_deploy_time)}s")
+                time.sleep(10)
+                continue
+
         deploy_time = time.time() - start_deploy_time
         ret["model_deploy_elasped_time"] = deploy_time
+
+        # Get final status with robust handling
+        try:
+            final_status_info = _get_robust_status_info(execution_id, region)
+            is_succeeded = final_status_info["is_succeeded"]
+        except Exception:
+            # Fallback: assume success if we exited the monitoring loop
+            is_succeeded = True
 
     if service_type == ServiceType.SAGEMAKER:
         ret["sagemaker_endpoint_name"] = f"{model_stack_name}-endpoint"

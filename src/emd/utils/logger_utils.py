@@ -17,7 +17,7 @@ class Logger:
         cls,
         name,
         level=int(os.environ.get('DEBUG_LEVEL', logging.INFO)),
-        format='%(asctime)s %(levelname)s [%(filename)s:%(lineno)d] %(message)s',
+        format='%(asctime)s %(levelname)s %(message)s',
         datefmt='%Y-%m-%d:%H:%M:%S'
     ):
         if name in cls.logger_map:

@@ -114,7 +114,7 @@ def print_aws_config():
     # Get region first (faster, no API call)
     region = get_current_region()
     if region is None:
-        console.print("[yellow]Warning: Unable to determine AWS region.[/yellow]")
+        console.print("[yellow]Warning: AWS region is not set. Please configure it using 'aws configure' or set the AWS_REGION environment variable.[/yellow]")
         raise typer.Exit(1)
 
     try:
@@ -164,7 +164,7 @@ def quick_aws_check():
     # Get region without additional API calls
     region = get_current_region()
     if region is None:
-        console.print("[yellow]Warning: Unable to determine AWS region.[/yellow]")
+        console.print("[yellow]Warning: AWS region is not set. Please configure it using 'aws configure' or set the AWS_REGION environment variable.[/yellow]")
         raise typer.Exit(1)
 
 def load_aws_profile(fn):

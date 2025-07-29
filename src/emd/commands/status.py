@@ -28,27 +28,44 @@ def status(
         str, typer.Argument(help="Model tag")
     ] = MODEL_DEFAULT_TAG,
 ):
-    # Show loading indicator while fetching model status
-    with console.status("[bold green]Fetching model status...", spinner="dots"):
+    with console.status("[bold green]Fetching model deployment status. Please wait patiently", spinner="dots"):
         ret = get_model_status(model_id, model_tag=model_tag)
 
     inprogress = ret['inprogress']
     completed = ret['completed']
 
     data = []
-    # Process all in-progress executions (now includes ALL parallel executions)
+    cli_messages = []  # Store CLI messages for display after the table
+
+    # Process all in-progress executions (now includes enhanced pipeline-stack logic)
     for d in inprogress:
         if d['status'] == "Stopped":
             continue
+
+        # Use enhanced status if available, otherwise fall back to original logic
+        if d.get('enhanced_status'):
+            display_status = d['enhanced_status']
+        else:
+            display_status = f"{d['status']} ({d['stage_name']})" if d.get('stage_name') else d['status']
+
         data.append({
             "model_id": d['model_id'],
             "model_tag": d['model_tag'],
-            "status": f"{d['status']} ({d['stage_name']})" if d.get('stage_name') else d['status'],
+            "status": display_status,
             "service_type": d.get('service_type', ''),
             "instance_type": d.get('instance_type', ''),
             "create_time": d.get('create_time', ''),
             "outputs": d.get('outputs', ''),  # Use .get() to handle missing outputs field
         })
+
+        # Collect CLI messages for this model
+        if d.get('cli_message'):
+            model_name = f"{d['model_id']}/{d['model_tag']}"
+            cli_messages.append({
+                'model_name': model_name,
+                'message_type': d['cli_message'],
+                'stack_name': d.get('stack_name', '')
+            })
 
     # Process completed models
     for d in completed:
@@ -151,6 +168,29 @@ def status(
 
     # Display the table
     console.print(models_table)
+
+    # Display CLI messages for user guidance
+    if cli_messages:
+        console.print("\n" + "=" * 60, style="dim")
+        console.print("📋 Action Required", style="bold yellow")
+        console.print("=" * 60, style="dim")
+
+        for msg in cli_messages:
+            model_name = msg['model_name']
+            message_type = msg['message_type']
+
+            if message_type == 'cleanup_warning':
+                stack_name = msg['stack_name']
+                console.print(f"\n🔧 [bold]{model_name}[/bold]")
+                console.print("   [yellow]⚠️  Failed stack detected. Manual cleanup required:[/yellow]")
+                console.print(f"   [dim]aws cloudformation delete-stack --stack-name {stack_name}[/dim]")
+
+            elif message_type == 'codepipeline_console':
+                console.print(f"\n🔍 [bold]{model_name}[/bold]")
+                console.print("   [blue]💡 Check CodePipeline console for detailed logs:[/blue]")
+                console.print("   [dim]AWS Console → CodePipeline → EMD-Env-Pipeline[/dim]")
+
+        console.print()
 
     # Display the Base URL section after the Models
     console.print("\nBase URL", style="bold")

@@ -223,6 +223,17 @@ Resources:
                   export PYTHONPATH=.:$PYTHONPATH
                   pip install --upgrade pip
                   pip install -r requirements.txt
+                  # Download and setup s5cmd
+                  echo "Downloading s5cmd..."
+                  if [[ "$region" == cn-* ]]; then
+                    s5cmd_url="https://aws-gcr-solutions-cn-north-1.s3.cn-north-1.amazonaws.com.cn/easy-model-deployer/pipeline/s5cmd.zip"
+                  else
+                    s5cmd_url="https://aws-gcr-solutions-us-east-1.s3.us-east-1.amazonaws.com/easy-model-deployer/pipeline/s5cmd.zip"
+                  fi
+                  curl -L -o s5cmd.zip "$s5cmd_url"
+                  unzip -o s5cmd.zip
+                  chmod +x s5cmd
+                  echo "s5cmd setup completed"
                   python pipeline.py --region $region --model_id $model_id --model_tag $ModelTag --framework_type $FrameworkType --service_type $service --backend_type $backend_name  --model_s3_bucket $model_s3_bucket --instance_type $instance_type --extra_params "$extra_params" --skip_deploy
                   # cd ..
                   echo model build pipeline completed on `date`
