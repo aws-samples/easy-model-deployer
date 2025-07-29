@@ -77,6 +77,10 @@ class SmartBootstrapManager:
         Check version compatibility and infrastructure completeness
         Returns: 'auto_bootstrap', 'version_mismatch_warning', 'compatible'
         """
+        if current_version == "0.0.0":
+            logger.debug(f"Development build found")
+            return 'auto_bootstrap'
+
         # First check if infrastructure is complete
         is_complete, status_msg = check_infrastructure_completeness(region)
         if not is_complete:
@@ -123,12 +127,6 @@ class SmartBootstrapManager:
         Returns: True if bootstrap was run, False otherwise
         """
         current_version = VERSION
-        
-        # Development mode check: if version is 0.0.0, skip upgrade checks
-        if current_version == "0.0.0":
-            logger.debug("Development mode detected (version 0.0.0), skipping version upgrade checks")
-            return False
-        
         deployed_version = get_deployed_infrastructure_version(region)
 
         action = self.check_version_compatibility(current_version, deployed_version, region)
