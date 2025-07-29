@@ -1,0 +1,4 @@
+Note: tokenizer.json has been moved to:
+https://aws-gcr-solutions-us-east-1.s3.us-east-1.amazonaws.com/easy-model-deployer/pipeline/ktransformers/tokenizer.zip
+
+If you plan to build this model, please download and extract this file before starting the build process.
