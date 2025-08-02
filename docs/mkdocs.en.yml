@@ -5,7 +5,7 @@ theme:
   language: en
 nav:
   - Quick Start: installation.md
-  - Supported Models: model-generator.html
+  - Supported Models: supported_models.md
   - Best Deployment Practices: best_deployment_practices.md
   - CLI Commands: commands.md
   - API Reference: api.md
