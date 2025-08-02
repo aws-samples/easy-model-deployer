@@ -24,7 +24,7 @@
 
 ## Introduction
 
-Easy Model Deployer is a lightweight tool designed for simplify deploy **Open-Source LLMs** ([Supported Models](docs/en/supported_models.md)) and Custom Models on AWS. It provides **OpenAI's Completions API** and [**LangChain Interface**](https://github.com/langchain-ai/langchain). Built for developers who need reliable and scalable model serving without complex environment setup.
+Easy Model Deployer is a lightweight tool designed for simplify deploy **Open-Source LLMs** ([Supported Models](https://aws-samples.github.io/easy-model-deployer/en/supported_models.html)) and Custom Models on AWS. It provides **OpenAI's Completions API** and [**LangChain Interface**](https://github.com/langchain-ai/langchain). Built for developers who need reliable and scalable model serving without complex environment setup.
 
 ![deploy](docs/images/demo-deploy.avif)
 
@@ -47,7 +47,7 @@ Easy Model Deployer supports a wide range of models including:
 - **ASR Models**: Whisper variants
 - **Custom Models**: Support for custom Docker images
 
-For the complete list of supported models and deployment configurations, see [Supported Models](docs/en/supported_models.md).
+For the complete list of supported models and deployment configurations, see [Supported Models](https://aws-samples.github.io/easy-model-deployer/en/supported_models.html).
 
 ## 🔧 Get Started
 
@@ -116,7 +116,7 @@ emd invoke <ModelId>
 
 ### List Supported Models
 
-Quickly see what models are supported, this command will output all information related to deployment. (Please browse [Supported Models](docs/en/supported_models.md) for more information.)
+Quickly see what models are supported, this command will output all information related to deployment. (Please browse [Supported Models](https://aws-samples.github.io/easy-model-deployer/en/supported_models.html) for more information.)
 
 ```bash
 emd list-supported-models
