@@ -41,7 +41,7 @@
 }
 </style>
 
-<iframe id="modelGeneratorFrame" src="model-generator.html" width="100%" height="100%" frameborder="0" style="border: none; display: block; margin: 0; padding: 0; min-height: calc(100vh - 120px);"></iframe>
+<iframe id="modelGeneratorFrame" src="https://aws-samples.github.io/easy-model-deployer/en/model-generator.html" width="100%" height="100%" frameborder="0" style="border: none; display: block; margin: 0; padding: 0; min-height: calc(100vh - 120px);"></iframe>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
