@@ -1,0 +1,13 @@
+FROM vllm/vllm-openai:{{VERSION}} AS vllm-base
+
+RUN pip3 install flash_attn==2.8.0.post2
+RUN pip3 install transformers==4.51.3
+
+FROM vllm-base AS sagemaker-serving
+
+RUN pip install boto3 hf_transfer modelscope
+
+EXPOSE 8080
+WORKDIR /opt/ml/code
+
+ENTRYPOINT ["/usr/bin/serve"]

@@ -545,6 +545,16 @@ ktransformers_engine = KtransformersEngine(**{
             "default_cli_args": " --max_new_tokens 2048",
 })
 
+# VLLM Engine v0.9.1 for dots.ocr
+vllm_dots_ocr_engine091 = VllmEngine(**{
+    **vllm_engine064.model_dump(),
+    "engine_dockerfile_config": {"VERSION":"v0.9.1"},
+    "dockerfile_name": "Dockerfile_dots_ocr",
+    "environment_variables": "export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True",
+    "default_cli_args": " --trust-remote-code --chat-template-content-format string --gpu-memory-utilization 0.95 --max_model_len 8192 --disable-log-stats --max_num_seq 5 --enforce-eager",
+    "description": "VLLM v0.9.1 engine for dots.ocr multilingual document parsing model with flash-attn support and eager execution for custom models"
+})
+
 custom_engine = Engine(**{
             "engine_type":EngineType.CUSTOM,
 })
