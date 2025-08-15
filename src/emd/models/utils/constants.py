@@ -235,3 +235,4 @@ class ModelSeriesType(ConstantBase):
     DEEPSEEK_REASONING_MODEL = "deepseek reasoning model"
     DEEPSEEK_v3 = "deepseek v3"
     BAICHUAN = "baichuan"
+    DOTS_OCR = "dots_ocr"

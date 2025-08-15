@@ -157,3 +157,9 @@ GME_SERIES = ModelSeries(
     description="General Multimodal Embedding (GME) models based on Qwen2-VL architecture, designed for unified multimodal representation learning supporting text, image, and image-text pair inputs for retrieval and search applications.",
     reference_link="https://huggingface.co/Alibaba-NLP/gme-Qwen2-VL-7B-Instruct"
 )
+
+DOTS_OCR_SERIES = ModelSeries(
+    model_series_name=ModelSeriesType.DOTS_OCR,
+    description="dots.ocr is a powerful, multilingual document parser that unifies layout detection and content recognition within a single vision-language model while maintaining good reading order. Despite its compact 1.7B-parameter LLM foundation, it achieves state-of-the-art(SOTA) performance on text, tables, and reading order tasks with multilingual support for over 100 languages.",
+    reference_link="https://github.com/rednote-hilab/dots.ocr"
+)
