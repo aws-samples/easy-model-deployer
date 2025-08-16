@@ -417,7 +417,7 @@ def deploy(
                 support_gpu_num = support_gpu_num or gpu_num
                 default_gpus_str = ",".join([str(i) for i in range(min(gpu_num,support_gpu_num))])
                 gpus_to_deploy = questionary.text(
-                        "input the local gpu ids to deploy the model (e.g. 0,1,2):",
+                        "Please specify the local GPU IDs for model deployment (e.g., 0,1,2):",
                         default=f"{default_gpus_str}"
                     ).ask()
                 os.environ['CUDA_VISIBLE_DEVICES']=gpus_to_deploy

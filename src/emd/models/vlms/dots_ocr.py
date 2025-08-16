@@ -42,6 +42,10 @@ Model.register(
         huggingface_model_id="rednote-hilab/dots.ocr",
         modelscope_model_id="rednote-hilab/dots.ocr",
         require_huggingface_token=False,
-        model_series=DOTS_OCR_SERIES
+        model_series=DOTS_OCR_SERIES,
+        # Model is pre-downloaded in Dockerfile, no need to prepare during deployment
+        need_prepare_model=False,
+        # Override local directory name to DotsOCR (without periods) as required by the blog
+        model_files_local_path="emd_models/DotsOCR"
     )
 )

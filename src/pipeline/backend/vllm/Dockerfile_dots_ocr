@@ -3,6 +3,26 @@ FROM vllm/vllm-openai:{{VERSION}} AS vllm-base
 RUN pip3 install flash_attn==2.8.0.post2
 RUN pip3 install transformers==4.51.3
 
+# Clone dots.ocr repository and install the package
+RUN git clone https://github.com/rednote-hilab/dots.ocr.git /opt/dots_ocr
+WORKDIR /opt/dots_ocr
+
+# Install dots.ocr package following the installation instructions
+RUN pip install -e .
+
+RUN python3 tools/download_model.py
+
+# Create symlink to match our expected model path
+RUN mkdir -p /emd_models && \
+    ln -sf /opt/dots_ocr/weights/DotsOCR /emd_models/DotsOCR
+
+# Set PYTHONPATH to include both the dots.ocr source and the model directory
+ENV PYTHONPATH="/emd_models:/opt/dots_ocr/weights:$PYTHONPATH"
+
+# Modify vllm executable to import the architecture from the downloaded model
+RUN sed -i '/^from vllm\.entrypoints\.cli\.main import main$/a\
+from DotsOCR import modeling_dots_ocr_vllm' `which vllm`
+
 FROM vllm-base AS sagemaker-serving
 
 RUN pip install boto3 hf_transfer modelscope
