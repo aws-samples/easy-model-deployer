@@ -262,10 +262,10 @@ def run(
                 is_build_success = True
                 break
             except Exception as e:
-                logger.error(f"docker build errorr: {e}")
+                logger.error(f"Docker build failed: {e}")
 
         if not is_build_success:
-            raise RuntimeError("docker build errorr")
+            raise RuntimeError("Docker build failed")
 
 
         # build_image_script = (
@@ -299,19 +299,30 @@ def run(
             "Version": "2008-10-17",
             "Statement": [
                 {
-                    "Sid": "new statement",
+                    "Sid": "AllowAccountUserAccess",
                     "Effect": "Allow",
-                    "Principal": "*",
+                    "Principal": {
+                        "AWS": f"arn:aws:iam::{push_image_account_id}:root"
+                    },
                     "Action": [
-                        "ecr: CompleteLayerUpload",
-                        "ecr: InitiateLayerUpload",
-                        "ecr: ListImages",
                         "ecr:BatchCheckLayerAvailability",
                         "ecr:BatchGetImage",
-                        "ecr:DescribeImages",
-                        "ecr:DescribeRepositories",
                         "ecr:GetDownloadUrlForLayer",
-                    ],
+                        "ecr:DescribeImages",
+                        "ecr:DescribeRepositories"
+                    ]
+                },
+                {
+                    "Sid": "AllowSageMakerService",
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Service": "sagemaker.amazonaws.com"
+                    },
+                    "Action": [
+                        "ecr:BatchCheckLayerAvailability",
+                        "ecr:BatchGetImage",
+                        "ecr:GetDownloadUrlForLayer"
+                    ]
                 }
             ],
         }
@@ -437,10 +448,10 @@ def run_custom(
                 is_build_success = True
                 break
             except Exception as e:
-                logger.error(f"docker build errorr: {e}")
+                logger.error(f"Docker build failed: {e}")
 
         if not is_build_success:
-            raise RuntimeError("docker build errorr")
+            raise RuntimeError("Docker build failed")
 
 
         # build_image_script = (
@@ -474,19 +485,30 @@ def run_custom(
             "Version": "2008-10-17",
             "Statement": [
                 {
-                    "Sid": "new statement",
+                    "Sid": "AllowAccountUserAccess",
                     "Effect": "Allow",
-                    "Principal": "*",
+                    "Principal": {
+                        "AWS": f"arn:aws:iam::{push_image_account_id}:root"
+                    },
                     "Action": [
-                        "ecr: CompleteLayerUpload",
-                        "ecr: InitiateLayerUpload",
-                        "ecr: ListImages",
                         "ecr:BatchCheckLayerAvailability",
                         "ecr:BatchGetImage",
-                        "ecr:DescribeImages",
-                        "ecr:DescribeRepositories",
                         "ecr:GetDownloadUrlForLayer",
-                    ],
+                        "ecr:DescribeImages",
+                        "ecr:DescribeRepositories"
+                    ]
+                },
+                {
+                    "Sid": "AllowSageMakerService",
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Service": "sagemaker.amazonaws.com"
+                    },
+                    "Action": [
+                        "ecr:BatchCheckLayerAvailability",
+                        "ecr:BatchGetImage",
+                        "ecr:GetDownloadUrlForLayer"
+                    ]
                 }
             ],
         }

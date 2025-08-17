@@ -49,6 +49,9 @@ function build_and_push_image() {
     aws ecr get-login-password --region "${region}" | \
 	docker login --username AWS --password-stdin "${ecr_repo_uri}"
 
+    # Update ECR policy file with current account ID
+    sed -i "s/{{ACCOUNT_ID}}/${account}/g" "${policy_file}"
+
     aws ecr set-repository-policy \
         --repository-name "${image_name}" \
         --policy-text "file://${policy_file}" \

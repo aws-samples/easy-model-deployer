@@ -1,20 +1,31 @@
 {
     "Version": "2008-10-17",
     "Statement": [
-      {
-        "Sid": "new statement",
-        "Effect": "Allow",
-        "Principal": "*",
-        "Action": [
-          "ecr: CompleteLayerUpload",
-          "ecr: InitiateLayerUpload",
-          "ecr: ListImages",
-          "ecr:BatchCheckLayerAvailability",
-          "ecr:BatchGetImage",
-          "ecr:DescribeImages",
-          "ecr:DescribeRepositories",
-          "ecr:GetDownloadUrlForLayer"
-        ]
-      }
+        {
+            "Sid": "AllowAccountUserAccess",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::{{ACCOUNT_ID}}:root"
+            },
+            "Action": [
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:BatchGetImage",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:DescribeImages",
+                "ecr:DescribeRepositories"
+            ]
+        },
+        {
+            "Sid": "AllowSageMakerService",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "sagemaker.amazonaws.com"
+            },
+            "Action": [
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:BatchGetImage",
+                "ecr:GetDownloadUrlForLayer"
+            ]
+        }
     ]
 }
