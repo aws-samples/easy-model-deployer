@@ -253,7 +253,8 @@ def deploy(
     else:
         region = get_current_region()
 
-    if region != LOCAL_REGION:
+    # Only bootstrap for non-local deployments
+    if region != LOCAL_REGION and not only_allow_local_deploy:
         smart_bootstrap_manager.auto_bootstrap_if_needed(region, skip_confirm)
 
     if dockerfile_local_path:
