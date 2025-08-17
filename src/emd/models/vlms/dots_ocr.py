@@ -2,12 +2,10 @@ from .. import Model
 from ..model_series import DOTS_OCR_SERIES
 from ..engines import vllm_dots_ocr_engine091, huggingface_llm_engine_4d41d2
 from ..instances import (
-    g4dn4xlarge_instance,
     g5dxlarge_instance,
     g5d2xlarge_instance,
     g5d4xlarge_instance,
     g5d8xlarge_instance,
-    g5d12xlarge_instance,
     local_instance
 )
 from ..services import (
@@ -27,8 +25,7 @@ Model.register(
         application_scenario="multilingual document layout parsing, OCR, document understanding, table extraction, formula recognition, reading order detection",
         supported_engines=[vllm_dots_ocr_engine091],
         supported_instances=[
-            g4dn4xlarge_instance, g5dxlarge_instance, g5d2xlarge_instance, g5d4xlarge_instance, g5d8xlarge_instance,
-            g5d12xlarge_instance, local_instance
+            g5dxlarge_instance, g5d2xlarge_instance, g5d4xlarge_instance, g5d8xlarge_instance, local_instance
         ],
         supported_services=[
             sagemaker_service, sagemaker_async_service, ecs_service, local_service
